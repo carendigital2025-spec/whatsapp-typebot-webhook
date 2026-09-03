@@ -25,9 +25,6 @@ export default async function handler(req, res) {
   // 2. RECEBIMENTO DAS MENSAGENS DO WHATSAPP
   // =========================================================
   if (req.method === "POST") {
-    // Responde rapidamente para a Meta
-    res.status(200).send("EVENTO_RECEBIDO");
-
     try {
       const change =
         req.body?.entry?.[0]?.changes?.[0]?.value;
@@ -36,7 +33,7 @@ export default async function handler(req, res) {
 
       // Ignora eventos que não sejam mensagens recebidas
       if (!message) {
-        return;
+        return res.status(200).send("EVENTO_RECEBIDO");
       }
 
       const from = message.from;
@@ -64,12 +61,19 @@ export default async function handler(req, res) {
       }
 
       if (!userMessage) {
-        console.log("Tipo de mensagem ainda não suportado:", message.type);
-        return;
+        console.log(
+          "Tipo de mensagem ainda não suportado:",
+          message.type
+        );
+
+        return res.status(200).send("EVENTO_RECEBIDO");
       }
 
-      console.log("Mensagem recebida de:", from);
-      console.log("Conteúdo:", userMessage);
+      console.log(
+        "Mensagem recebida:",
+        from,
+        userMessage
+      );
 
       // =====================================================
       // 4. VERIFICA SE JÁ EXISTE SESSÃO DO TYPEBOT
@@ -79,12 +83,19 @@ export default async function handler(req, res) {
       let typebotResponse;
 
       if (!sessionId) {
-        // PRIMEIRA MENSAGEM DO CLIENTE
-        typebotResponse = await startTypebot(userMessage);
+        console.log("Iniciando nova sessão no Typebot...");
+
+        typebotResponse = await startTypebot(
+          userMessage
+        );
 
         if (typebotResponse?.sessionId) {
           sessionId = typebotResponse.sessionId;
-          sessions.set(from, sessionId);
+
+          sessions.set(
+            from,
+            sessionId
+          );
 
           console.log(
             "Nova sessão Typebot criada:",
@@ -92,11 +103,16 @@ export default async function handler(req, res) {
           );
         }
       } else {
-        // CONTINUA A CONVERSA EXISTENTE
-        typebotResponse = await continueTypebot(
-          sessionId,
-          userMessage
+        console.log(
+          "Continuando sessão Typebot:",
+          sessionId
         );
+
+        typebotResponse =
+          await continueTypebot(
+            sessionId,
+            userMessage
+          );
       }
 
       // =====================================================
@@ -107,18 +123,29 @@ export default async function handler(req, res) {
         typebotResponse,
         from
       );
+
+      return res
+        .status(200)
+        .send("EVENTO_RECEBIDO");
+
     } catch (error) {
       console.error(
         "Erro ao processar webhook:",
         error
       );
-    }
 
-    return;
+      // Mesmo em caso de erro, responde 200 para a Meta
+      return res
+        .status(200)
+        .send("EVENTO_RECEBIDO");
+    }
   }
 
-  return res.status(405).send("Método não permitido");
+  return res
+    .status(405)
+    .send("Método não permitido");
 }
+
 
 // ===========================================================
 // INICIAR CONVERSA NO TYPEBOT
@@ -128,25 +155,34 @@ async function startTypebot(userMessage) {
   const url =
     `https://typebot.co/api/v1/typebots/${process.env.TYPEBOT_ID}/startChat`;
 
-  const response = await fetch(url, {
-    method: "POST",
+  console.log(
+    "Chamando Typebot startChat..."
+  );
 
-    headers: {
-      "Content-Type": "application/json",
-    },
+  const response = await fetch(
+    url,
+    {
+      method: "POST",
 
-    body: JSON.stringify({
-      message: userMessage,
-    }),
-  });
+      headers: {
+        "Content-Type":
+          "application/json",
+      },
+
+      body: JSON.stringify({
+        message: userMessage,
+      }),
+    }
+  );
+
+  const responseText =
+    await response.text();
 
   if (!response.ok) {
-    const errorText = await response.text();
-
     console.error(
-      "Erro ao iniciar Typebot:",
+      "Erro Typebot startChat:",
       response.status,
-      errorText
+      responseText
     );
 
     throw new Error(
@@ -154,8 +190,28 @@ async function startTypebot(userMessage) {
     );
   }
 
-  return await response.json();
+  let data;
+
+  try {
+    data = JSON.parse(responseText);
+  } catch {
+    console.error(
+      "Resposta inválida do Typebot:",
+      responseText
+    );
+
+    throw new Error(
+      "Resposta inválida do Typebot"
+    );
+  }
+
+  console.log(
+    "Typebot startChat respondeu com sucesso."
+  );
+
+  return data;
 }
+
 
 // ===========================================================
 // CONTINUAR CONVERSA NO TYPEBOT
@@ -168,25 +224,34 @@ async function continueTypebot(
   const url =
     `https://typebot.co/api/v1/sessions/${sessionId}/continueChat`;
 
-  const response = await fetch(url, {
-    method: "POST",
+  console.log(
+    "Chamando Typebot continueChat..."
+  );
 
-    headers: {
-      "Content-Type": "application/json",
-    },
+  const response = await fetch(
+    url,
+    {
+      method: "POST",
 
-    body: JSON.stringify({
-      message: userMessage,
-    }),
-  });
+      headers: {
+        "Content-Type":
+          "application/json",
+      },
+
+      body: JSON.stringify({
+        message: userMessage,
+      }),
+    }
+  );
+
+  const responseText =
+    await response.text();
 
   if (!response.ok) {
-    const errorText = await response.text();
-
     console.error(
-      "Erro ao continuar Typebot:",
+      "Erro Typebot continueChat:",
       response.status,
-      errorText
+      responseText
     );
 
     throw new Error(
@@ -194,8 +259,28 @@ async function continueTypebot(
     );
   }
 
-  return await response.json();
+  let data;
+
+  try {
+    data = JSON.parse(responseText);
+  } catch {
+    console.error(
+      "Resposta inválida do Typebot:",
+      responseText
+    );
+
+    throw new Error(
+      "Resposta inválida do Typebot"
+    );
+  }
+
+  console.log(
+    "Typebot continueChat respondeu com sucesso."
+  );
+
+  return data;
 }
+
 
 // ===========================================================
 // PROCESSAR RESPOSTA DO TYPEBOT
@@ -205,13 +290,24 @@ async function processTypebotResponse(
   typebotResponse,
   to
 ) {
-  if (!typebotResponse) return;
+  if (!typebotResponse) {
+    console.log(
+      "Typebot não retornou resposta."
+    );
+
+    return;
+  }
 
   const messages =
     typebotResponse.messages || [];
 
   const input =
     typebotResponse.input || null;
+
+  console.log(
+    "Quantidade de mensagens do Typebot:",
+    messages.length
+  );
 
   // ---------------------------------------------------------
   // ENVIA AS MENSAGENS DE TEXTO
@@ -223,12 +319,20 @@ async function processTypebotResponse(
         message.content?.richText
           ?.map((paragraph) =>
             paragraph.children
-              ?.map((child) => child.text || "")
+              ?.map(
+                (child) =>
+                  child.text || ""
+              )
               .join("")
           )
           .join("\n") || "";
 
       if (text.trim()) {
+        console.log(
+          "Enviando resposta para WhatsApp:",
+          text
+        );
+
         await sendWhatsAppText(
           to,
           text
@@ -238,7 +342,7 @@ async function processTypebotResponse(
   }
 
   // ---------------------------------------------------------
-  // VERIFICA SE O TYPEBOT ESTÁ PEDINDO UMA RESPOSTA
+  // TYPEBOT AGUARDANDO RESPOSTA DO CLIENTE
   // ---------------------------------------------------------
 
   if (input) {
@@ -248,6 +352,7 @@ async function processTypebotResponse(
     );
   }
 }
+
 
 // ===========================================================
 // ENVIAR TEXTO PELO WHATSAPP
@@ -260,37 +365,45 @@ async function sendWhatsAppText(
   const url =
     `https://graph.facebook.com/${process.env.GRAPH_API_VERSION}/${process.env.PHONE_NUMBER_ID}/messages`;
 
-  const response = await fetch(url, {
-    method: "POST",
+  const response = await fetch(
+    url,
+    {
+      method: "POST",
 
-    headers: {
-      Authorization:
-        `Bearer ${process.env.WHATSAPP_TOKEN}`,
+      headers: {
+        Authorization:
+          `Bearer ${process.env.WHATSAPP_TOKEN}`,
 
-      "Content-Type":
-        "application/json",
-    },
-
-    body: JSON.stringify({
-      messaging_product: "whatsapp",
-      recipient_type: "individual",
-      to: to,
-
-      type: "text",
-
-      text: {
-        preview_url: false,
-        body: text,
+        "Content-Type":
+          "application/json",
       },
-    }),
-  });
 
-  const data = await response.json();
+      body: JSON.stringify({
+        messaging_product:
+          "whatsapp",
+
+        recipient_type:
+          "individual",
+
+        to: to,
+
+        type: "text",
+
+        text: {
+          preview_url: false,
+          body: text,
+        },
+      }),
+    }
+  );
+
+  const data =
+    await response.json();
 
   if (!response.ok) {
     console.error(
       "Erro ao enviar mensagem WhatsApp:",
-      data
+      JSON.stringify(data)
     );
 
     throw new Error(
@@ -299,9 +412,10 @@ async function sendWhatsAppText(
   }
 
   console.log(
-    "Mensagem enviada com sucesso:",
-    data
+    "Mensagem enviada com sucesso para o WhatsApp."
   );
 
   return data;
 }
+
+   
