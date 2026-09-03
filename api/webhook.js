@@ -44,19 +44,58 @@ export default async function handler(req, res) {
       // 3. IDENTIFICA O TIPO DA MENSAGEM
       // =====================================================
 
+      // Mensagem digitada
       if (message.type === "text") {
-        userMessage = message.text?.body || "";
+        userMessage =
+          message.text?.body || "";
       }
 
+      // Resposta de botão ou lista
       if (message.type === "interactive") {
-        if (message.interactive?.type === "button_reply") {
-          userMessage =
-            message.interactive.button_reply?.title || "";
+        // Botão
+        if (
+          message.interactive?.type ===
+          "button_reply"
+        ) {
+          const buttonReply =
+            message.interactive.button_reply;
+
+          const buttonId =
+            buttonReply?.id || "";
+
+          // Se for botão criado pelo Typebot,
+          // recupera o valor original da opção.
+          if (
+            buttonId.startsWith(
+              "typebot_choice:"
+            )
+          ) {
+            try {
+              userMessage =
+                decodeURIComponent(
+                  buttonId.replace(
+                    "typebot_choice:",
+                    ""
+                  )
+                );
+            } catch {
+              userMessage =
+                buttonReply?.title || "";
+            }
+          } else {
+            userMessage =
+              buttonReply?.title || "";
+          }
         }
 
-        if (message.interactive?.type === "list_reply") {
+        // Lista
+        if (
+          message.interactive?.type ===
+          "list_reply"
+        ) {
           userMessage =
-            message.interactive.list_reply?.title || "";
+            message.interactive
+              .list_reply?.title || "";
         }
       }
 
@@ -66,7 +105,9 @@ export default async function handler(req, res) {
           message.type
         );
 
-        return res.status(200).send("EVENTO_RECEBIDO");
+        return res
+          .status(200)
+          .send("EVENTO_RECEBIDO");
       }
 
       console.log(
@@ -79,18 +120,30 @@ export default async function handler(req, res) {
       // 4. VERIFICA SE JÁ EXISTE SESSÃO DO TYPEBOT
       // =====================================================
 
-      let sessionId = sessions.get(from);
+      let sessionId =
+        sessions.get(from);
+
       let typebotResponse;
 
-      if (!sessionId) {
-        console.log("Iniciando nova sessão no Typebot...");
+      // -----------------------------------------------------
+      // NOVA CONVERSA
+      // -----------------------------------------------------
 
-        typebotResponse = await startTypebot(
-          userMessage
+      if (!sessionId) {
+        console.log(
+          "Iniciando nova sessão no Typebot..."
         );
 
-        if (typebotResponse?.sessionId) {
-          sessionId = typebotResponse.sessionId;
+        typebotResponse =
+          await startTypebot(
+            userMessage
+          );
+
+        if (
+          typebotResponse?.sessionId
+        ) {
+          sessionId =
+            typebotResponse.sessionId;
 
           sessions.set(
             from,
@@ -102,7 +155,13 @@ export default async function handler(req, res) {
             sessionId
           );
         }
-      } else {
+      }
+
+      // -----------------------------------------------------
+      // CONTINUAR CONVERSA
+      // -----------------------------------------------------
+
+      else {
         console.log(
           "Continuando sessão Typebot:",
           sessionId
@@ -116,7 +175,7 @@ export default async function handler(req, res) {
       }
 
       // =====================================================
-      // 5. ENVIA AS RESPOSTAS DO TYPEBOT PARA O WHATSAPP
+      // 5. PROCESSA RESPOSTA DO TYPEBOT
       // =====================================================
 
       await processTypebotResponse(
@@ -127,14 +186,14 @@ export default async function handler(req, res) {
       return res
         .status(200)
         .send("EVENTO_RECEBIDO");
-
     } catch (error) {
       console.error(
         "Erro ao processar webhook:",
         error
       );
 
-      // Mesmo em caso de erro, responde 200 para a Meta
+      // Mesmo em caso de erro,
+      // responde 200 para a Meta.
       return res
         .status(200)
         .send("EVENTO_RECEBIDO");
@@ -148,10 +207,12 @@ export default async function handler(req, res) {
 
 
 // ===========================================================
-// INICIAR CONVERSA NO TYPEBOT
+// 6. INICIAR CONVERSA NO TYPEBOT
 // ===========================================================
 
-async function startTypebot(userMessage) {
+async function startTypebot(
+  userMessage
+) {
   const url =
     `https://typebot.co/api/v1/typebots/${process.env.TYPEBOT_ID}/startChat`;
 
@@ -159,9 +220,8 @@ async function startTypebot(userMessage) {
     "Chamando Typebot startChat..."
   );
 
-  const response = await fetch(
-    url,
-    {
+  const response =
+    await fetch(url, {
       method: "POST",
 
       headers: {
@@ -172,8 +232,7 @@ async function startTypebot(userMessage) {
       body: JSON.stringify({
         message: userMessage,
       }),
-    }
-  );
+    });
 
   const responseText =
     await response.text();
@@ -193,7 +252,8 @@ async function startTypebot(userMessage) {
   let data;
 
   try {
-    data = JSON.parse(responseText);
+    data =
+      JSON.parse(responseText);
   } catch {
     console.error(
       "Resposta inválida do Typebot:",
@@ -214,7 +274,7 @@ async function startTypebot(userMessage) {
 
 
 // ===========================================================
-// CONTINUAR CONVERSA NO TYPEBOT
+// 7. CONTINUAR CONVERSA NO TYPEBOT
 // ===========================================================
 
 async function continueTypebot(
@@ -228,9 +288,8 @@ async function continueTypebot(
     "Chamando Typebot continueChat..."
   );
 
-  const response = await fetch(
-    url,
-    {
+  const response =
+    await fetch(url, {
       method: "POST",
 
       headers: {
@@ -241,8 +300,7 @@ async function continueTypebot(
       body: JSON.stringify({
         message: userMessage,
       }),
-    }
-  );
+    });
 
   const responseText =
     await response.text();
@@ -262,7 +320,8 @@ async function continueTypebot(
   let data;
 
   try {
-    data = JSON.parse(responseText);
+    data =
+      JSON.parse(responseText);
   } catch {
     console.error(
       "Resposta inválida do Typebot:",
@@ -283,7 +342,7 @@ async function continueTypebot(
 
 
 // ===========================================================
-// PROCESSAR RESPOSTA DO TYPEBOT
+// 8. PROCESSAR RESPOSTA DO TYPEBOT
 // ===========================================================
 
 async function processTypebotResponse(
@@ -309,53 +368,299 @@ async function processTypebotResponse(
     messages.length
   );
 
-  // ---------------------------------------------------------
-  // ENVIA AS MENSAGENS DE TEXTO
-  // ---------------------------------------------------------
+  // =========================================================
+  // 9. ENVIA AS MENSAGENS DE TEXTO
+  // =========================================================
 
   for (const message of messages) {
-    if (message.type === "text") {
-      const text =
-        message.content?.richText
-          ?.map((paragraph) =>
-            paragraph.children
-              ?.map(
-                (child) =>
-                  child.text || ""
-              )
-              .join("")
-          )
-          .join("\n") || "";
-
-      if (text.trim()) {
-        console.log(
-          "Enviando resposta para WhatsApp:",
-          text
-        );
-
-        await sendWhatsAppText(
-          to,
-          text
-        );
-      }
+    if (message.type !== "text") {
+      continue;
     }
-  }
 
-  // ---------------------------------------------------------
-  // TYPEBOT AGUARDANDO RESPOSTA DO CLIENTE
-  // ---------------------------------------------------------
+    const text =
+      extractTypebotText(message);
 
-  if (input) {
+    if (!text.trim()) {
+      continue;
+    }
+
     console.log(
-      "Typebot aguardando resposta:",
-      JSON.stringify(input)
+      "Enviando resposta para WhatsApp:",
+      text
+    );
+
+    await sendWhatsAppText(
+      to,
+      text
     );
   }
+
+  // =========================================================
+  // 10. VERIFICA SE O TYPEBOT AGUARDA UMA RESPOSTA
+  // =========================================================
+
+  if (!input) {
+    console.log(
+      "Typebot não está aguardando nova resposta."
+    );
+
+    return;
+  }
+
+  console.log(
+    "Typebot aguardando resposta:",
+    JSON.stringify(input)
+  );
+
+  // =========================================================
+  // 11. CHOICE INPUT = BOTÕES DO WHATSAPP
+  // =========================================================
+
+  if (
+    input.type === "choice input" &&
+    Array.isArray(input.items) &&
+    input.items.length > 0
+  ) {
+    console.log(
+      "Choice input detectado."
+    );
+
+    await sendWhatsAppButtons(
+      to,
+      input.items
+    );
+
+    return;
+  }
+
+  // =========================================================
+  // 12. INPUT DE TEXTO, NOME, CPF ETC.
+  // =========================================================
+
+  console.log(
+    "Typebot aguardando resposta digitada pelo usuário."
+  );
 }
 
 
 // ===========================================================
-// ENVIAR TEXTO PELO WHATSAPP
+// 13. EXTRAIR TEXTO DAS MENSAGENS DO TYPEBOT
+// ===========================================================
+
+function extractTypebotText(
+  message
+) {
+  if (
+    typeof message?.content ===
+    "string"
+  ) {
+    return message.content;
+  }
+
+  if (
+    typeof message?.content?.text ===
+    "string"
+  ) {
+    return message.content.text;
+  }
+
+  const richText =
+    message?.content?.richText;
+
+  if (!Array.isArray(richText)) {
+    return "";
+  }
+
+  return richText
+    .map((paragraph) => {
+      if (
+        typeof paragraph ===
+        "string"
+      ) {
+        return paragraph;
+      }
+
+      if (
+        typeof paragraph?.text ===
+        "string"
+      ) {
+        return paragraph.text;
+      }
+
+      if (
+        Array.isArray(
+          paragraph?.children
+        )
+      ) {
+        return paragraph.children
+          .map(
+            (child) =>
+              child?.text || ""
+          )
+          .join("");
+      }
+
+      return "";
+    })
+    .join("\n");
+}
+
+
+// ===========================================================
+// 14. IDENTIFICAR TEXTO DA OPÇÃO DO TYPEBOT
+// ===========================================================
+
+function getChoiceText(
+  item,
+  index
+) {
+  if (
+    typeof item === "string"
+  ) {
+    return item;
+  }
+
+  const possibleValues = [
+    item?.content,
+    item?.label,
+    item?.value,
+    item?.text,
+    item?.name,
+  ];
+
+  for (
+    const value of possibleValues
+  ) {
+    if (
+      typeof value === "string" &&
+      value.trim()
+    ) {
+      return value.trim();
+    }
+  }
+
+  return `Opção ${index + 1}`;
+}
+
+
+// ===========================================================
+// 15. ENVIAR BOTÕES DO TYPEBOT PELO WHATSAPP
+// ===========================================================
+
+async function sendWhatsAppButtons(
+  to,
+  items
+) {
+  // WhatsApp permite no máximo
+  // 3 botões de resposta.
+  const choices =
+    items.slice(0, 3);
+
+  const buttons =
+    choices.map(
+      (item, index) => {
+        const originalText =
+          getChoiceText(
+            item,
+            index
+          );
+
+        // WhatsApp permite até
+        // 20 caracteres no título.
+        const buttonTitle =
+          originalText
+            .substring(0, 20);
+
+        // Guardamos o texto original
+        // no ID para enviar ao Typebot
+        // quando o cliente clicar.
+        const buttonId =
+          "typebot_choice:" +
+          encodeURIComponent(
+            originalText
+          );
+
+        return {
+          type: "reply",
+
+          reply: {
+            id: buttonId,
+            title: buttonTitle,
+          },
+        };
+      }
+    );
+
+  console.log(
+    "Botões preparados:",
+    JSON.stringify(buttons)
+  );
+
+  const url =
+    `https://graph.facebook.com/${process.env.GRAPH_API_VERSION}/${process.env.PHONE_NUMBER_ID}/messages`;
+
+  const response =
+    await fetch(url, {
+      method: "POST",
+
+      headers: {
+        Authorization:
+          `Bearer ${process.env.WHATSAPP_TOKEN}`,
+
+        "Content-Type":
+          "application/json",
+      },
+
+      body: JSON.stringify({
+        messaging_product:
+          "whatsapp",
+
+        recipient_type:
+          "individual",
+
+        to: to,
+
+        type: "interactive",
+
+        interactive: {
+          type: "button",
+
+          body: {
+            text:
+              "Escolha uma das opções abaixo:",
+          },
+
+          action: {
+            buttons: buttons,
+          },
+        },
+      }),
+    });
+
+  const data =
+    await response.json();
+
+  if (!response.ok) {
+    console.error(
+      "Erro ao enviar botões WhatsApp:",
+      JSON.stringify(data)
+    );
+
+    throw new Error(
+      "Falha ao enviar botões pelo WhatsApp"
+    );
+  }
+
+  console.log(
+    "Botões enviados com sucesso para o WhatsApp."
+  );
+
+  return data;
+}
+
+
+// ===========================================================
+// 16. ENVIAR TEXTO PELO WHATSAPP
 // ===========================================================
 
 async function sendWhatsAppText(
@@ -365,9 +670,8 @@ async function sendWhatsAppText(
   const url =
     `https://graph.facebook.com/${process.env.GRAPH_API_VERSION}/${process.env.PHONE_NUMBER_ID}/messages`;
 
-  const response = await fetch(
-    url,
-    {
+  const response =
+    await fetch(url, {
       method: "POST",
 
       headers: {
@@ -394,8 +698,7 @@ async function sendWhatsAppText(
           body: text,
         },
       }),
-    }
-  );
+    });
 
   const data =
     await response.json();
@@ -417,5 +720,3 @@ async function sendWhatsAppText(
 
   return data;
 }
-
-   
