@@ -661,36 +661,107 @@ console.log(
 );
 
   // =========================================================
-  // 13. ENVIA MENSAGENS DE TEXTO
+  // 13. ENVIA AS MENSAGENS DO TYPEBOT NA ORDEM
   // =========================================================
+  //
+  // O Typebot pode retornar texto, vídeo e outros tipos de
+  // mensagem no mesmo retorno. Aqui tratamos texto e vídeo
+  // separadamente, preservando a ordem original do fluxo.
 
   for (const message of messages) {
 
-    if (message.type !== "text") {
-      continue;
-    }
+    // ---------------------------------------------------------
+    // TEXTO
+    // ---------------------------------------------------------
+
+    if (message.type === "text") {
+
+      const text =
+        extractTypebotText(
+          message
+        );
 
 
-    const text =
-      extractTypebotText(
-        message
+      if (!text.trim()) {
+        continue;
+      }
+
+
+      console.log(
+        "Enviando resposta de texto para WhatsApp:",
+        text
       );
 
 
-    if (!text.trim()) {
+      await sendWhatsAppText(
+        to,
+        text
+      );
+
       continue;
     }
 
 
+    // ---------------------------------------------------------
+    // VÍDEO
+    // ---------------------------------------------------------
+
+    if (message.type === "video") {
+
+      const videoUrl =
+        extractTypebotVideoUrl(
+          message
+        );
+
+
+      if (!videoUrl) {
+        console.log(
+          "Vídeo recebido do Typebot, mas nenhuma URL foi encontrada:",
+          JSON.stringify(message)
+        );
+
+        continue;
+      }
+
+
+      console.log(
+        "Enviando vídeo para WhatsApp:",
+        videoUrl
+      );
+
+
+      try {
+        await sendWhatsAppVideo(
+          to,
+          videoUrl
+        );
+      } catch (error) {
+
+        console.error(
+          "Falha ao enviar vídeo como mídia. Enviando o link como texto:",
+          error
+        );
+
+        // Fallback:
+        // se a Meta não aceitar a URL como mídia direta,
+        // o cliente ainda recebe o link do vídeo.
+        await sendWhatsAppText(
+          to,
+          videoUrl
+        );
+      }
+
+      continue;
+    }
+
+
+    // ---------------------------------------------------------
+    // OUTRO TIPO DE MENSAGEM
+    // ---------------------------------------------------------
+
     console.log(
-      "Enviando resposta para WhatsApp:",
-      text
-    );
-
-
-    await sendWhatsAppText(
-      to,
-      text
+      "Tipo de mensagem do Typebot ainda não tratado:",
+      message.type
     );
   }
 
@@ -851,7 +922,127 @@ function extractTypebotText(message) {
 
 
 // ===========================================================
-// 18. IDENTIFICAR TEXTO DA OPÇÃO
+// 18. EXTRAIR URL DO VÍDEO DO TYPEBOT
+// ===========================================================
+
+function extractTypebotVideoUrl(message) {
+
+  const content =
+    message?.content;
+
+
+  // Primeiro tenta os formatos mais comuns.
+  const directCandidates = [
+    content?.url,
+    content?.src,
+    content?.videoUrl,
+    content?.video?.url,
+    content?.media?.url,
+    content?.file?.url,
+    message?.url,
+  ];
+
+
+  for (const candidate of directCandidates) {
+
+    if (
+      typeof candidate === "string" &&
+      isHttpUrl(candidate)
+    ) {
+      return candidate.trim();
+    }
+  }
+
+
+  // Caso a estrutura do Typebot mude ou a URL venha
+  // aninhada em outro campo, procura recursivamente.
+  return findFirstHttpUrl(content);
+}
+
+
+// ===========================================================
+// 19. PROCURAR URL HTTP/HTTPS EM UM OBJETO
+// ===========================================================
+
+function findFirstHttpUrl(value) {
+
+  if (
+    typeof value === "string"
+  ) {
+    const trimmed =
+      value.trim();
+
+    if (isHttpUrl(trimmed)) {
+      return trimmed;
+    }
+
+    return "";
+  }
+
+
+  if (
+    !value ||
+    typeof value !== "object"
+  ) {
+    return "";
+  }
+
+
+  if (Array.isArray(value)) {
+
+    for (const item of value) {
+
+      const found =
+        findFirstHttpUrl(item);
+
+      if (found) {
+        return found;
+      }
+    }
+
+    return "";
+  }
+
+
+  for (const key of Object.keys(value)) {
+
+    const found =
+      findFirstHttpUrl(
+        value[key]
+      );
+
+    if (found) {
+      return found;
+    }
+  }
+
+
+  return "";
+}
+
+
+// ===========================================================
+// 20. VALIDAR URL HTTP/HTTPS
+// ===========================================================
+
+function isHttpUrl(value) {
+
+  if (
+    typeof value !== "string"
+  ) {
+    return false;
+  }
+
+
+  return (
+    value.startsWith("https://") ||
+    value.startsWith("http://")
+  );
+}
+
+
+// ===========================================================
+// 21. IDENTIFICAR TEXTO DA OPÇÃO
 // ===========================================================
 
 function getChoiceText(item, index) {
@@ -886,7 +1077,7 @@ function getChoiceText(item, index) {
 
 
 // ===========================================================
-// 19. ENVIAR BOTÕES PELO WHATSAPP
+// 22. ENVIAR BOTÕES PELO WHATSAPP
 // ===========================================================
 
 async function sendWhatsAppButtons(
@@ -1020,7 +1211,100 @@ async function sendWhatsAppButtons(
 
 
 // ===========================================================
-// 20. ENVIAR TEXTO PELO WHATSAPP
+// 23. ENVIAR VÍDEO PELO WHATSAPP
+// ===========================================================
+
+async function sendWhatsAppVideo(
+  to,
+  videoUrl
+) {
+
+  const url =
+    `https://graph.facebook.com/${process.env.GRAPH_API_VERSION}/${process.env.PHONE_NUMBER_ID}/messages`;
+
+
+  const response =
+    await fetch(
+      url,
+      {
+        method: "POST",
+
+        headers: {
+          Authorization:
+            `Bearer ${process.env.WHATSAPP_TOKEN}`,
+
+          "Content-Type":
+            "application/json",
+        },
+
+
+        body:
+          JSON.stringify({
+            messaging_product:
+              "whatsapp",
+
+            recipient_type:
+              "individual",
+
+            to: to,
+
+            type:
+              "video",
+
+            video: {
+              link:
+                videoUrl,
+            },
+          }),
+      }
+    );
+
+
+  const responseText =
+    await response.text();
+
+
+  let data;
+
+  try {
+    data =
+      JSON.parse(
+        responseText
+      );
+  } catch {
+    data = {
+      raw:
+        responseText,
+    };
+  }
+
+
+  if (!response.ok) {
+
+    console.error(
+      "Erro ao enviar vídeo WhatsApp:",
+      response.status,
+      JSON.stringify(data)
+    );
+
+
+    throw new Error(
+      `Falha ao enviar vídeo pelo WhatsApp: ${response.status}`
+    );
+  }
+
+
+  console.log(
+    "Vídeo enviado com sucesso para o WhatsApp."
+  );
+
+
+  return data;
+}
+
+
+// ===========================================================
+// 24. ENVIAR TEXTO PELO WHATSAPP
 // ===========================================================
 
 async function sendWhatsAppText(
