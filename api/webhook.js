@@ -337,6 +337,40 @@ export default async function handler(req, res) {
 
 
       // =====================================================
+      // 5.1 COMANDO PARA REINICIAR O FUNIL
+      // =====================================================
+
+      if (
+        userMessage.trim().toLowerCase() === "reiniciar"
+      ) {
+        console.log(
+          "Comando REINICIAR recebido. Apagando sessão atual..."
+        );
+
+        await deleteSession(from);
+
+        const typebotResponse =
+          await startTypebot("");
+
+        if (typebotResponse?.sessionId) {
+          await saveSession(
+            from,
+            typebotResponse.sessionId
+          );
+        }
+
+        await processTypebotResponse(
+          typebotResponse,
+          from
+        );
+
+        return res
+          .status(200)
+          .send("EVENTO_RECEBIDO");
+      }
+
+
+      // =====================================================
       // 6. BUSCA SESSÃO NO REDIS
       // =====================================================
 
@@ -469,8 +503,6 @@ export default async function handler(req, res) {
     .status(405)
     .send("Método não permitido");
 }
-
-
 // ===========================================================
 // 10. INICIAR CONVERSA NO TYPEBOT
 // ===========================================================
@@ -483,7 +515,6 @@ async function startTypebot(userMessage) {
   console.log(
     "Chamando Typebot startChat..."
   );
-
 
   const response =
     await fetch(
@@ -502,10 +533,8 @@ async function startTypebot(userMessage) {
       }
     );
 
-
   const responseText =
     await response.text();
-
 
   if (!response.ok) {
     console.error(
@@ -518,7 +547,6 @@ async function startTypebot(userMessage) {
       `Erro Typebot startChat: ${response.status}`
     );
   }
-
 
   let data;
 
@@ -537,7 +565,6 @@ async function startTypebot(userMessage) {
       "Resposta inválida do Typebot"
     );
   }
-
 
   console.log(
     "Typebot startChat respondeu com sucesso."
@@ -563,7 +590,6 @@ async function continueTypebot(
     "Chamando Typebot continueChat..."
   );
 
-
   const response =
     await fetch(
       url,
@@ -581,10 +607,8 @@ async function continueTypebot(
       }
     );
 
-
   const responseText =
     await response.text();
-
 
   if (!response.ok) {
     console.error(
@@ -597,7 +621,6 @@ async function continueTypebot(
       `Erro Typebot continueChat: ${response.status}`
     );
   }
-
 
   let data;
 
@@ -616,7 +639,6 @@ async function continueTypebot(
       "Resposta inválida do Typebot"
     );
   }
-
 
   console.log(
     "Typebot continueChat respondeu com sucesso."
@@ -643,22 +665,22 @@ async function processTypebotResponse(
     return;
   }
 
-
   const messages =
     typebotResponse.messages || [];
 
   const input =
     typebotResponse.input || null;
 
-
   console.log(
     "Quantidade de mensagens do Typebot:",
     messages.length
   );
-console.log(
-  "MESSAGES COMPLETAS DO TYPEBOT:",
-  JSON.stringify(messages)
-);
+
+  console.log(
+    "MESSAGES COMPLETAS DO TYPEBOT:",
+    JSON.stringify(messages)
+  );
+
 
   // =========================================================
   // 13. ENVIA AS MENSAGENS DO TYPEBOT NA ORDEM
@@ -681,17 +703,14 @@ console.log(
           message
         );
 
-
       if (!text.trim()) {
         continue;
       }
-
 
       console.log(
         "Enviando resposta de texto para WhatsApp:",
         text
       );
-
 
       await sendWhatsAppText(
         to,
@@ -713,7 +732,6 @@ console.log(
           message
         );
 
-
       if (!videoUrl) {
         console.log(
           "Vídeo recebido do Typebot, mas nenhuma URL foi encontrada:",
@@ -723,12 +741,10 @@ console.log(
         continue;
       }
 
-
       console.log(
         "Enviando vídeo para WhatsApp:",
         videoUrl
       );
-
 
       try {
         await sendWhatsAppVideo(
@@ -742,9 +758,8 @@ console.log(
           error
         );
 
-        // Fallback:
-        // se a Meta não aceitar a URL como mídia direta,
-        // o cliente ainda recebe o link do vídeo.
+        // Se a Meta não aceitar a URL como mídia,
+        // envia o link para o cliente.
         await sendWhatsAppText(
           to,
           videoUrl
@@ -778,7 +793,6 @@ console.log(
     return;
   }
 
-
   console.log(
     "Typebot aguardando resposta:",
     JSON.stringify(input)
@@ -799,12 +813,10 @@ console.log(
       "Choice input detectado."
     );
 
-
     await sendWhatsAppButtons(
       to,
       input.items
     );
-
 
     return;
   }
@@ -858,7 +870,6 @@ function extractTypebotText(message) {
     return message.content;
   }
 
-
   if (
     typeof message
       ?.content?.text ===
@@ -869,17 +880,14 @@ function extractTypebotText(message) {
       .text;
   }
 
-
   const richText =
     message
       ?.content
       ?.richText;
 
-
   if (!Array.isArray(richText)) {
     return "";
   }
-
 
   return richText
     .map((paragraph) => {
@@ -891,14 +899,12 @@ function extractTypebotText(message) {
         return paragraph;
       }
 
-
       if (
         typeof paragraph?.text ===
         "string"
       ) {
         return paragraph.text;
       }
-
 
       if (
         Array.isArray(
@@ -913,7 +919,6 @@ function extractTypebotText(message) {
           )
           .join("");
       }
-
 
       return "";
     })
@@ -930,8 +935,6 @@ function extractTypebotVideoUrl(message) {
   const content =
     message?.content;
 
-
-  // Primeiro tenta os formatos mais comuns.
   const directCandidates = [
     content?.url,
     content?.src,
@@ -941,7 +944,6 @@ function extractTypebotVideoUrl(message) {
     content?.file?.url,
     message?.url,
   ];
-
 
   for (const candidate of directCandidates) {
 
@@ -953,9 +955,8 @@ function extractTypebotVideoUrl(message) {
     }
   }
 
-
-  // Caso a estrutura do Typebot mude ou a URL venha
-  // aninhada em outro campo, procura recursivamente.
+  // Se a URL estiver aninhada em outro campo,
+  // procura recursivamente.
   return findFirstHttpUrl(content);
 }
 
@@ -979,14 +980,12 @@ function findFirstHttpUrl(value) {
     return "";
   }
 
-
   if (
     !value ||
     typeof value !== "object"
   ) {
     return "";
   }
-
 
   if (Array.isArray(value)) {
 
@@ -1003,7 +1002,6 @@ function findFirstHttpUrl(value) {
     return "";
   }
 
-
   for (const key of Object.keys(value)) {
 
     const found =
@@ -1015,7 +1013,6 @@ function findFirstHttpUrl(value) {
       return found;
     }
   }
-
 
   return "";
 }
@@ -1033,14 +1030,11 @@ function isHttpUrl(value) {
     return false;
   }
 
-
   return (
     value.startsWith("https://") ||
     value.startsWith("http://")
   );
 }
-
-
 // ===========================================================
 // 21. IDENTIFICAR TEXTO DA OPÇÃO
 // ===========================================================
@@ -1051,7 +1045,6 @@ function getChoiceText(item, index) {
     return item;
   }
 
-
   const possibleValues = [
     item?.content,
     item?.label,
@@ -1059,7 +1052,6 @@ function getChoiceText(item, index) {
     item?.text,
     item?.name,
   ];
-
 
   for (const value of possibleValues) {
 
@@ -1070,7 +1062,6 @@ function getChoiceText(item, index) {
       return value.trim();
     }
   }
-
 
   return `Opção ${index + 1}`;
 }
@@ -1088,7 +1079,6 @@ async function sendWhatsAppButtons(
   const choices =
     items.slice(0, 3);
 
-
   const buttons =
     choices.map(
       (item, index) => {
@@ -1099,7 +1089,6 @@ async function sendWhatsAppButtons(
             index
           );
 
-
         // WhatsApp: título máximo de 20 caracteres.
         const buttonTitle =
           originalText.substring(
@@ -1107,13 +1096,11 @@ async function sendWhatsAppButtons(
             20
           );
 
-
         const buttonId =
           "typebot_choice:" +
           encodeURIComponent(
             originalText
           );
-
 
         return {
           type: "reply",
@@ -1126,16 +1113,13 @@ async function sendWhatsAppButtons(
       }
     );
 
-
   console.log(
     "Botões preparados:",
     JSON.stringify(buttons)
   );
 
-
   const url =
     `https://graph.facebook.com/${process.env.GRAPH_API_VERSION}/${process.env.PHONE_NUMBER_ID}/messages`;
-
 
   const response =
     await fetch(
@@ -1150,7 +1134,6 @@ async function sendWhatsAppButtons(
           "Content-Type":
             "application/json",
         },
-
 
         body:
           JSON.stringify({
@@ -1183,10 +1166,8 @@ async function sendWhatsAppButtons(
       }
     );
 
-
   const data =
     await response.json();
-
 
   if (!response.ok) {
     console.error(
@@ -1194,17 +1175,14 @@ async function sendWhatsAppButtons(
       JSON.stringify(data)
     );
 
-
     throw new Error(
       "Falha ao enviar botões pelo WhatsApp"
     );
   }
 
-
   console.log(
     "Botões enviados com sucesso para o WhatsApp."
   );
-
 
   return data;
 }
@@ -1222,7 +1200,6 @@ async function sendWhatsAppVideo(
   const url =
     `https://graph.facebook.com/${process.env.GRAPH_API_VERSION}/${process.env.PHONE_NUMBER_ID}/messages`;
 
-
   const response =
     await fetch(
       url,
@@ -1236,7 +1213,6 @@ async function sendWhatsAppVideo(
           "Content-Type":
             "application/json",
         },
-
 
         body:
           JSON.stringify({
@@ -1259,10 +1235,8 @@ async function sendWhatsAppVideo(
       }
     );
 
-
   const responseText =
     await response.text();
-
 
   let data;
 
@@ -1278,7 +1252,6 @@ async function sendWhatsAppVideo(
     };
   }
 
-
   if (!response.ok) {
 
     console.error(
@@ -1287,17 +1260,14 @@ async function sendWhatsAppVideo(
       JSON.stringify(data)
     );
 
-
     throw new Error(
       `Falha ao enviar vídeo pelo WhatsApp: ${response.status}`
     );
   }
 
-
   console.log(
     "Vídeo enviado com sucesso para o WhatsApp."
   );
-
 
   return data;
 }
@@ -1315,7 +1285,6 @@ async function sendWhatsAppText(
   const url =
     `https://graph.facebook.com/${process.env.GRAPH_API_VERSION}/${process.env.PHONE_NUMBER_ID}/messages`;
 
-
   const response =
     await fetch(
       url,
@@ -1329,7 +1298,6 @@ async function sendWhatsAppText(
           "Content-Type":
             "application/json",
         },
-
 
         body:
           JSON.stringify({
@@ -1355,10 +1323,8 @@ async function sendWhatsAppText(
       }
     );
 
-
   const data =
     await response.json();
-
 
   if (!response.ok) {
     console.error(
@@ -1366,17 +1332,14 @@ async function sendWhatsAppText(
       JSON.stringify(data)
     );
 
-
     throw new Error(
       "Falha ao enviar mensagem pelo WhatsApp"
     );
   }
 
-
   console.log(
     "Mensagem enviada com sucesso para o WhatsApp."
   );
-
 
   return data;
 }
