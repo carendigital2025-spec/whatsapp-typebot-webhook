@@ -655,7 +655,10 @@ async function processTypebotResponse(
     "Quantidade de mensagens do Typebot:",
     messages.length
   );
-
+console.log(
+  "MESSAGES COMPLETAS DO TYPEBOT:",
+  JSON.stringify(messages)
+);
 
   // =========================================================
   // 13. ENVIA MENSAGENS DE TEXTO
