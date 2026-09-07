@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Conversas | ADCred</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      background: #f3f5f8;
+      color: #1f2937;
+    }
+
+    header {
+      height: 70px;
+      background: #111827;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 30px;
+    }
+
+    header h1 {
+      font-size: 22px;
+    }
+
+    .voltar {
+      color: white;
+      text-decoration: none;
+      background: #273244;
+      padding: 10px 16px;
+      border-radius: 7px;
+    }
+
+    .container {
+      max-width: 1450px;
+      margin: 30px auto;
+      padding: 0 20px;
+    }
+
+    .titulo {
+      margin-bottom: 20px;
+    }
+
+    .titulo h2 {
+      font-size: 28px;
+      margin-bottom: 5px;
+    }
+
+    .titulo p {
+      color: #6b7280;
+    }
+
+    .chat {
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 2px 12px rgba(0,0,0,.08);
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      height: 680px;
+    }
+
+    /* COLUNA DOS CLIENTES */
+
+    .clientes {
+      border-right: 1px solid #e5e7eb;
+      overflow-y: auto;
+    }
+
+    .busca {
+      padding: 15px;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    .busca input {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      outline: none;
+    }
+
+    .cliente {
+      padding: 17px;
+      border-bottom: 1px solid #f0f0f0;
+      cursor: pointer;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .cliente:hover {
+      background: #f8fafc;
+    }
+
+    .cliente.ativo {
+      background: #eef4ff;
+    }
+
+    .avatar {
+      width: 45px;
+      height: 45px;
+      background: #1f2937;
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      flex-shrink: 0;
+    }
+
+    .dados-cliente {
+      min-width: 0;
+      flex: 1;
+    }
+
+    .dados-cliente strong {
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    .dados-cliente span {
+      display: block;
+      font-size: 13px;
+      color: #6b7280;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* CONVERSA */
+
+    .conversa {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+
+    .cabecalho-conversa {
+      height: 75px;
+      border-bottom: 1px solid #e5e7eb;
+      display: flex;
+      align-items: center;
+      padding: 0 20px;
+      gap: 12px;
+    }
+
+    .cabecalho-conversa strong {
+      display: block;
+    }
+
+    .cabecalho-conversa span {
+      font-size: 13px;
+      color: #6b7280;
+    }
+
+    .mensagens {
+      flex: 1;
+      background: #f7f8fa;
+      padding: 25px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .vazio {
+      margin: auto;
+      text-align: center;
+      color: #6b7280;
+    }
+
+    .vazio h3 {
+      color: #374151;
+      margin-bottom: 8px;
+    }
+
+    .mensagem {
+      max-width: 70%;
+      padding: 11px 14px;
+      border-radius: 10px;
+      line-height: 1.4;
+      font-size: 14px;
+    }
+
+    .mensagem.cliente-msg {
+      background: white;
+      align-self: flex-start;
+      border: 1px solid #e5e7eb;
+    }
+
+    .mensagem.atendente-msg {
+      background: #d9fdd3;
+      align-self: flex-end;
+    }
+
+    .hora {
+      display: block;
+      font-size: 10px;
+      color: #6b7280;
+      margin-top: 5px;
+      text-align: right;
+    }
+
+    /* CAMPO DE RESPOSTA */
+
+    .resposta {
+      border-top: 1px solid #e5e7eb;
+      padding: 15px;
+      display: flex;
+      gap: 10px;
+      background: white;
+    }
+
+    .resposta textarea {
+      flex: 1;
+      resize: none;
+      height: 48px;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      padding: 12px;
+      outline: none;
+    }
+
+    .resposta button {
+      border: 0;
+      background: #1f2937;
+      color: white;
+      padding: 0 22px;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .resposta button:hover {
+      background: #111827;
+    }
+
+    @media (max-width: 800px) {
+      .chat {
+        grid-template-columns: 1fr;
+      }
+
+      .clientes {
+        display: none;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <h1>ADCred | Atendimento</h1>
+
+  <a class="voltar" href="/painel.html">
+    Voltar ao painel
+  </a>
+</header>
+
+<div class="container">
+
+  <div class="titulo">
+    <h2>Conversas</h2>
+    <p>Atendimento dos clientes pelo WhatsApp</p>
+  </div>
+
+  <div class="chat">
+
+    <div class="clientes">
+
+      <div class="busca">
+        <input
+          type="text"
+          id="buscarCliente"
+          placeholder="Buscar cliente ou telefone..."
+        >
+      </div>
+
+      <div id="listaClientes">
+
+        <div style="padding:25px;text-align:center;color:#6b7280;">
+          Nenhuma conversa carregada.
+        </div>
+
+      </div>
+
+    </div>
+
+    <div class="conversa">
+
+      <div class="cabecalho-conversa">
+
+        <div class="avatar" id="avatarConversa">
+          ?
+        </div>
+
+        <div>
+          <strong id="nomeConversa">
+            Selecione uma conversa
+          </strong>
+
+          <span id="telefoneConversa">
+            WhatsApp
+          </span>
+        </div>
+
+      </div>
+
+      <div class="mensagens" id="mensagens">
+
+        <div class="vazio">
+          <h3>Caixa de atendimento</h3>
+          <p>
+            As conversas dos clientes aparecerão aqui.
+          </p>
+        </div>
+
+      </div>
+
+      <div class="resposta">
+
+        <textarea
+          id="mensagemResposta"
+          placeholder="Digite uma mensagem..."
+          disabled
+        ></textarea>
+
+        <button
+          id="botaoEnviar"
+          disabled
+        >
+          Enviar
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+
+  /*
+    Esta primeira versão cria a interface da caixa de atendimento.
+
+    Ainda NÃO envia mensagens e NÃO altera o webhook existente.
+
+    Na próxima etapa conectaremos esta tela ao servidor para:
+    - receber conversas do WhatsApp;
+    - guardar histórico;
+    - identificar cliente;
+    - mostrar mensagens;
+    - permitir atendimento manual.
+  */
+
+  async function verificarLogin() {
+
+    try {
+
+      const resposta = await fetch(
+        "/api/panel-login",
+        {
+          method: "GET",
+          credentials: "same-origin"
+        }
+      );
+
+      const dados = await resposta.json();
+
+      if (!dados.autenticado) {
+        window.location.href = "/painel.html";
+      }
+
+    } catch (erro) {
+
+      console.error(
+        "Erro ao verificar acesso:",
+        erro
+      );
+
+      window.location.href = "/painel.html";
+    }
+  }
+
+  verificarLogin();
+
+</script>
+
+</body>
+</html>v
