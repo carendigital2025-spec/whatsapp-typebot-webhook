@@ -779,56 +779,115 @@ function mostrarPreview() {
 
 /* Botão preparar campanha */
 
-function prepararCampanha() {
+async function prepararCampanha() {
 
   const nomeCampanha =
     document
-      .getElementById(
-        "nomeCampanha"
-      )
+      .getElementById("nomeCampanha")
       .value
       .trim();
 
-
   if (!nomeCampanha) {
-
     mostrarErro(
       "Digite o nome da campanha."
     );
-
     return;
   }
-
 
   if (
     contatosProcessados.length === 0
   ) {
-
     mostrarErro(
       "Importe uma lista CSV antes de preparar a campanha."
     );
-
     return;
   }
 
+  const contatosValidos =
+    contatosProcessados.filter(
+      contato =>
+        contato.status === "Válido"
+    );
 
-  const quantidadeValidos =
-    contatosProcessados
-      .filter(
-        contato =>
-          contato.status === "Válido"
-      )
-      .length;
+  if (
+    contatosValidos.length === 0
+  ) {
+    mostrarErro(
+      "A lista não possui contatos válidos."
+    );
+    return;
+  }
 
+  const campoTemplate =
+    document.getElementById("template");
+
+  const templateSelecionado =
+    campoTemplate &&
+    campoTemplate.value
+      ? campoTemplate.value
+      : "teste_local";
 
   mostrarSucesso(
-
-    `Campanha "${nomeCampanha}" preparada com ${quantidadeValidos} contatos válidos. Nenhuma mensagem foi enviada.`
-
+    "Preparando campanha em modo de teste..."
   );
 
-}
+  try {
 
+    const resposta =
+      await fetch(
+        "/api/send-campaign",
+        {
+          method: "POST",
+
+          headers: {
+            "Content-Type":
+              "application/json"
+          },
+
+          body: JSON.stringify({
+            campanha:
+              nomeCampanha,
+
+            template:
+              templateSelecionado,
+
+            contatos:
+              contatosValidos
+          })
+        }
+      );
+
+    const dados =
+      await resposta.json();
+
+    if (
+      !resposta.ok ||
+      !dados.ok
+    ) {
+      throw new Error(
+        dados.erro ||
+        "Erro ao preparar campanha"
+      );
+    }
+
+    mostrarSucesso(
+      `Campanha "${nomeCampanha}" recebida pelo servidor com ${dados.quantidade} contatos válidos. Nenhuma mensagem foi enviada.`
+    );
+
+  } catch (erro) {
+
+    console.error(
+      "Erro ao preparar campanha:",
+      erro
+    );
+
+    mostrarErro(
+      "Não foi possível comunicar com o servidor: " +
+      erro.message
+    );
+  }
+
+}
 
 /* Mensagens */
 
