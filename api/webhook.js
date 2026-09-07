@@ -400,7 +400,23 @@ export default async function handler(req, res) {
           .send("EVENTO_RECEBIDO");
       }
 
+      // =====================================================
+      // CRM - SALVAR MENSAGEM RECEBIDA DO CLIENTE
+      // =====================================================
 
+      try {
+        await saveCrmMessage({
+          telefone: from,
+          texto: userMessage,
+          direcao: "entrada",
+          tipo: message.type
+        });
+      } catch (erroCrm) {
+        console.error(
+          "Erro ao salvar mensagem no CRM:",
+          erroCrm
+        );
+      }
       console.log(
         "Mensagem recebida:",
         from,
