@@ -1,4 +1,18 @@
 export default async function handler(req, res) {
+    // Proteção: somente usuário autenticado no painel pode usar esta rota
+  const cookies = req.headers.cookie || "";
+
+  const autenticado = cookies
+    .split(";")
+    .map(cookie => cookie.trim())
+    .some(cookie => cookie === "painel_session=1");
+
+  if (!autenticado) {
+    return res.status(401).json({
+      ok: false,
+      erro: "Não autorizado. Faça login no painel."
+    });
+  }
   // Esta rota será usada pelo painel de campanhas da ADCred.
   // Por enquanto ela NÃO envia nenhuma mensagem.
 
