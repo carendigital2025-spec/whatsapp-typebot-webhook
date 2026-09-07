@@ -90,7 +90,79 @@ async function redisCommand(command) {
 
   return data?.result;
 }
+// ===========================================================
+// CRM - SALVAR CONVERSAS E MENSAGENS
+// ===========================================================
 
+async function saveCrmMessage({
+  telefone,
+  texto,
+  direcao,
+  nome = "",
+  tipo = "text"
+}) {
+
+  if (!telefone || !texto) {
+    return;
+  }
+
+  const agora = Date.now();
+  const dataIso = new Date(agora).toISOString();
+
+  const mensagem = {
+    telefone,
+    texto,
+    direcao,
+    tipo,
+    timestamp: agora,
+    data: dataIso
+  };
+
+
+  // Guarda a mensagem no histórico do cliente
+  await redisCommand([
+    "RPUSH",
+    `crm:messages:${telefone}`,
+    JSON.stringify(mensagem)
+  ]);
+
+
+  // Mantém somente as 100 mensagens mais recentes
+  await redisCommand([
+    "LTRIM",
+    `crm:messages:${telefone}`,
+    "-100",
+    "-1"
+  ]);
+
+
+  // Guarda o resumo da conversa
+  const conversa = {
+    telefone,
+    nome: nome || telefone,
+    ultimaMensagem: texto,
+    ultimaDirecao: direcao,
+    atualizadoEm: dataIso,
+    timestamp: agora
+  };
+
+  await redisCommand([
+    "SET",
+    `crm:conversation:${telefone}`,
+    JSON.stringify(conversa)
+  ]);
+
+
+  // Coloca a conversa na lista geral,
+  // ordenada pela mensagem mais recente
+  await redisCommand([
+    "ZADD",
+    "crm:conversations",
+    agora.toString(),
+    telefone
+  ]);
+
+}
 
 // ===========================================================
 // CHAVE DA SESSÃO
