@@ -307,4 +307,4 @@ export default async function handler(
         "Erro ao carregar as conversas."
     });
   }
-}v
+}
