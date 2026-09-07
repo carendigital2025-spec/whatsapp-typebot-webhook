@@ -1,11 +1,49 @@
+import crypto from "crypto";
 export default async function handler(req, res) {
-    // Proteção: somente usuário autenticado no painel pode usar esta rota
+  // Proteção da rota usando a mesma sessão do painel
   const cookies = req.headers.cookie || "";
 
-  const autenticado = cookies
+  const cookieSessao = cookies
     .split(";")
     .map(cookie => cookie.trim())
-    .some(cookie => cookie === "painel_session=1");
+    .find(cookie =>
+      cookie.startsWith("panel_session=")
+    );
+
+  if (!cookieSessao || !process.env.PANEL_PASSWORD) {
+    return res.status(401).json({
+      ok: false,
+      erro: "Não autorizado. Faça login no painel."
+    });
+  }
+
+  const tokenRecebido =
+    cookieSessao.substring(
+      "panel_session=".length
+    );
+
+  const tokenEsperado = crypto
+    .createHmac(
+      "sha256",
+      process.env.PANEL_PASSWORD
+    )
+    .update(
+      "adcred-painel-autorizado"
+    )
+    .digest("hex");
+
+  const recebido =
+    Buffer.from(tokenRecebido);
+
+  const esperado =
+    Buffer.from(tokenEsperado);
+
+  const autenticado =
+    recebido.length === esperado.length &&
+    crypto.timingSafeEqual(
+      recebido,
+      esperado
+    );
 
   if (!autenticado) {
     return res.status(401).json({
@@ -13,6 +51,7 @@ export default async function handler(req, res) {
       erro: "Não autorizado. Faça login no painel."
     });
   }
+   
   // Esta rota será usada pelo painel de campanhas da ADCred.
   // Por enquanto ela NÃO envia nenhuma mensagem.
 
