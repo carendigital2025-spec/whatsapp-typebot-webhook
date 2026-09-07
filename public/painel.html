@@ -1025,6 +1025,28 @@ function escaparHTML(valor) {
 
   /* Proteção do painel */
 
+function liberarPainel() {
+  document
+    .getElementById("telaLogin")
+    .style.display = "none";
+
+  document
+    .getElementById("conteudoPainel")
+    .style.display = "block";
+}
+
+
+function bloquearPainel() {
+  document
+    .getElementById("telaLogin")
+    .style.display = "flex";
+
+  document
+    .getElementById("conteudoPainel")
+    .style.display = "none";
+}
+
+
 async function verificarLoginPainel() {
   try {
     const resposta = await fetch("/api/panel-login", {
@@ -1034,37 +1056,84 @@ async function verificarLoginPainel() {
 
     const dados = await resposta.json();
 
-    if (!dados.autenticado) {
-      const senha = prompt("Digite a senha para acessar o Painel ADCred:");
-
-      if (!senha) {
-        document.body.innerHTML = "<h2 style='text-align:center;margin-top:100px;'>Acesso não autorizado.</h2>";
-        return;
-      }
-
-      const login = await fetch("/api/panel-login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        credentials: "same-origin",
-        body: JSON.stringify({ senha })
-      });
-
-      const resultado = await login.json();
-
-      if (!resultado.ok) {
-        alert("Senha incorreta.");
-        location.reload();
-        return;
-      }
-
-      location.reload();
+    if (resposta.ok && dados.autenticado) {
+      liberarPainel();
+    } else {
+      bloquearPainel();
     }
+
   } catch (erro) {
-    alert("Não foi possível verificar o acesso ao painel.");
+    bloquearPainel();
   }
 }
+
+
+async function entrarPainel() {
+  const campoSenha =
+    document.getElementById("senhaPainel");
+
+  const erroLogin =
+    document.getElementById("erroLogin");
+
+  const senha =
+    campoSenha.value.trim();
+
+  erroLogin.style.display = "none";
+  erroLogin.textContent = "";
+
+  if (!senha) {
+    erroLogin.textContent =
+      "Digite a senha.";
+
+    erroLogin.style.display =
+      "block";
+
+    return;
+  }
+
+  try {
+    const resposta = await fetch("/api/panel-login", {
+      method: "POST",
+
+      headers: {
+        "Content-Type": "application/json"
+      },
+
+      credentials: "same-origin",
+
+      body: JSON.stringify({
+        senha: senha
+      })
+    });
+
+    const dados = await resposta.json();
+
+    if (!resposta.ok || !dados.ok) {
+      erroLogin.textContent =
+        dados.erro || "Senha incorreta.";
+
+      erroLogin.style.display =
+        "block";
+
+      campoSenha.value = "";
+      campoSenha.focus();
+
+      return;
+    }
+
+    campoSenha.value = "";
+
+    liberarPainel();
+
+  } catch (erro) {
+    erroLogin.textContent =
+      "Não foi possível acessar o servidor.";
+
+    erroLogin.style.display =
+      "block";
+  }
+}
+
 
 verificarLoginPainel();
 
