@@ -1035,10 +1035,34 @@ async function verificarLoginPainel() {
     const dados = await resposta.json();
 
     if (!dados.autenticado) {
-      window.location.href = "/login.html";
+      const senha = prompt("Digite a senha para acessar o Painel ADCred:");
+
+      if (!senha) {
+        document.body.innerHTML = "<h2 style='text-align:center;margin-top:100px;'>Acesso não autorizado.</h2>";
+        return;
+      }
+
+      const login = await fetch("/api/panel-login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        credentials: "same-origin",
+        body: JSON.stringify({ senha })
+      });
+
+      const resultado = await login.json();
+
+      if (!resultado.ok) {
+        alert("Senha incorreta.");
+        location.reload();
+        return;
+      }
+
+      location.reload();
     }
   } catch (erro) {
-    window.location.href = "/login.html";
+    alert("Não foi possível verificar o acesso ao painel.");
   }
 }
 
