@@ -1,12 +1,8 @@
-// ===========================================================
-// WHATSAPP + TYPEBOT + UPSTASH REDIS + CRM
-// ===========================================================
-
 const SESSION_TTL_SECONDS = 60 * 60 * 24;
 
 
 // ===========================================================
-// CONFIGURAÇÃO DO REDIS
+// REDIS
 // ===========================================================
 
 function getRedisConfig() {
@@ -32,10 +28,6 @@ function getRedisConfig() {
   };
 }
 
-
-// ===========================================================
-// EXECUTAR COMANDO NO REDIS
-// ===========================================================
 
 async function redisCommand(command) {
   const { url, token } =
@@ -94,7 +86,7 @@ async function redisCommand(command) {
 
 
 // ===========================================================
-// CRM - BUSCAR CONVERSA
+// CRM
 // ===========================================================
 
 async function getCrmConversation(
@@ -118,10 +110,6 @@ async function getCrmConversation(
 }
 
 
-// ===========================================================
-// CRM - SALVAR MENSAGEM
-// ===========================================================
-
 async function saveCrmMessage({
   telefone,
   texto,
@@ -129,10 +117,7 @@ async function saveCrmMessage({
   nome = "",
   tipo = "text"
 }) {
-  if (
-    !telefone ||
-    !texto
-  ) {
+  if (!telefone || !texto) {
     return;
   }
 
@@ -149,10 +134,8 @@ async function saveCrmMessage({
     texto,
     direcao,
     tipo,
-    timestamp:
-      agora,
-    data:
-      dataIso
+    timestamp: agora,
+    data: dataIso
   };
 
   await redisCommand([
@@ -221,7 +204,11 @@ async function saveCrmMessage({
 
     status:
       conversaAnterior.status ||
-      "novo"
+      "novo",
+
+    modoAtendimento:
+      conversaAnterior.modoAtendimento ||
+      "bot"
   };
 
   await redisCommand([
@@ -242,7 +229,7 @@ async function saveCrmMessage({
 
 
 // ===========================================================
-// SESSÃO DO TYPEBOT
+// TYPEBOT SESSION
 // ===========================================================
 
 function getSessionKey(from) {
@@ -292,10 +279,6 @@ export default async function handler(
   res
 ) {
 
-  // ---------------------------------------------------------
-  // VERIFICAÇÃO DO WEBHOOK DA META
-  // ---------------------------------------------------------
-
   if (req.method === "GET") {
     const mode =
       req.query["hub.mode"];
@@ -326,10 +309,6 @@ export default async function handler(
       .send("Token inválido");
   }
 
-
-  // ---------------------------------------------------------
-  // RECEBIMENTO DE EVENTOS
-  // ---------------------------------------------------------
 
   if (req.method === "POST") {
     try {
@@ -363,10 +342,7 @@ export default async function handler(
       let userMessage = "";
 
 
-      // -----------------------------------------------------
       // TEXTO
-      // -----------------------------------------------------
-
       if (
         message.type ===
         "text"
@@ -378,10 +354,7 @@ export default async function handler(
       }
 
 
-      // -----------------------------------------------------
-      // BOTÕES E LISTAS
-      // -----------------------------------------------------
-
+      // BOTÃO / LISTA
       if (
         message.type ===
         "interactive"
@@ -415,14 +388,12 @@ export default async function handler(
                 );
             } catch {
               userMessage =
-                buttonReply
-                  ?.title ||
+                buttonReply?.title ||
                 "";
             }
           } else {
             userMessage =
-              buttonReply
-                ?.title ||
+              buttonReply?.title ||
               "";
           }
         }
@@ -442,16 +413,7 @@ export default async function handler(
       }
 
 
-      // -----------------------------------------------------
-      // TIPO AINDA NÃO SUPORTADO
-      // -----------------------------------------------------
-
       if (!userMessage) {
-        console.log(
-          "Tipo de mensagem ainda não suportado:",
-          message.type
-        );
-
         return res
           .status(200)
           .send(
@@ -460,10 +422,7 @@ export default async function handler(
       }
 
 
-      // -----------------------------------------------------
-      // SALVAR MENSAGEM RECEBIDA NO CRM
-      // -----------------------------------------------------
-
+      // SALVA NO CRM
       try {
         await saveCrmMessage({
           telefone:
@@ -483,15 +442,47 @@ export default async function handler(
         });
       } catch (erroCrm) {
         console.error(
-          "Erro ao salvar mensagem recebida no CRM:",
+          "Erro CRM:",
           erroCrm
         );
       }
 
 
-      // -----------------------------------------------------
+      // =====================================================
+      // VERIFICAR SE HUMANO ASSUMIU
+      // =====================================================
+
+      const conversaAtual =
+        await getCrmConversation(
+          from
+        );
+
+      const modoAtendimento =
+        conversaAtual
+          ?.modoAtendimento ||
+        "bot";
+
+
+      if (
+        modoAtendimento ===
+        "humano"
+      ) {
+        console.log(
+          "Atendimento humano ativo para:",
+          from
+        );
+
+        return res
+          .status(200)
+          .send(
+            "EVENTO_RECEBIDO"
+          );
+      }
+
+
+      // =====================================================
       // COMANDO REINICIAR
-      // -----------------------------------------------------
+      // =====================================================
 
       if (
         userMessage
@@ -532,9 +523,9 @@ export default async function handler(
       }
 
 
-      // -----------------------------------------------------
-      // BUSCAR OU CRIAR SESSÃO
-      // -----------------------------------------------------
+      // =====================================================
+      // TYPEBOT
+      // =====================================================
 
       let sessionId =
         await getSession(
@@ -562,6 +553,7 @@ export default async function handler(
             sessionId
           );
         }
+
       } else {
         try {
           typebotResponse =
@@ -620,7 +612,7 @@ export default async function handler(
 
     } catch (error) {
       console.error(
-        "Erro ao processar webhook:",
+        "Erro webhook:",
         error
       );
 
@@ -632,6 +624,7 @@ export default async function handler(
     }
   }
 
+
   return res
     .status(405)
     .send(
@@ -641,7 +634,7 @@ export default async function handler(
 
 
 // ===========================================================
-// INICIAR TYPEBOT
+// TYPEBOT START
 // ===========================================================
 
 async function startTypebot(
@@ -674,12 +667,6 @@ async function startTypebot(
     await response.text();
 
   if (!response.ok) {
-    console.error(
-      "Erro Typebot startChat:",
-      response.status,
-      responseText
-    );
-
     throw new Error(
       `Erro Typebot startChat: ${response.status}`
     );
@@ -692,7 +679,7 @@ async function startTypebot(
 
 
 // ===========================================================
-// CONTINUAR TYPEBOT
+// TYPEBOT CONTINUE
 // ===========================================================
 
 async function continueTypebot(
@@ -726,12 +713,6 @@ async function continueTypebot(
     await response.text();
 
   if (!response.ok) {
-    console.error(
-      "Erro Typebot continueChat:",
-      response.status,
-      responseText
-    );
-
     throw new Error(
       `Erro Typebot continueChat: ${response.status}`
     );
@@ -744,7 +725,7 @@ async function continueTypebot(
 
 
 // ===========================================================
-// PROCESSAR RESPOSTA DO TYPEBOT
+// PROCESSAR TYPEBOT
 // ===========================================================
 
 async function processTypebotResponse(
@@ -756,25 +737,16 @@ async function processTypebotResponse(
   }
 
   const messages =
-    typebotResponse
-      .messages ||
+    typebotResponse.messages ||
     [];
 
   const input =
-    typebotResponse
-      .input ||
+    typebotResponse.input ||
     null;
 
 
-  // ---------------------------------------------------------
-  // MENSAGENS DO TYPEBOT
-  // ---------------------------------------------------------
+  for (const message of messages) {
 
-  for (
-    const message of messages
-  ) {
-
-    // TEXTO
     if (
       message.type ===
       "text"
@@ -793,7 +765,6 @@ async function processTypebotResponse(
         text
       );
 
-      // Também registra no CRM
       try {
         await saveCrmMessage({
           telefone:
@@ -808,18 +779,12 @@ async function processTypebotResponse(
           tipo:
             "typebot"
         });
-      } catch (erroCrm) {
-        console.error(
-          "Erro ao registrar resposta do Typebot no CRM:",
-          erroCrm
-        );
-      }
+      } catch {}
 
       continue;
     }
 
 
-    // VÍDEO
     if (
       message.type ===
       "video"
@@ -855,12 +820,7 @@ async function processTypebotResponse(
           });
         } catch {}
 
-      } catch (error) {
-        console.error(
-          "Falha ao enviar vídeo. Enviando link:",
-          error
-        );
-
+      } catch {
         await sendWhatsAppText(
           to,
           videoUrl
@@ -891,10 +851,6 @@ async function processTypebotResponse(
   }
 
 
-  // ---------------------------------------------------------
-  // BOTÕES
-  // ---------------------------------------------------------
-
   if (
     input.type ===
       "choice input" &&
@@ -911,10 +867,6 @@ async function processTypebotResponse(
     return;
   }
 
-
-  // ---------------------------------------------------------
-  // ENTRADA DE TEXTO
-  // ---------------------------------------------------------
 
   if (
     input.type ===
@@ -947,14 +899,12 @@ async function processTypebotResponse(
           "typebot"
       });
     } catch {}
-
-    return;
   }
 }
 
 
 // ===========================================================
-// EXTRAIR TEXTO DO TYPEBOT
+// EXTRAIR TEXTO
 // ===========================================================
 
 function extractTypebotText(
@@ -984,57 +934,52 @@ function extractTypebotText(
       ?.content
       ?.richText;
 
-  if (
-    !Array.isArray(
-      richText
-    )
-  ) {
+  if (!Array.isArray(richText)) {
     return "";
   }
 
   return richText
-    .map(
-      (paragraph) => {
-        if (
-          typeof paragraph ===
-          "string"
-        ) {
-          return paragraph;
-        }
+    .map((paragraph) => {
 
-        if (
-          typeof paragraph
-            ?.text ===
-          "string"
-        ) {
-          return paragraph.text;
-        }
-
-        if (
-          Array.isArray(
-            paragraph
-              ?.children
-          )
-        ) {
-          return paragraph
-            .children
-            .map(
-              (child) =>
-                child?.text ||
-                ""
-            )
-            .join("");
-        }
-
-        return "";
+      if (
+        typeof paragraph ===
+        "string"
+      ) {
+        return paragraph;
       }
-    )
+
+      if (
+        typeof paragraph
+          ?.text ===
+        "string"
+      ) {
+        return paragraph.text;
+      }
+
+      if (
+        Array.isArray(
+          paragraph
+            ?.children
+        )
+      ) {
+        return paragraph
+          .children
+          .map(
+            (child) =>
+              child?.text ||
+              ""
+          )
+          .join("");
+      }
+
+      return "";
+    })
     .join("\n");
 }
 
 
 // ===========================================================
-// EXTRAIR URL DO VÍDEO
+// VÍDEO
 // ===========================================================
 
 function extractTypebotVideoUrl(
@@ -1153,7 +1098,7 @@ function isHttpUrl(value) {
 
 
 // ===========================================================
-// TEXTO DAS OPÇÕES
+// BOTÕES
 // ===========================================================
 
 function getChoiceText(
@@ -1190,10 +1135,6 @@ function getChoiceText(
   return `Opção ${index + 1}`;
 }
 
-
-// ===========================================================
-// ENVIAR BOTÕES
-// ===========================================================
 
 async function sendWhatsAppButtons(
   to,
@@ -1284,13 +1225,6 @@ async function sendWhatsAppButtons(
     await response.json();
 
   if (!response.ok) {
-    console.error(
-      "Erro ao enviar botões:",
-      JSON.stringify(
-        data
-      )
-    );
-
     throw new Error(
       "Falha ao enviar botões pelo WhatsApp"
     );
@@ -1365,14 +1299,6 @@ async function sendWhatsAppVideo(
   }
 
   if (!response.ok) {
-    console.error(
-      "Erro ao enviar vídeo:",
-      response.status,
-      JSON.stringify(
-        data
-      )
-    );
-
     throw new Error(
       `Falha ao enviar vídeo: ${response.status}`
     );
@@ -1436,13 +1362,6 @@ async function sendWhatsAppText(
     await response.json();
 
   if (!response.ok) {
-    console.error(
-      "Erro ao enviar mensagem WhatsApp:",
-      JSON.stringify(
-        data
-      )
-    );
-
     throw new Error(
       "Falha ao enviar mensagem pelo WhatsApp"
     );
