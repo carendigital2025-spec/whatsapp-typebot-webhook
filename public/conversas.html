@@ -351,53 +351,404 @@
 
 </div>
 
-<script>
+async function verificarLogin() {
+  try {
+    const resposta = await fetch(
+      "/api/panel-login",
+      {
+        method: "GET",
+        credentials: "same-origin"
+      }
+    );
 
-  /*
-    Esta primeira versão cria a interface da caixa de atendimento.
+    const dados = await resposta.json();
 
-    Ainda NÃO envia mensagens e NÃO altera o webhook existente.
+    if (!dados.autenticado) {
+      window.location.href = "/painel.html";
+      return false;
+    }
 
-    Na próxima etapa conectaremos esta tela ao servidor para:
-    - receber conversas do WhatsApp;
-    - guardar histórico;
-    - identificar cliente;
-    - mostrar mensagens;
-    - permitir atendimento manual.
-  */
+    return true;
 
-  async function verificarLogin() {
+  } catch (erro) {
+    window.location.href = "/painel.html";
+    return false;
+  }
+}
 
-    try {
 
-      const resposta = await fetch(
-        "/api/panel-login",
+// ===========================================================
+// CARREGAR LISTA DE CONVERSAS
+// ===========================================================
+
+async function carregarConversas() {
+
+  const lista =
+    document.getElementById(
+      "listaClientes"
+    );
+
+  try {
+
+    const resposta = await fetch(
+      "/api/conversations",
+      {
+        method: "GET",
+        credentials: "same-origin"
+      }
+    );
+
+    const dados =
+      await resposta.json();
+
+    if (!resposta.ok || !dados.ok) {
+      throw new Error(
+        dados.erro ||
+        "Erro ao carregar conversas"
+      );
+    }
+
+    const conversas =
+      dados.conversations || [];
+
+    if (conversas.length === 0) {
+
+      lista.innerHTML = `
+        <div style="
+          padding:25px;
+          text-align:center;
+          color:#6b7280;
+        ">
+          Nenhuma conversa encontrada.
+        </div>
+      `;
+
+      return;
+    }
+
+    lista.innerHTML = "";
+
+    conversas.forEach(
+      conversa => {
+
+        const telefone =
+          conversa.telefone || "";
+
+        const nome =
+          conversa.nome ||
+          telefone;
+
+        const ultimaMensagem =
+          conversa.ultimaMensagem ||
+          "";
+
+        const item =
+          document.createElement(
+            "div"
+          );
+
+        item.className =
+          "cliente";
+
+        item.dataset.telefone =
+          telefone;
+
+        item.innerHTML = `
+          <div class="avatar">
+            ${pegarInicial(nome)}
+          </div>
+
+          <div class="dados-cliente">
+            <strong>
+              ${escaparHTML(nome)}
+            </strong>
+
+            <span>
+              ${escaparHTML(ultimaMensagem)}
+            </span>
+          </div>
+        `;
+
+        item.addEventListener(
+          "click",
+          () => abrirConversa(
+            telefone,
+            nome,
+            item
+          )
+        );
+
+        lista.appendChild(item);
+      }
+    );
+
+  } catch (erro) {
+
+    console.error(
+      "Erro ao carregar conversas:",
+      erro
+    );
+
+    lista.innerHTML = `
+      <div style="
+        padding:25px;
+        text-align:center;
+        color:#b00020;
+      ">
+        Não foi possível carregar as conversas.
+      </div>
+    `;
+  }
+}
+
+
+// ===========================================================
+// ABRIR HISTÓRICO DO CLIENTE
+// ===========================================================
+
+async function abrirConversa(
+  telefone,
+  nome,
+  elemento
+) {
+
+  document
+    .querySelectorAll(".cliente")
+    .forEach(item =>
+      item.classList.remove(
+        "ativo"
+      )
+    );
+
+  if (elemento) {
+    elemento.classList.add(
+      "ativo"
+    );
+  }
+
+  document.getElementById(
+    "nomeConversa"
+  ).textContent = nome;
+
+  document.getElementById(
+    "telefoneConversa"
+  ).textContent = telefone;
+
+  document.getElementById(
+    "avatarConversa"
+  ).textContent =
+    pegarInicial(nome);
+
+  const areaMensagens =
+    document.getElementById(
+      "mensagens"
+    );
+
+  areaMensagens.innerHTML =
+    "<div class='vazio'>Carregando conversa...</div>";
+
+  try {
+
+    const resposta =
+      await fetch(
+        `/api/conversations?telefone=${encodeURIComponent(telefone)}`,
         {
-          method: "GET",
-          credentials: "same-origin"
+          credentials:
+            "same-origin"
         }
       );
 
-      const dados = await resposta.json();
+    const dados =
+      await resposta.json();
 
-      if (!dados.autenticado) {
-        window.location.href = "/painel.html";
-      }
-
-    } catch (erro) {
-
-      console.error(
-        "Erro ao verificar acesso:",
-        erro
+    if (!resposta.ok || !dados.ok) {
+      throw new Error(
+        dados.erro ||
+        "Erro ao carregar histórico"
       );
-
-      window.location.href = "/painel.html";
     }
+
+    const mensagens =
+      dados.mensagens || [];
+
+    areaMensagens.innerHTML = "";
+
+    if (mensagens.length === 0) {
+
+      areaMensagens.innerHTML = `
+        <div class="vazio">
+          Nenhuma mensagem encontrada.
+        </div>
+      `;
+
+      return;
+    }
+
+    mensagens.forEach(
+      mensagem => {
+
+        const bolha =
+          document.createElement(
+            "div"
+          );
+
+        bolha.className =
+          mensagem.direcao ===
+          "saida"
+            ? "mensagem atendente-msg"
+            : "mensagem cliente-msg";
+
+        const hora =
+          formatarHora(
+            mensagem.data
+          );
+
+        bolha.innerHTML = `
+          ${escaparHTML(
+            mensagem.texto || ""
+          )}
+
+          <span class="hora">
+            ${hora}
+          </span>
+        `;
+
+        areaMensagens.appendChild(
+          bolha
+        );
+      }
+    );
+
+    areaMensagens.scrollTop =
+      areaMensagens.scrollHeight;
+
+  } catch (erro) {
+
+    console.error(
+      "Erro ao abrir conversa:",
+      erro
+    );
+
+    areaMensagens.innerHTML = `
+      <div class="vazio">
+        Não foi possível carregar esta conversa.
+      </div>
+    `;
+  }
+}
+
+
+// ===========================================================
+// FUNÇÕES AUXILIARES
+// ===========================================================
+
+function pegarInicial(nome) {
+
+  const texto =
+    String(nome || "?").trim();
+
+  return texto
+    ? texto.charAt(0).toUpperCase()
+    : "?";
+}
+
+
+function formatarHora(data) {
+
+  if (!data) {
+    return "";
   }
 
-  verificarLogin();
+  const objeto =
+    new Date(data);
 
+  if (
+    Number.isNaN(
+      objeto.getTime()
+    )
+  ) {
+    return "";
+  }
+
+  return objeto.toLocaleTimeString(
+    "pt-BR",
+    {
+      hour: "2-digit",
+      minute: "2-digit"
+    }
+  );
+}
+
+
+function escaparHTML(valor) {
+
+  const div =
+    document.createElement(
+      "div"
+    );
+
+  div.textContent =
+    valor || "";
+
+  return div.innerHTML;
+}
+
+
+// ===========================================================
+// BUSCA
+// ===========================================================
+
+document
+  .getElementById(
+    "buscarCliente"
+  )
+  .addEventListener(
+    "input",
+    function () {
+
+      const termo =
+        this.value
+          .toLowerCase()
+          .trim();
+
+      document
+        .querySelectorAll(
+          ".cliente"
+        )
+        .forEach(
+          cliente => {
+
+            const texto =
+              cliente.textContent
+                .toLowerCase();
+
+            cliente.style.display =
+              texto.includes(termo)
+                ? "flex"
+                : "none";
+          }
+        );
+    }
+  );
+
+
+// ===========================================================
+// INICIAR
+// ===========================================================
+
+async function iniciarConversas() {
+
+  const autenticado =
+    await verificarLogin();
+
+  if (!autenticado) {
+    return;
+  }
+
+  await carregarConversas();
+}
+
+iniciarConversas();
 </script>
-
 </body>
 </html>v
