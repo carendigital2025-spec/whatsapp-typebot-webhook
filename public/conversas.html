@@ -3,7 +3,6 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
   <title>Conversas | ADCred</title>
 
   <style>
@@ -14,9 +13,16 @@
       font-family: Arial, sans-serif;
     }
 
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+    }
+
     body {
       background: #f3f5f8;
       color: #1f2937;
+      overflow: hidden;
     }
 
     header {
@@ -42,13 +48,20 @@
     }
 
     .container {
+      height: calc(100vh - 70px);
       max-width: 1450px;
-      margin: 30px auto;
-      padding: 0 20px;
+      margin: 0 auto;
+      padding: 22px 20px;
+
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
     }
 
     .titulo {
-      margin-bottom: 20px;
+      flex: 0 0 auto;
+      margin-bottom: 18px;
+
       display: flex;
       align-items: flex-end;
       justify-content: space-between;
@@ -70,19 +83,30 @@
     }
 
     .chat {
+      flex: 1;
+      height: 0;
+      min-height: 0;
+
       background: white;
       border-radius: 12px;
       overflow: hidden;
-      box-shadow: 0 2px 12px rgba(0,0,0,.08);
+
+      box-shadow: 0 2px 12px rgba(0, 0, 0, .08);
 
       display: grid;
-      grid-template-columns: 380px 1fr;
-
-      height: 680px;
+      grid-template-columns: 360px minmax(0, 1fr);
     }
 
+    /* ==========================
+       LISTA DE CLIENTES
+       ========================== */
+
     .clientes {
+      height: 100%;
+      min-height: 0;
+
       border-right: 1px solid #e5e7eb;
+
       overflow-y: auto;
     }
 
@@ -94,7 +118,7 @@
       top: 0;
 
       background: white;
-      z-index: 2;
+      z-index: 10;
     }
 
     .busca input {
@@ -109,6 +133,7 @@
 
     .cliente {
       padding: 15px 17px;
+
       border-bottom: 1px solid #f0f0f0;
 
       cursor: pointer;
@@ -140,6 +165,7 @@
       justify-content: center;
 
       font-weight: bold;
+
       flex-shrink: 0;
     }
 
@@ -163,8 +189,10 @@
       text-overflow: ellipsis;
     }
 
-    .dados-cliente span.preview {
+    .preview {
       display: block;
+
+      margin-top: 5px;
 
       font-size: 13px;
       color: #6b7280;
@@ -172,16 +200,14 @@
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-
-      margin-top: 5px;
     }
 
     .meta-cliente {
+      margin-top: 6px;
+
       display: flex;
       align-items: center;
       gap: 7px;
-
-      margin-top: 6px;
 
       font-size: 11px;
       color: #9ca3af;
@@ -233,22 +259,60 @@
       color: #92400e;
     }
 
+    /* ==========================
+       CONVERSA
+       ========================== */
+
     .conversa {
+      min-width: 0;
+      min-height: 0;
+      height: 100%;
+
       display: flex;
       flex-direction: column;
-      min-width: 0;
+
+      overflow: hidden;
     }
 
+    .erro-topo {
+      display: none;
+
+      flex: 0 0 auto;
+
+      padding: 8px 14px;
+
+      background: #fef2f2;
+      color: #991b1b;
+
+      font-size: 12px;
+
+      border-bottom: 1px solid #fecaca;
+    }
+
+    /* ==========================
+       CABEÇALHO
+       ========================== */
+
     .cabecalho-conversa {
+      width: 100%;
+
       min-height: 82px;
+      height: 82px;
+
+      flex: 0 0 82px;
+
+      padding: 10px 20px;
+
+      background: white;
 
       border-bottom: 1px solid #e5e7eb;
 
       display: flex;
       align-items: center;
-
-      padding: 10px 20px;
       gap: 12px;
+
+      position: relative;
+      z-index: 20;
     }
 
     .cabecalho-info {
@@ -257,46 +321,56 @@
     }
 
     .cabecalho-info strong {
-      display: inline-block;
-      max-width: 100%;
+      display: block;
+
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
-    .cabecalho-info span {
+    .cabecalho-info > span {
       display: block;
+
+      margin-top: 3px;
 
       font-size: 13px;
       color: #6b7280;
-
-      margin-top: 3px;
     }
 
     .modo-atual {
-      margin-top: 6px;
       display: inline-block;
+
+      margin-top: 6px;
       padding: 5px 9px;
+
       border-radius: 999px;
+
       font-size: 11px;
       font-weight: bold;
     }
 
     .acoes-cabecalho {
+      flex: 0 0 auto;
+
       display: flex;
       align-items: center;
-      gap: 8px;
-      flex-wrap: wrap;
       justify-content: flex-end;
+
+      gap: 8px;
+
+      flex-wrap: nowrap;
     }
 
     .acoes-cabecalho select,
     .acoes-cabecalho button {
       height: 36px;
 
+      padding: 0 10px;
+
       border: 1px solid #d1d5db;
       border-radius: 7px;
 
       background: white;
-
-      padding: 0 10px;
     }
 
     .acoes-cabecalho button {
@@ -305,6 +379,7 @@
 
     #botaoModo {
       font-weight: bold;
+      flex-shrink: 0;
     }
 
     #botaoModo.assumir {
@@ -319,109 +394,159 @@
       border-color: #0284c7;
     }
 
+    /* ==========================
+       HISTÓRICO
+       ========================== */
+
     .mensagens {
-      flex: 1;
+      flex: 1 1 auto;
+
+      width: 100%;
+      min-height: 0;
+
+      padding: 18px 22px;
 
       background: #f7f8fa;
 
-      padding: 25px;
-
       overflow-y: auto;
+      overflow-x: hidden;
 
       display: flex;
       flex-direction: column;
-      gap: 12px;
+
+      justify-content: flex-start;
+
+      gap: 10px;
     }
 
     .vazio {
       margin: auto;
+
       text-align: center;
       color: #6b7280;
     }
 
     .vazio h3 {
-      color: #374151;
       margin-bottom: 8px;
+      color: #374151;
     }
 
-    .mensagem {
-      max-width: 72%;
+    /* ==========================
+       BALÕES
+       ========================== */
 
-      padding: 11px 14px;
+    .mensagem {
+      display: block;
+
+      width: fit-content;
+      height: auto;
+
+      min-width: 60px;
+      min-height: 0;
+
+      max-width: 68%;
+
+      padding: 9px 12px;
+
+      flex: 0 0 auto;
 
       border-radius: 10px;
 
-      line-height: 1.4;
+      line-height: 1.35;
       font-size: 14px;
 
       white-space: pre-wrap;
+
       overflow-wrap: anywhere;
+      word-break: normal;
     }
 
     .cliente-msg {
-      background: white;
-
       align-self: flex-start;
+
+      background: white;
 
       border: 1px solid #e5e7eb;
     }
 
     .atendente-msg {
-      background: #d9fdd3;
       align-self: flex-end;
+
+      background: #d9fdd3;
     }
 
     .hora {
       display: block;
 
-      font-size: 10px;
-      color: #6b7280;
+      margin-top: 4px;
 
-      margin-top: 5px;
+      font-size: 10px;
+      line-height: 1;
+
+      color: #6b7280;
 
       text-align: right;
     }
 
-    .resposta {
-      border-top: 1px solid #e5e7eb;
+    /* ==========================
+       RESPOSTA
+       ========================== */
 
-      padding: 15px;
+    .resposta {
+      width: 100%;
+
+      min-height: 74px;
+      height: 74px;
+
+      flex: 0 0 74px;
+
+      padding: 12px 15px;
+
+      background: white;
+
+      border-top: 1px solid #e5e7eb;
 
       display: flex;
       gap: 10px;
 
-      background: white;
+      position: relative;
+      z-index: 20;
     }
 
     .resposta textarea {
       flex: 1;
 
-      resize: none;
+      width: 100%;
 
       height: 48px;
-      max-height: 120px;
+      min-height: 48px;
+      max-height: 48px;
+
+      padding: 12px;
 
       border: 1px solid #d1d5db;
       border-radius: 8px;
 
-      padding: 12px;
-
       outline: none;
+      resize: none;
     }
 
     .resposta button {
+      height: 48px;
+
+      padding: 0 22px;
+
       border: 0;
+      border-radius: 8px;
 
       background: #1f2937;
       color: white;
 
-      padding: 0 22px;
-
-      border-radius: 8px;
-
       font-weight: bold;
 
       cursor: pointer;
+
+      flex-shrink: 0;
     }
 
     .resposta button:disabled,
@@ -432,191 +557,34 @@
       cursor: not-allowed;
     }
 
-    .erro-topo {
-      display: none;
+    /* ==========================
+       RESPONSIVO
+       ========================== */
 
-      padding: 8px 14px;
-
-      background: #fef2f2;
-      color: #991b1b;
-
-      font-size: 12px;
-
-      border-bottom: 1px solid #fecaca;
-    }
-
-    @media (max-width: 900px) {
+    @media (max-width: 1100px) {
       .chat {
-        grid-template-columns: 330px 1fr;
-      }
-
-      .acoes-cabecalho {
-        max-width: 320px;
-      }
-    }
-
-    @media (max-width: 800px) {
-      .chat {
-        grid-template-columns: 1fr;
-      }
-
-      .clientes {
-        display: none;
+        grid-template-columns: 300px minmax(0, 1fr);
       }
 
       .cabecalho-conversa {
-        align-items: flex-start;
+        padding-left: 12px;
+        padding-right: 12px;
       }
 
       .acoes-cabecalho {
-        max-width: 250px;
+        gap: 5px;
       }
 
-      .acoes-cabecalho select {
-        max-width: 140px;
-      }
-    }
-     /* ======================================================
-       CORREÇÃO DO LAYOUT DO CHAT
-       ====================================================== */
-
-    html,
-    body {
-      height: 100%;
-    }
-
-    body {
-      overflow: hidden;
-    }
-
-    .container {
-      height: calc(100vh - 70px);
-      max-width: 1450px;
-      margin: 0 auto;
-      padding: 24px 20px;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .titulo {
-      flex: 0 0 auto;
-      margin-bottom: 18px;
-    }
-
-    .chat {
-      flex: 1;
-      min-height: 0;
-      height: auto;
-      max-height: none;
-      overflow: hidden;
-
-      display: grid;
-      grid-template-columns: 380px minmax(0, 1fr);
-    }
-
-    .clientes {
-      height: 100%;
-      min-height: 0;
-      overflow-y: auto;
-    }
-
-    .conversa {
-      height: 100%;
-      min-height: 0;
-      overflow: hidden;
-
-      display: grid;
-      grid-template-rows: auto auto minmax(0, 1fr) auto;
-    }
-
-    .erro-topo {
-      flex-shrink: 0;
-    }
-
-    .cabecalho-conversa {
-      position: relative;
-      z-index: 5;
-
-      min-height: 82px;
-      height: auto;
-
-      background: white;
-
-      flex-shrink: 0;
-    }
-
-    .mensagens {
-      min-height: 0;
-      height: 100%;
-
-      overflow-x: hidden;
-      overflow-y: auto;
-
-      padding: 22px 26px;
-
-      display: flex;
-      flex-direction: column;
-      justify-content: flex-start;
-      gap: 10px;
-    }
-
-    .mensagem {
-      width: fit-content;
-      min-width: 70px;
-      max-width: min(70%, 650px);
-
-      height: auto;
-      min-height: 0;
-
-      padding: 10px 12px;
-
-      flex: 0 0 auto;
-
-      line-height: 1.35;
-
-      white-space: pre-wrap;
-      overflow-wrap: break-word;
-      word-break: break-word;
-    }
-
-    .cliente-msg {
-      align-self: flex-start;
-    }
-
-    .atendente-msg {
-      align-self: flex-end;
-    }
-
-    .hora {
-      margin-top: 4px;
-    }
-
-    .resposta {
-      position: relative;
-      z-index: 5;
-
-      flex-shrink: 0;
-
-      min-height: 78px;
-
-      background: white;
-    }
-
-    .resposta textarea {
-      min-height: 48px;
-      height: 48px;
-    }
-
-    @media (max-width: 900px) {
-      .chat {
-        grid-template-columns: 320px minmax(0, 1fr);
+      .acoes-cabecalho select,
+      .acoes-cabecalho button {
+        padding-left: 7px;
+        padding-right: 7px;
       }
 
       .mensagem {
-        max-width: 80%;
+        max-width: 75%;
       }
     }
-  
   </style>
 </head>
 
@@ -632,7 +600,6 @@
     Voltar ao painel
   </a>
 </header>
-
 
 <div class="container">
 
@@ -655,8 +622,11 @@
 
   </div>
 
-
   <div class="chat">
+
+    <!-- ==========================
+         CLIENTES
+         ========================== -->
 
     <div class="clientes">
 
@@ -686,6 +656,9 @@
 
     </div>
 
+    <!-- ==========================
+         CONVERSA
+         ========================== -->
 
     <div class="conversa">
 
@@ -694,6 +667,7 @@
         id="erroTopo"
       ></div>
 
+      <!-- CABEÇALHO -->
 
       <div class="cabecalho-conversa">
 
@@ -703,7 +677,6 @@
         >
           ?
         </div>
-
 
         <div class="cabecalho-info">
 
@@ -723,7 +696,6 @@
           </div>
 
         </div>
-
 
         <div class="acoes-cabecalho">
 
@@ -750,7 +722,6 @@
 
           </select>
 
-
           <button
             id="editarNome"
             type="button"
@@ -758,7 +729,6 @@
           >
             Editar nome
           </button>
-
 
           <button
             id="botaoModo"
@@ -773,6 +743,7 @@
 
       </div>
 
+      <!-- HISTÓRICO -->
 
       <div
         class="mensagens"
@@ -793,6 +764,7 @@
 
       </div>
 
+      <!-- RESPOSTA -->
 
       <div class="resposta">
 
@@ -817,17 +789,13 @@
 
 </div>
 
-
 <script>
 
 let telefoneSelecionado = "";
-
 let nomeSelecionado = "";
-
 let assinaturaHistorico = "";
 
 let atualizando = false;
-
 let enviando = false;
 
 let modoSelecionado = "bot";
@@ -839,17 +807,15 @@ let modoSelecionado = "bot";
 
 async function verificarLogin() {
   try {
-    const resposta =
-      await fetch(
-        "/api/panel-login",
-        {
-          method: "GET",
-          credentials: "same-origin"
-        }
-      );
+    const resposta = await fetch(
+      "/api/panel-login",
+      {
+        method: "GET",
+        credentials: "same-origin"
+      }
+    );
 
-    const dados =
-      await resposta.json();
+    const dados = await resposta.json();
 
     if (!dados.autenticado) {
       window.location.href =
@@ -875,9 +841,7 @@ async function verificarLogin() {
 
 function pegarInicial(nome) {
   const texto =
-    String(
-      nome || "?"
-    ).trim();
+    String(nome || "?").trim();
 
   return texto
     ? texto.charAt(0).toUpperCase()
@@ -887,9 +851,7 @@ function pegarInicial(nome) {
 
 function escaparHTML(valor) {
   const div =
-    document.createElement(
-      "div"
-    );
+    document.createElement("div");
 
   div.textContent =
     valor || "";
@@ -914,14 +876,13 @@ function formatarHora(data) {
     return "";
   }
 
-  return objeto
-    .toLocaleTimeString(
-      "pt-BR",
-      {
-        hour: "2-digit",
-        minute: "2-digit"
-      }
-    );
+  return objeto.toLocaleTimeString(
+    "pt-BR",
+    {
+      hour: "2-digit",
+      minute: "2-digit"
+    }
+  );
 }
 
 
@@ -945,12 +906,10 @@ function statusLabel(status) {
 
 
 // ===========================================================
-// MODO DE ATENDIMENTO NA TELA
+// MODO BOT / HUMANO
 // ===========================================================
 
-function atualizarInterfaceModo(
-  modo
-) {
+function atualizarInterfaceModo(modo) {
   modoSelecionado =
     modo || "bot";
 
@@ -964,10 +923,8 @@ function atualizarInterfaceModo(
       "botaoModo"
     );
 
-
   if (
-    modoSelecionado ===
-    "humano"
+    modoSelecionado === "humano"
   ) {
     indicador.textContent =
       "👤 Atendimento humano";
@@ -998,19 +955,19 @@ function atualizarInterfaceModo(
 
 
 // ===========================================================
-// ERRO
+// ERROS
 // ===========================================================
 
 function mostrarErro(texto) {
-  const el =
+  const elemento =
     document.getElementById(
       "erroTopo"
     );
 
-  el.textContent =
+  elemento.textContent =
     texto || "";
 
-  el.style.display =
+  elemento.style.display =
     texto
       ? "block"
       : "none";
@@ -1050,7 +1007,7 @@ function aplicarBusca() {
 
 
 // ===========================================================
-// CARREGAR CONVERSAS
+// CARREGAR LISTA
 // ===========================================================
 
 async function carregarConversas() {
@@ -1082,12 +1039,10 @@ async function carregarConversas() {
     );
 
   const conversas =
-    dados.conversations ||
-    [];
+    dados.conversations || [];
 
   if (!conversas.length) {
-    lista.innerHTML =
-      `
+    lista.innerHTML = `
       <div
         style="
           padding:25px;
@@ -1097,7 +1052,7 @@ async function carregarConversas() {
       >
         Nenhuma conversa encontrada.
       </div>
-      `;
+    `;
 
     return;
   }
@@ -1108,8 +1063,7 @@ async function carregarConversas() {
   conversas.forEach(
     (conversa) => {
       const telefone =
-        conversa.telefone ||
-        "";
+        conversa.telefone || "";
 
       const nome =
         conversa.nome ||
@@ -1127,8 +1081,7 @@ async function carregarConversas() {
       item.className =
         "cliente" +
         (
-          telefone ===
-          telefoneSelecionado
+          telefone === telefoneSelecionado
             ? " ativo"
             : ""
         );
@@ -1136,8 +1089,7 @@ async function carregarConversas() {
       item.dataset.telefone =
         telefone;
 
-      item.innerHTML =
-        `
+      item.innerHTML = `
         <div class="avatar">
           ${escaparHTML(
             pegarInicial(nome)
@@ -1154,10 +1106,8 @@ async function carregarConversas() {
 
             ${
               Number(
-                conversa.naoLidas ||
-                0
+                conversa.naoLidas || 0
               ) > 0
-
                 ? `
                   <span class="badge">
                     ${Number(
@@ -1165,7 +1115,6 @@ async function carregarConversas() {
                     )}
                   </span>
                 `
-
                 : ""
             }
 
@@ -1213,17 +1162,18 @@ async function carregarConversas() {
           </div>
 
         </div>
-        `;
+      `;
 
       item.addEventListener(
         "click",
-        () =>
+        () => {
           abrirConversa(
             telefone,
             nome,
             item,
             true
-          )
+          );
+        }
       );
 
       fragmento.appendChild(
@@ -1241,7 +1191,7 @@ async function carregarConversas() {
 
 
 // ===========================================================
-// MARCAR LIDA
+// MARCAR COMO LIDA
 // ===========================================================
 
 async function marcarComoLida(
@@ -1324,14 +1274,13 @@ async function buscarHistorico(
   }
 
   const mensagens =
-    dados.mensagens ||
-    [];
+    dados.mensagens || [];
 
   const assinaturaNova =
     mensagens
       .map(
-        (m) =>
-          `${m.timestamp}|${m.direcao}|${m.texto}`
+        (mensagem) =>
+          `${mensagem.timestamp}|${mensagem.direcao}|${mensagem.texto}`
       )
       .join("§");
 
@@ -1343,12 +1292,11 @@ async function buscarHistorico(
       assinaturaNova;
 
     if (!mensagens.length) {
-      area.innerHTML =
-        `
+      area.innerHTML = `
         <div class="vazio">
           Nenhuma mensagem encontrada.
         </div>
-        `;
+      `;
 
     } else {
       const fragmento =
@@ -1365,26 +1313,37 @@ async function buscarHistorico(
           bolha.className =
             mensagem.direcao ===
             "saida"
-
               ? "mensagem atendente-msg"
-
               : "mensagem cliente-msg";
 
-          bolha.innerHTML =
-            `
-            ${escaparHTML(
-              mensagem.texto ||
-              ""
-            )}
+          const texto =
+            document.createElement(
+              "div"
+            );
 
-            <span class="hora">
-              ${escaparHTML(
-                formatarHora(
-                  mensagem.data
-                )
-              )}
-            </span>
-            `;
+          texto.textContent =
+            mensagem.texto || "";
+
+          const hora =
+            document.createElement(
+              "span"
+            );
+
+          hora.className =
+            "hora";
+
+          hora.textContent =
+            formatarHora(
+              mensagem.data
+            );
+
+          bolha.appendChild(
+            texto
+          );
+
+          bolha.appendChild(
+            hora
+          );
 
           fragmento.appendChild(
             bolha
@@ -1401,14 +1360,17 @@ async function buscarHistorico(
       forcarRolagem ||
       pertoDoFim
     ) {
-      area.scrollTop =
-        area.scrollHeight;
+      requestAnimationFrame(
+        () => {
+          area.scrollTop =
+            area.scrollHeight;
+        }
+      );
     }
   }
 
   const conversa =
-    dados.conversa ||
-    {};
+    dados.conversa || {};
 
   if (
     telefone ===
@@ -1425,6 +1387,13 @@ async function buscarHistorico(
       )
       .textContent =
         nomeSelecionado;
+
+    document
+      .getElementById(
+        "telefoneConversa"
+      )
+      .textContent =
+        telefone;
 
     document
       .getElementById(
@@ -1465,8 +1434,7 @@ async function abrirConversa(
     telefone;
 
   nomeSelecionado =
-    nome ||
-    telefone;
+    nome || telefone;
 
   assinaturaHistorico =
     "";
@@ -1476,20 +1444,17 @@ async function abrirConversa(
       ".cliente"
     )
     .forEach(
-      (item) =>
-        item
-          .classList
-          .remove(
-            "ativo"
-          )
+      (item) => {
+        item.classList.remove(
+          "ativo"
+        );
+      }
     );
 
   if (elemento) {
-    elemento
-      .classList
-      .add(
-        "ativo"
-      );
+    elemento.classList.add(
+      "ativo"
+    );
   }
 
   document
@@ -1614,12 +1579,9 @@ async function enviarMensagem() {
     return;
   }
 
-  enviando =
-    true;
+  enviando = true;
 
-  botao.disabled =
-    true;
-
+  botao.disabled = true;
   botao.textContent =
     "Enviando...";
 
@@ -1630,8 +1592,7 @@ async function enviarMensagem() {
       await fetch(
         "/api/send-message",
         {
-          method:
-            "POST",
+          method: "POST",
 
           credentials:
             "same-origin",
@@ -1664,11 +1625,9 @@ async function enviarMensagem() {
       );
     }
 
-    campo.value =
-      "";
+    campo.value = "";
 
-    assinaturaHistorico =
-      "";
+    assinaturaHistorico = "";
 
     await buscarHistorico(
       telefoneSelecionado,
@@ -1679,7 +1638,7 @@ async function enviarMensagem() {
 
   } catch (erro) {
     console.error(
-      "Erro ao enviar pelo CRM:",
+      "Erro ao enviar mensagem:",
       erro
     );
 
@@ -1689,11 +1648,9 @@ async function enviarMensagem() {
     );
 
   } finally {
-    enviando =
-      false;
+    enviando = false;
 
-    botao.disabled =
-      false;
+    botao.disabled = false;
 
     botao.textContent =
       "Enviar";
@@ -1704,7 +1661,7 @@ async function enviarMensagem() {
 
 
 // ===========================================================
-// ALTERAR MODO BOT/HUMANO
+// ASSUMIR / DEVOLVER AO BOT
 // ===========================================================
 
 async function alternarModoAtendimento() {
@@ -1717,8 +1674,7 @@ async function alternarModoAtendimento() {
       "botaoModo"
     );
 
-  botao.disabled =
-    true;
+  botao.disabled = true;
 
   const acao =
     modoSelecionado ===
@@ -1746,6 +1702,7 @@ async function alternarModoAtendimento() {
           body:
             JSON.stringify({
               acao,
+
               telefone:
                 telefoneSelecionado
             })
@@ -1772,8 +1729,7 @@ async function alternarModoAtendimento() {
     );
 
     if (
-      dados.conversa
-        ?.status
+      dados.conversa?.status
     ) {
       document
         .getElementById(
@@ -1792,8 +1748,7 @@ async function alternarModoAtendimento() {
     );
 
   } finally {
-    botao.disabled =
-      false;
+    botao.disabled = false;
   }
 }
 
@@ -1815,12 +1770,13 @@ async function atualizarStatus() {
       .value;
 
   try {
+    mostrarErro("");
+
     const resposta =
       await fetch(
         "/api/conversations",
         {
-          method:
-            "POST",
+          method: "POST",
 
           credentials:
             "same-origin",
@@ -1890,12 +1846,13 @@ async function editarNome() {
   }
 
   try {
+    mostrarErro("");
+
     const resposta =
       await fetch(
         "/api/conversations",
         {
-          method:
-            "POST",
+          method: "POST",
 
           credentials:
             "same-origin",
@@ -1933,8 +1890,7 @@ async function editarNome() {
     }
 
     nomeSelecionado =
-      dados.conversa
-        ?.nome ||
+      dados.conversa?.nome ||
       telefoneSelecionado;
 
     document
@@ -1976,8 +1932,7 @@ async function atualizarAutomaticamente() {
     return;
   }
 
-  atualizando =
-    true;
+  atualizando = true;
 
   try {
     document
@@ -1989,9 +1944,7 @@ async function atualizarAutomaticamente() {
 
     await carregarConversas();
 
-    if (
-      telefoneSelecionado
-    ) {
+    if (telefoneSelecionado) {
       await buscarHistorico(
         telefoneSelecionado,
         false
@@ -2019,8 +1972,7 @@ async function atualizarAutomaticamente() {
         "Falha temporária na atualização";
 
   } finally {
-    atualizando =
-      false;
+    atualizando = false;
   }
 }
 
@@ -2087,8 +2039,7 @@ document
     "keydown",
     (event) => {
       if (
-        event.key ===
-          "Enter" &&
+        event.key === "Enter" &&
         !event.shiftKey
       ) {
         event.preventDefault();
@@ -2100,7 +2051,7 @@ document
 
 
 // ===========================================================
-// INICIALIZAÇÃO
+// INICIAR
 // ===========================================================
 
 async function iniciarConversas() {
@@ -2115,9 +2066,7 @@ async function iniciarConversas() {
     await carregarConversas();
 
   } catch (erro) {
-    console.error(
-      erro
-    );
+    console.error(erro);
 
     mostrarErro(
       "Não foi possível carregar as conversas."
