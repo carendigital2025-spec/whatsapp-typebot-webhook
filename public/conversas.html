@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <title>Conversas | ADCred</title>
 
   <style>
@@ -48,6 +49,10 @@
 
     .titulo {
       margin-bottom: 20px;
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 15px;
     }
 
     .titulo h2 {
@@ -59,17 +64,22 @@
       color: #6b7280;
     }
 
+    .conexao {
+      font-size: 12px;
+      color: #6b7280;
+    }
+
     .chat {
       background: white;
       border-radius: 12px;
       overflow: hidden;
       box-shadow: 0 2px 12px rgba(0,0,0,.08);
+
       display: grid;
-      grid-template-columns: 360px 1fr;
+      grid-template-columns: 380px 1fr;
+
       height: 680px;
     }
-
-    /* COLUNA DOS CLIENTES */
 
     .clientes {
       border-right: 1px solid #e5e7eb;
@@ -79,20 +89,30 @@
     .busca {
       padding: 15px;
       border-bottom: 1px solid #e5e7eb;
+
+      position: sticky;
+      top: 0;
+
+      background: white;
+      z-index: 2;
     }
 
     .busca input {
       width: 100%;
       padding: 12px;
+
       border: 1px solid #d1d5db;
       border-radius: 8px;
+
       outline: none;
     }
 
     .cliente {
-      padding: 17px;
+      padding: 15px 17px;
       border-bottom: 1px solid #f0f0f0;
+
       cursor: pointer;
+
       display: flex;
       gap: 12px;
       align-items: center;
@@ -109,12 +129,16 @@
     .avatar {
       width: 45px;
       height: 45px;
+
       background: #1f2937;
       color: white;
+
       border-radius: 50%;
+
       display: flex;
       align-items: center;
       justify-content: center;
+
       font-weight: bold;
       flex-shrink: 0;
     }
@@ -124,21 +148,72 @@
       flex: 1;
     }
 
-    .dados-cliente strong {
-      display: block;
-      margin-bottom: 5px;
+    .linha-nome {
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
 
-    .dados-cliente span {
+    .dados-cliente strong {
       display: block;
-      font-size: 13px;
-      color: #6b7280;
+      flex: 1;
+
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
     }
 
-    /* CONVERSA */
+    .dados-cliente span.preview {
+      display: block;
+
+      font-size: 13px;
+      color: #6b7280;
+
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+
+      margin-top: 5px;
+    }
+
+    .meta-cliente {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+
+      margin-top: 6px;
+
+      font-size: 11px;
+      color: #9ca3af;
+    }
+
+    .badge {
+      min-width: 20px;
+      height: 20px;
+
+      padding: 0 6px;
+
+      border-radius: 999px;
+
+      background: #16a34a;
+      color: white;
+
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+
+      font-size: 11px;
+      font-weight: bold;
+    }
+
+    .status-mini {
+      padding: 3px 7px;
+
+      border-radius: 999px;
+
+      background: #f3f4f6;
+      color: #4b5563;
+    }
 
     .conversa {
       display: flex;
@@ -147,28 +222,67 @@
     }
 
     .cabecalho-conversa {
-      height: 75px;
+      min-height: 75px;
+
       border-bottom: 1px solid #e5e7eb;
+
       display: flex;
       align-items: center;
-      padding: 0 20px;
+
+      padding: 10px 20px;
       gap: 12px;
     }
 
-    .cabecalho-conversa strong {
-      display: block;
+    .cabecalho-info {
+      min-width: 0;
+      flex: 1;
     }
 
-    .cabecalho-conversa span {
+    .cabecalho-info strong {
+      display: inline-block;
+      max-width: 100%;
+    }
+
+    .cabecalho-info span {
+      display: block;
+
       font-size: 13px;
       color: #6b7280;
+
+      margin-top: 3px;
+    }
+
+    .acoes-cabecalho {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .acoes-cabecalho select,
+    .acoes-cabecalho button {
+      height: 36px;
+
+      border: 1px solid #d1d5db;
+      border-radius: 7px;
+
+      background: white;
+
+      padding: 0 10px;
+    }
+
+    .acoes-cabecalho button {
+      cursor: pointer;
     }
 
     .mensagens {
       flex: 1;
+
       background: #f7f8fa;
+
       padding: 25px;
+
       overflow-y: auto;
+
       display: flex;
       flex-direction: column;
       gap: 12px;
@@ -186,64 +300,102 @@
     }
 
     .mensagem {
-      max-width: 70%;
+      max-width: 72%;
+
       padding: 11px 14px;
+
       border-radius: 10px;
+
       line-height: 1.4;
       font-size: 14px;
+
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
     }
 
-    .mensagem.cliente-msg {
+    .cliente-msg {
       background: white;
+
       align-self: flex-start;
+
       border: 1px solid #e5e7eb;
     }
 
-    .mensagem.atendente-msg {
+    .atendente-msg {
       background: #d9fdd3;
       align-self: flex-end;
     }
 
     .hora {
       display: block;
+
       font-size: 10px;
       color: #6b7280;
+
       margin-top: 5px;
+
       text-align: right;
     }
 
-    /* CAMPO DE RESPOSTA */
-
     .resposta {
       border-top: 1px solid #e5e7eb;
+
       padding: 15px;
+
       display: flex;
       gap: 10px;
+
       background: white;
     }
 
     .resposta textarea {
       flex: 1;
+
       resize: none;
+
       height: 48px;
+      max-height: 120px;
+
       border: 1px solid #d1d5db;
       border-radius: 8px;
+
       padding: 12px;
+
       outline: none;
     }
 
     .resposta button {
       border: 0;
+
       background: #1f2937;
       color: white;
+
       padding: 0 22px;
+
       border-radius: 8px;
+
       font-weight: bold;
+
       cursor: pointer;
     }
 
-    .resposta button:hover {
-      background: #111827;
+    .resposta button:disabled,
+    .resposta textarea:disabled {
+      opacity: .55;
+      cursor: not-allowed;
+    }
+
+    .erro-topo {
+      display: none;
+
+      padding: 8px 14px;
+
+      background: #fef2f2;
+      color: #991b1b;
+
+      font-size: 12px;
+
+      border-bottom: 1px solid #fecaca;
     }
 
     @media (max-width: 800px) {
@@ -254,6 +406,10 @@
       .clientes {
         display: none;
       }
+
+      .acoes-cabecalho select {
+        max-width: 140px;
+      }
     }
   </style>
 </head>
@@ -263,49 +419,92 @@
 <header>
   <h1>ADCred | Atendimento</h1>
 
-  <a class="voltar" href="/painel.html">
+  <a
+    class="voltar"
+    href="/painel.html"
+  >
     Voltar ao painel
   </a>
 </header>
 
+
 <div class="container">
 
   <div class="titulo">
-    <h2>Conversas</h2>
-    <p>Atendimento dos clientes pelo WhatsApp</p>
+
+    <div>
+      <h2>Conversas</h2>
+
+      <p>
+        Atendimento dos clientes pelo WhatsApp
+      </p>
+    </div>
+
+    <div
+      class="conexao"
+      id="estadoAtualizacao"
+    >
+      Atualização automática ativa
+    </div>
+
   </div>
 
+
   <div class="chat">
+
+    <!-- LISTA DE CLIENTES -->
 
     <div class="clientes">
 
       <div class="busca">
+
         <input
           type="text"
           id="buscarCliente"
           placeholder="Buscar cliente ou telefone..."
         >
+
       </div>
 
       <div id="listaClientes">
 
-        <div style="padding:25px;text-align:center;color:#6b7280;">
-          Nenhuma conversa carregada.
+        <div
+          style="
+            padding:25px;
+            text-align:center;
+            color:#6b7280;
+          "
+        >
+          Carregando conversas...
         </div>
 
       </div>
 
     </div>
 
+
+    <!-- CONVERSA -->
+
     <div class="conversa">
+
+      <div
+        class="erro-topo"
+        id="erroTopo"
+      ></div>
+
 
       <div class="cabecalho-conversa">
 
-        <div class="avatar" id="avatarConversa">
+        <div
+          class="avatar"
+          id="avatarConversa"
+        >
           ?
         </div>
 
-        <div>
+
+        <div class="cabecalho-info">
+
           <strong id="nomeConversa">
             Selecione uma conversa
           </strong>
@@ -313,32 +512,80 @@
           <span id="telefoneConversa">
             WhatsApp
           </span>
+
+        </div>
+
+
+        <div class="acoes-cabecalho">
+
+          <select
+            id="statusConversa"
+            disabled
+          >
+
+            <option value="novo">
+              Novo
+            </option>
+
+            <option value="em_atendimento">
+              Em atendimento
+            </option>
+
+            <option value="aguardando_cliente">
+              Aguardando cliente
+            </option>
+
+            <option value="finalizado">
+              Finalizado
+            </option>
+
+          </select>
+
+
+          <button
+            id="editarNome"
+            type="button"
+            disabled
+          >
+            Editar nome
+          </button>
+
         </div>
 
       </div>
 
-      <div class="mensagens" id="mensagens">
+
+      <div
+        class="mensagens"
+        id="mensagens"
+      >
 
         <div class="vazio">
-          <h3>Caixa de atendimento</h3>
+
+          <h3>
+            Caixa de atendimento
+          </h3>
+
           <p>
             As conversas dos clientes aparecerão aqui.
           </p>
+
         </div>
 
       </div>
+
 
       <div class="resposta">
 
         <textarea
           id="mensagemResposta"
           placeholder="Digite uma mensagem..."
-          
+          disabled
         ></textarea>
 
         <button
           id="botaoEnviar"
-          
+          disabled
         >
           Enviar
         </button>
@@ -351,290 +598,56 @@
 
 </div>
 
+
 <script>
-  async function verificarLogin() {
-  try {
-    const resposta = await fetch(
-      "/api/panel-login",
-      {
-        method: "GET",
-        credentials: "same-origin"
-      }
-    );
 
-    const dados = await resposta.json();
+let telefoneSelecionado = "";
 
-    if (!dados.autenticado) {
-      window.location.href = "/painel.html";
-      return false;
-    }
+let nomeSelecionado = "";
 
-    return true;
+let assinaturaHistorico = "";
 
-  } catch (erro) {
-    window.location.href = "/painel.html";
-    return false;
-  }
-}
+let atualizando = false;
+
+let enviando = false;
 
 
 // ===========================================================
-// CARREGAR LISTA DE CONVERSAS
+// VERIFICAR LOGIN
 // ===========================================================
 
-async function carregarConversas() {
-
-  const lista =
-    document.getElementById(
-      "listaClientes"
-    );
-
-  try {
-
-    const resposta = await fetch(
-      "/api/conversations",
-      {
-        method: "GET",
-        credentials: "same-origin"
-      }
-    );
-
-    const dados =
-      await resposta.json();
-
-    if (!resposta.ok || !dados.ok) {
-      throw new Error(
-        dados.erro ||
-        "Erro ao carregar conversas"
-      );
-    }
-
-    const conversas =
-      dados.conversations || [];
-
-    if (conversas.length === 0) {
-
-      lista.innerHTML = `
-        <div style="
-          padding:25px;
-          text-align:center;
-          color:#6b7280;
-        ">
-          Nenhuma conversa encontrada.
-        </div>
-      `;
-
-      return;
-    }
-
-    lista.innerHTML = "";
-
-    conversas.forEach(
-      conversa => {
-
-        const telefone =
-          conversa.telefone || "";
-
-        const nome =
-          conversa.nome ||
-          telefone;
-
-        const ultimaMensagem =
-          conversa.ultimaMensagem ||
-          "";
-
-        const item =
-          document.createElement(
-            "div"
-          );
-
-        item.className =
-          "cliente";
-
-        item.dataset.telefone =
-          telefone;
-
-        item.innerHTML = `
-          <div class="avatar">
-            ${pegarInicial(nome)}
-          </div>
-
-          <div class="dados-cliente">
-            <strong>
-              ${escaparHTML(nome)}
-            </strong>
-
-            <span>
-              ${escaparHTML(ultimaMensagem)}
-            </span>
-          </div>
-        `;
-
-        item.addEventListener(
-          "click",
-          () => abrirConversa(
-            telefone,
-            nome,
-            item
-          )
-        );
-
-        lista.appendChild(item);
-      }
-    );
-
-  } catch (erro) {
-
-    console.error(
-      "Erro ao carregar conversas:",
-      erro
-    );
-
-    lista.innerHTML = `
-      <div style="
-        padding:25px;
-        text-align:center;
-        color:#b00020;
-      ">
-        Não foi possível carregar as conversas.
-      </div>
-    `;
-  }
-}
-
-
-// ===========================================================
-// ABRIR HISTÓRICO DO CLIENTE
-// ===========================================================
-
-async function abrirConversa(
-  telefone,
-  nome,
-  elemento
-) {
-
-  document
-    .querySelectorAll(".cliente")
-    .forEach(item =>
-      item.classList.remove(
-        "ativo"
-      )
-    );
-
-  if (elemento) {
-    elemento.classList.add(
-      "ativo"
-    );
-  }
-
-  document.getElementById(
-    "nomeConversa"
-  ).textContent = nome;
-
-  document.getElementById(
-    "telefoneConversa"
-  ).textContent = telefone;
-
-  document.getElementById(
-    "avatarConversa"
-  ).textContent =
-    pegarInicial(nome);
-
-  const areaMensagens =
-    document.getElementById(
-      "mensagens"
-    );
-
-  areaMensagens.innerHTML =
-    "<div class='vazio'>Carregando conversa...</div>";
+async function verificarLogin() {
 
   try {
 
     const resposta =
       await fetch(
-        `/api/conversations?telefone=${encodeURIComponent(telefone)}`,
+        "/api/panel-login",
         {
-          credentials:
-            "same-origin"
+          method: "GET",
+          credentials: "same-origin"
         }
       );
 
     const dados =
       await resposta.json();
 
-    if (!resposta.ok || !dados.ok) {
-      throw new Error(
-        dados.erro ||
-        "Erro ao carregar histórico"
-      );
+    if (!dados.autenticado) {
+
+      window.location.href =
+        "/painel.html";
+
+      return false;
     }
 
-    const mensagens =
-      dados.mensagens || [];
+    return true;
 
-    areaMensagens.innerHTML = "";
+  } catch {
 
-    if (mensagens.length === 0) {
+    window.location.href =
+      "/painel.html";
 
-      areaMensagens.innerHTML = `
-        <div class="vazio">
-          Nenhuma mensagem encontrada.
-        </div>
-      `;
-
-      return;
-    }
-
-    mensagens.forEach(
-      mensagem => {
-
-        const bolha =
-          document.createElement(
-            "div"
-          );
-
-        bolha.className =
-          mensagem.direcao ===
-          "saida"
-            ? "mensagem atendente-msg"
-            : "mensagem cliente-msg";
-
-        const hora =
-          formatarHora(
-            mensagem.data
-          );
-
-        bolha.innerHTML = `
-          ${escaparHTML(
-            mensagem.texto || ""
-          )}
-
-          <span class="hora">
-            ${hora}
-          </span>
-        `;
-
-        areaMensagens.appendChild(
-          bolha
-        );
-      }
-    );
-
-    areaMensagens.scrollTop =
-      areaMensagens.scrollHeight;
-
-  } catch (erro) {
-
-    console.error(
-      "Erro ao abrir conversa:",
-      erro
-    );
-
-    areaMensagens.innerHTML = `
-      <div class="vazio">
-        Não foi possível carregar esta conversa.
-      </div>
-    `;
+    return false;
   }
 }
 
@@ -646,11 +659,29 @@ async function abrirConversa(
 function pegarInicial(nome) {
 
   const texto =
-    String(nome || "?").trim();
+    String(
+      nome || "?"
+    ).trim();
 
   return texto
-    ? texto.charAt(0).toUpperCase()
+    ? texto
+        .charAt(0)
+        .toUpperCase()
     : "?";
+}
+
+
+function escaparHTML(valor) {
+
+  const div =
+    document.createElement(
+      "div"
+    );
+
+  div.textContent =
+    valor || "";
+
+  return div.innerHTML;
 }
 
 
@@ -671,32 +702,1079 @@ function formatarHora(data) {
     return "";
   }
 
-  return objeto.toLocaleTimeString(
-    "pt-BR",
-    {
-      hour: "2-digit",
-      minute: "2-digit"
-    }
-  );
+  return objeto
+    .toLocaleTimeString(
+      "pt-BR",
+      {
+        hour: "2-digit",
+        minute: "2-digit"
+      }
+    );
 }
 
 
-function escaparHTML(valor) {
+function statusLabel(status) {
 
-  const div =
-    document.createElement(
-      "div"
+  const mapa = {
+
+    novo:
+      "Novo",
+
+    em_atendimento:
+      "Em atendimento",
+
+    aguardando_cliente:
+      "Aguardando cliente",
+
+    finalizado:
+      "Finalizado"
+
+  };
+
+  return mapa[status] ||
+    "Novo";
+}
+
+
+// ===========================================================
+// ERROS
+// ===========================================================
+
+function mostrarErro(texto) {
+
+  const el =
+    document.getElementById(
+      "erroTopo"
     );
 
-  div.textContent =
-    valor || "";
+  el.textContent =
+    texto || "";
 
-  return div.innerHTML;
+  el.style.display =
+    texto
+      ? "block"
+      : "none";
 }
 
 
 // ===========================================================
 // BUSCA
+// ===========================================================
+
+function aplicarBusca() {
+
+  const termo =
+    document
+      .getElementById(
+        "buscarCliente"
+      )
+      .value
+      .toLowerCase()
+      .trim();
+
+  document
+    .querySelectorAll(
+      ".cliente"
+    )
+    .forEach(
+      (cliente) => {
+
+        cliente.style.display =
+          cliente
+            .textContent
+            .toLowerCase()
+            .includes(termo)
+            ? "flex"
+            : "none";
+
+      }
+    );
+}
+
+
+// ===========================================================
+// CARREGAR LISTA DE CONVERSAS
+// ===========================================================
+
+async function carregarConversas() {
+
+  const resposta =
+    await fetch(
+      "/api/conversations",
+      {
+        method: "GET",
+        credentials: "same-origin"
+      }
+    );
+
+  const dados =
+    await resposta.json();
+
+  if (
+    !resposta.ok ||
+    !dados.ok
+  ) {
+    throw new Error(
+      dados.erro ||
+      "Erro ao carregar conversas"
+    );
+  }
+
+  const lista =
+    document.getElementById(
+      "listaClientes"
+    );
+
+  const conversas =
+    dados.conversations ||
+    [];
+
+
+  if (!conversas.length) {
+
+    lista.innerHTML =
+      `
+      <div
+        style="
+          padding:25px;
+          text-align:center;
+          color:#6b7280;
+        "
+      >
+        Nenhuma conversa encontrada.
+      </div>
+      `;
+
+    return;
+  }
+
+
+  const fragmento =
+    document.createDocumentFragment();
+
+
+  conversas.forEach(
+    (conversa) => {
+
+      const telefone =
+        conversa.telefone ||
+        "";
+
+      const nome =
+        conversa.nome ||
+        telefone;
+
+      const item =
+        document.createElement(
+          "div"
+        );
+
+      item.className =
+        "cliente" +
+        (
+          telefone ===
+          telefoneSelecionado
+            ? " ativo"
+            : ""
+        );
+
+      item.dataset.telefone =
+        telefone;
+
+
+      item.innerHTML =
+        `
+        <div class="avatar">
+          ${escaparHTML(
+            pegarInicial(nome)
+          )}
+        </div>
+
+        <div class="dados-cliente">
+
+          <div class="linha-nome">
+
+            <strong>
+              ${escaparHTML(nome)}
+            </strong>
+
+            ${
+              Number(
+                conversa.naoLidas ||
+                0
+              ) > 0
+
+                ? `
+                  <span class="badge">
+                    ${Number(
+                      conversa.naoLidas
+                    )}
+                  </span>
+                `
+
+                : ""
+            }
+
+          </div>
+
+          <span class="preview">
+            ${escaparHTML(
+              conversa
+                .ultimaMensagem ||
+              ""
+            )}
+          </span>
+
+          <div class="meta-cliente">
+
+            <span class="status-mini">
+              ${escaparHTML(
+                statusLabel(
+                  conversa.status
+                )
+              )}
+            </span>
+
+            <span>
+              ${escaparHTML(
+                formatarHora(
+                  conversa
+                    .atualizadoEm
+                )
+              )}
+            </span>
+
+          </div>
+
+        </div>
+        `;
+
+
+      item.addEventListener(
+        "click",
+        () =>
+          abrirConversa(
+            telefone,
+            nome,
+            item,
+            true
+          )
+      );
+
+
+      fragmento.appendChild(
+        item
+      );
+
+    }
+  );
+
+
+  lista.replaceChildren(
+    fragmento
+  );
+
+  aplicarBusca();
+}
+
+
+// ===========================================================
+// MARCAR CONVERSA COMO LIDA
+// ===========================================================
+
+async function marcarComoLida(
+  telefone
+) {
+
+  try {
+
+    await fetch(
+      "/api/conversations",
+      {
+        method: "POST",
+
+        credentials:
+          "same-origin",
+
+        headers: {
+          "Content-Type":
+            "application/json"
+        },
+
+        body:
+          JSON.stringify({
+            acao:
+              "marcar_lida",
+
+            telefone
+          })
+      }
+    );
+
+  } catch (erro) {
+
+    console.error(
+      "Erro ao marcar como lida:",
+      erro
+    );
+  }
+}
+
+
+// ===========================================================
+// BUSCAR HISTÓRICO
+// ===========================================================
+
+async function buscarHistorico(
+  telefone,
+  forcarRolagem = false
+) {
+
+  const area =
+    document.getElementById(
+      "mensagens"
+    );
+
+
+  const pertoDoFim =
+    area.scrollHeight -
+    area.scrollTop -
+    area.clientHeight <
+    120;
+
+
+  const resposta =
+    await fetch(
+      `/api/conversations?telefone=${encodeURIComponent(
+        telefone
+      )}`,
+      {
+        credentials:
+          "same-origin"
+      }
+    );
+
+
+  const dados =
+    await resposta.json();
+
+
+  if (
+    !resposta.ok ||
+    !dados.ok
+  ) {
+    throw new Error(
+      dados.erro ||
+      "Erro ao carregar histórico"
+    );
+  }
+
+
+  const mensagens =
+    dados.mensagens ||
+    [];
+
+
+  const assinaturaNova =
+    mensagens
+      .map(
+        (m) =>
+          `${m.timestamp}|${m.direcao}|${m.texto}`
+      )
+      .join("§");
+
+
+  if (
+    assinaturaNova !==
+    assinaturaHistorico
+  ) {
+
+    assinaturaHistorico =
+      assinaturaNova;
+
+
+    if (!mensagens.length) {
+
+      area.innerHTML =
+        `
+        <div class="vazio">
+          Nenhuma mensagem encontrada.
+        </div>
+        `;
+
+    } else {
+
+      const fragmento =
+        document
+          .createDocumentFragment();
+
+
+      mensagens.forEach(
+        (mensagem) => {
+
+          const bolha =
+            document.createElement(
+              "div"
+            );
+
+
+          bolha.className =
+            mensagem.direcao ===
+            "saida"
+
+              ? "mensagem atendente-msg"
+
+              : "mensagem cliente-msg";
+
+
+          bolha.innerHTML =
+            `
+            ${escaparHTML(
+              mensagem.texto ||
+              ""
+            )}
+
+            <span class="hora">
+              ${escaparHTML(
+                formatarHora(
+                  mensagem.data
+                )
+              )}
+            </span>
+            `;
+
+
+          fragmento.appendChild(
+            bolha
+          );
+
+        }
+      );
+
+
+      area.replaceChildren(
+        fragmento
+      );
+    }
+
+
+    if (
+      forcarRolagem ||
+      pertoDoFim
+    ) {
+
+      area.scrollTop =
+        area.scrollHeight;
+    }
+  }
+
+
+  const conversa =
+    dados.conversa ||
+    {};
+
+
+  if (
+    telefone ===
+    telefoneSelecionado
+  ) {
+
+    nomeSelecionado =
+      conversa.nome ||
+      nomeSelecionado ||
+      telefone;
+
+
+    document
+      .getElementById(
+        "nomeConversa"
+      )
+      .textContent =
+        nomeSelecionado;
+
+
+    document
+      .getElementById(
+        "avatarConversa"
+      )
+      .textContent =
+        pegarInicial(
+          nomeSelecionado
+        );
+
+
+    document
+      .getElementById(
+        "statusConversa"
+      )
+      .value =
+        conversa.status ||
+        "novo";
+  }
+}
+
+
+// ===========================================================
+// ABRIR CONVERSA
+// ===========================================================
+
+async function abrirConversa(
+  telefone,
+  nome,
+  elemento,
+  marcarLida = true
+) {
+
+  telefoneSelecionado =
+    telefone;
+
+  nomeSelecionado =
+    nome ||
+    telefone;
+
+  assinaturaHistorico =
+    "";
+
+
+  document
+    .querySelectorAll(
+      ".cliente"
+    )
+    .forEach(
+      (item) =>
+        item
+          .classList
+          .remove(
+            "ativo"
+          )
+    );
+
+
+  if (elemento) {
+
+    elemento
+      .classList
+      .add(
+        "ativo"
+      );
+  }
+
+
+  document
+    .getElementById(
+      "nomeConversa"
+    )
+    .textContent =
+      nomeSelecionado;
+
+
+  document
+    .getElementById(
+      "telefoneConversa"
+    )
+    .textContent =
+      telefone;
+
+
+  document
+    .getElementById(
+      "avatarConversa"
+    )
+    .textContent =
+      pegarInicial(
+        nomeSelecionado
+      );
+
+
+  document
+    .getElementById(
+      "mensagemResposta"
+    )
+    .disabled =
+      false;
+
+
+  document
+    .getElementById(
+      "botaoEnviar"
+    )
+    .disabled =
+      false;
+
+
+  document
+    .getElementById(
+      "statusConversa"
+    )
+    .disabled =
+      false;
+
+
+  document
+    .getElementById(
+      "editarNome"
+    )
+    .disabled =
+      false;
+
+
+  try {
+
+    mostrarErro("");
+
+
+    await buscarHistorico(
+      telefone,
+      true
+    );
+
+
+    if (marcarLida) {
+
+      await marcarComoLida(
+        telefone
+      );
+
+      await carregarConversas();
+    }
+
+
+    document
+      .getElementById(
+        "mensagemResposta"
+      )
+      .focus();
+
+
+  } catch (erro) {
+
+    console.error(
+      "Erro ao abrir conversa:",
+      erro
+    );
+
+
+    mostrarErro(
+      "Não foi possível carregar esta conversa."
+    );
+  }
+}
+
+
+// ===========================================================
+// ENVIAR MENSAGEM
+// ===========================================================
+
+async function enviarMensagem() {
+
+  if (
+    enviando ||
+    !telefoneSelecionado
+  ) {
+    return;
+  }
+
+
+  const campo =
+    document.getElementById(
+      "mensagemResposta"
+    );
+
+
+  const botao =
+    document.getElementById(
+      "botaoEnviar"
+    );
+
+
+  const texto =
+    campo.value.trim();
+
+
+  if (!texto) {
+    return;
+  }
+
+
+  enviando =
+    true;
+
+
+  botao.disabled =
+    true;
+
+
+  botao.textContent =
+    "Enviando...";
+
+
+  try {
+
+    mostrarErro("");
+
+
+    const resposta =
+      await fetch(
+        "/api/send-message",
+        {
+          method:
+            "POST",
+
+          credentials:
+            "same-origin",
+
+          headers: {
+            "Content-Type":
+              "application/json"
+          },
+
+          body:
+            JSON.stringify({
+              telefone:
+                telefoneSelecionado,
+
+              texto
+            })
+        }
+      );
+
+
+    const dados =
+      await resposta.json();
+
+
+    if (
+      !resposta.ok ||
+      !dados.ok
+    ) {
+
+      throw new Error(
+        dados.erro ||
+        "Erro ao enviar mensagem"
+      );
+    }
+
+
+    campo.value =
+      "";
+
+
+    assinaturaHistorico =
+      "";
+
+
+    await buscarHistorico(
+      telefoneSelecionado,
+      true
+    );
+
+
+    await carregarConversas();
+
+
+  } catch (erro) {
+
+    console.error(
+      "Erro ao enviar pelo CRM:",
+      erro
+    );
+
+
+    mostrarErro(
+      erro.message ||
+      "Não foi possível enviar a mensagem."
+    );
+
+
+  } finally {
+
+    enviando =
+      false;
+
+
+    botao.disabled =
+      false;
+
+
+    botao.textContent =
+      "Enviar";
+
+
+    campo.focus();
+  }
+}
+
+
+// ===========================================================
+// ATUALIZAR STATUS
+// ===========================================================
+
+async function atualizarStatus() {
+
+  if (
+    !telefoneSelecionado
+  ) {
+    return;
+  }
+
+
+  const status =
+    document
+      .getElementById(
+        "statusConversa"
+      )
+      .value;
+
+
+  try {
+
+    const resposta =
+      await fetch(
+        "/api/conversations",
+        {
+          method:
+            "POST",
+
+          credentials:
+            "same-origin",
+
+          headers: {
+            "Content-Type":
+              "application/json"
+          },
+
+          body:
+            JSON.stringify({
+              acao:
+                "atualizar_status",
+
+              telefone:
+                telefoneSelecionado,
+
+              status
+            })
+        }
+      );
+
+
+    const dados =
+      await resposta.json();
+
+
+    if (
+      !resposta.ok ||
+      !dados.ok
+    ) {
+
+      throw new Error(
+        dados.erro ||
+        "Erro ao atualizar status"
+      );
+    }
+
+
+    await carregarConversas();
+
+
+  } catch (erro) {
+
+    mostrarErro(
+      erro.message ||
+      "Não foi possível atualizar o status."
+    );
+  }
+}
+
+
+// ===========================================================
+// EDITAR NOME
+// ===========================================================
+
+async function editarNome() {
+
+  if (
+    !telefoneSelecionado
+  ) {
+    return;
+  }
+
+
+  const novoNome =
+    prompt(
+      "Nome do cliente:",
+      nomeSelecionado ||
+      telefoneSelecionado
+    );
+
+
+  if (
+    novoNome === null
+  ) {
+    return;
+  }
+
+
+  try {
+
+    const resposta =
+      await fetch(
+        "/api/conversations",
+        {
+          method:
+            "POST",
+
+          credentials:
+            "same-origin",
+
+          headers: {
+            "Content-Type":
+              "application/json"
+          },
+
+          body:
+            JSON.stringify({
+              acao:
+                "atualizar_nome",
+
+              telefone:
+                telefoneSelecionado,
+
+              nome:
+                novoNome
+            })
+        }
+      );
+
+
+    const dados =
+      await resposta.json();
+
+
+    if (
+      !resposta.ok ||
+      !dados.ok
+    ) {
+
+      throw new Error(
+        dados.erro ||
+        "Erro ao atualizar nome"
+      );
+    }
+
+
+    nomeSelecionado =
+      dados.conversa
+        ?.nome ||
+      telefoneSelecionado;
+
+
+    document
+      .getElementById(
+        "nomeConversa"
+      )
+      .textContent =
+        nomeSelecionado;
+
+
+    document
+      .getElementById(
+        "avatarConversa"
+      )
+      .textContent =
+        pegarInicial(
+          nomeSelecionado
+        );
+
+
+    await carregarConversas();
+
+
+  } catch (erro) {
+
+    mostrarErro(
+      erro.message ||
+      "Não foi possível atualizar o nome."
+    );
+  }
+}
+
+
+// ===========================================================
+// ATUALIZAÇÃO AUTOMÁTICA
+// ===========================================================
+
+async function atualizarAutomaticamente() {
+
+  if (
+    atualizando ||
+    enviando
+  ) {
+    return;
+  }
+
+
+  atualizando =
+    true;
+
+
+  try {
+
+    document
+      .getElementById(
+        "estadoAtualizacao"
+      )
+      .textContent =
+        "Atualizando...";
+
+
+    await carregarConversas();
+
+
+    if (
+      telefoneSelecionado
+    ) {
+
+      await buscarHistorico(
+        telefoneSelecionado,
+        false
+      );
+    }
+
+
+    document
+      .getElementById(
+        "estadoAtualizacao"
+      )
+      .textContent =
+        "Atualização automática ativa";
+
+
+  } catch (erro) {
+
+    console.error(
+      "Erro na atualização automática:",
+      erro
+    );
+
+
+    document
+      .getElementById(
+        "estadoAtualizacao"
+      )
+      .textContent =
+        "Falha temporária na atualização";
+
+
+  } finally {
+
+    atualizando =
+      false;
+  }
+}
+
+
+// ===========================================================
+// EVENTOS
 // ===========================================================
 
 document
@@ -705,187 +1783,64 @@ document
   )
   .addEventListener(
     "input",
-    function () {
-
-      const termo =
-        this.value
-          .toLowerCase()
-          .trim();
-
-      document
-        .querySelectorAll(
-          ".cliente"
-        )
-        .forEach(
-          cliente => {
-
-            const texto =
-              cliente.textContent
-                .toLowerCase();
-
-            cliente.style.display =
-              texto.includes(termo)
-                ? "flex"
-                : "none";
-          }
-        );
-    }
+    aplicarBusca
   );
 
-
-// ===========================================================
-// ENVIAR MENSAGEM PELO CRM
-// ===========================================================
 
 document
-  .getElementById("botaoEnviar")
+  .getElementById(
+    "botaoEnviar"
+  )
   .addEventListener(
     "click",
-    async function () {
+    enviarMensagem
+  );
 
-      const telefone =
-        document
-          .getElementById(
-            "telefoneConversa"
-          )
-          .textContent
-          .trim();
 
-      const campo =
-        document.getElementById(
-          "mensagemResposta"
-        );
+document
+  .getElementById(
+    "statusConversa"
+  )
+  .addEventListener(
+    "change",
+    atualizarStatus
+  );
 
-      const texto =
-        campo.value.trim();
+
+document
+  .getElementById(
+    "editarNome"
+  )
+  .addEventListener(
+    "click",
+    editarNome
+  );
+
+
+document
+  .getElementById(
+    "mensagemResposta"
+  )
+  .addEventListener(
+    "keydown",
+    (event) => {
 
       if (
-        !telefone ||
-        telefone === "WhatsApp" ||
-        !texto
+        event.key ===
+          "Enter" &&
+        !event.shiftKey
       ) {
-        return;
-      }
 
-      this.disabled = true;
+        event.preventDefault();
 
-      try {
-        const resposta =
-          await fetch(
-            "/api/send-message",
-            {
-              method: "POST",
-              credentials:
-                "same-origin",
-
-              headers: {
-                "Content-Type":
-                  "application/json"
-              },
-
-              body:
-                JSON.stringify({
-                  telefone,
-                  texto
-                })
-            }
-          );
-
-        const dados =
-          await resposta.json();
-
-        if (
-          !resposta.ok ||
-          !dados.ok
-        ) {
-          throw new Error(
-            dados.erro ||
-            "Erro ao enviar mensagem"
-          );
-        }
-
-        campo.value = "";
-
-        // Atualiza o histórico
-        const itemAtivo =
-          document.querySelector(
-            ".cliente.ativo"
-          );
-
-        await abrirConversa(
-          telefone,
-          document
-            .getElementById(
-              "nomeConversa"
-            )
-            .textContent,
-          itemAtivo
-        );
-
-        // Atualiza lista lateral
-        await carregarConversas();
-
-      } catch (erro) {
-        console.error(
-          "Erro ao enviar pelo CRM:",
-          erro
-        );
-
-        alert(
-          "Não foi possível enviar a mensagem."
-        );
-
-      } finally {
-        this.disabled = false;
-        campo.focus();
+        enviarMensagem();
       }
     }
   );
-  // ===========================================================
-// INICIAR
-// ===========================================================
-
-async function atualizarAutomaticamente() {
-
-  await carregarConversas();
-
-  const telefone =
-    document
-      .getElementById(
-        "telefoneConversa"
-      )
-      .textContent
-      .trim();
-
-  if (
-    telefone &&
-    telefone !== "WhatsApp"
-  ) {
-
-    const itemAtivo =
-      document.querySelector(
-        ".cliente.ativo"
-      );
-
-    const nome =
-      document
-        .getElementById(
-          "nomeConversa"
-        )
-        .textContent
-        .trim();
-
-    await abrirConversa(
-      telefone,
-      nome,
-      itemAtivo
-    );
-  }
-}
 
 
 // ===========================================================
-// INICIAR
+// INICIALIZAÇÃO
 // ===========================================================
 
 async function iniciarConversas() {
@@ -893,11 +1848,28 @@ async function iniciarConversas() {
   const autenticado =
     await verificarLogin();
 
+
   if (!autenticado) {
     return;
   }
 
-  await carregarConversas();
+
+  try {
+
+    await carregarConversas();
+
+  } catch (erro) {
+
+    console.error(
+      erro
+    );
+
+
+    mostrarErro(
+      "Não foi possível carregar as conversas."
+    );
+  }
+
 
   setInterval(
     atualizarAutomaticamente,
@@ -905,7 +1877,10 @@ async function iniciarConversas() {
   );
 }
 
+
 iniciarConversas();
+
 </script>
+
 </body>
 </html>
