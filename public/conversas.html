@@ -845,6 +845,49 @@ document
 // INICIAR
 // ===========================================================
 
+async function atualizarAutomaticamente() {
+
+  await carregarConversas();
+
+  const telefone =
+    document
+      .getElementById(
+        "telefoneConversa"
+      )
+      .textContent
+      .trim();
+
+  if (
+    telefone &&
+    telefone !== "WhatsApp"
+  ) {
+
+    const itemAtivo =
+      document.querySelector(
+        ".cliente.ativo"
+      );
+
+    const nome =
+      document
+        .getElementById(
+          "nomeConversa"
+        )
+        .textContent
+        .trim();
+
+    await abrirConversa(
+      telefone,
+      nome,
+      itemAtivo
+    );
+  }
+}
+
+
+// ===========================================================
+// INICIAR
+// ===========================================================
+
 async function iniciarConversas() {
 
   const autenticado =
@@ -855,6 +898,11 @@ async function iniciarConversas() {
   }
 
   await carregarConversas();
+
+  setInterval(
+    atualizarAutomaticamente,
+    5000
+  );
 }
 
 iniciarConversas();
