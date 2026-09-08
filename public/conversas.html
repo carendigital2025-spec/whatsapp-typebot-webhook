@@ -215,6 +215,24 @@
       color: #4b5563;
     }
 
+    .modo-mini {
+      padding: 3px 7px;
+
+      border-radius: 999px;
+
+      font-weight: bold;
+    }
+
+    .modo-bot {
+      background: #e0f2fe;
+      color: #0369a1;
+    }
+
+    .modo-humano {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
     .conversa {
       display: flex;
       flex-direction: column;
@@ -222,7 +240,7 @@
     }
 
     .cabecalho-conversa {
-      min-height: 75px;
+      min-height: 82px;
 
       border-bottom: 1px solid #e5e7eb;
 
@@ -252,10 +270,21 @@
       margin-top: 3px;
     }
 
+    .modo-atual {
+      margin-top: 6px;
+      display: inline-block;
+      padding: 5px 9px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: bold;
+    }
+
     .acoes-cabecalho {
       display: flex;
       align-items: center;
       gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
     }
 
     .acoes-cabecalho select,
@@ -272,6 +301,22 @@
 
     .acoes-cabecalho button {
       cursor: pointer;
+    }
+
+    #botaoModo {
+      font-weight: bold;
+    }
+
+    #botaoModo.assumir {
+      background: #111827;
+      color: white;
+      border-color: #111827;
+    }
+
+    #botaoModo.devolver {
+      background: #0284c7;
+      color: white;
+      border-color: #0284c7;
     }
 
     .mensagens {
@@ -380,7 +425,9 @@
     }
 
     .resposta button:disabled,
-    .resposta textarea:disabled {
+    .resposta textarea:disabled,
+    .acoes-cabecalho button:disabled,
+    .acoes-cabecalho select:disabled {
       opacity: .55;
       cursor: not-allowed;
     }
@@ -398,6 +445,16 @@
       border-bottom: 1px solid #fecaca;
     }
 
+    @media (max-width: 900px) {
+      .chat {
+        grid-template-columns: 330px 1fr;
+      }
+
+      .acoes-cabecalho {
+        max-width: 320px;
+      }
+    }
+
     @media (max-width: 800px) {
       .chat {
         grid-template-columns: 1fr;
@@ -405,6 +462,14 @@
 
       .clientes {
         display: none;
+      }
+
+      .cabecalho-conversa {
+        align-items: flex-start;
+      }
+
+      .acoes-cabecalho {
+        max-width: 250px;
       }
 
       .acoes-cabecalho select {
@@ -452,8 +517,6 @@
 
   <div class="chat">
 
-    <!-- LISTA DE CLIENTES -->
-
     <div class="clientes">
 
       <div class="busca">
@@ -483,8 +546,6 @@
     </div>
 
 
-    <!-- CONVERSA -->
-
     <div class="conversa">
 
       <div
@@ -512,6 +573,13 @@
           <span id="telefoneConversa">
             WhatsApp
           </span>
+
+          <div
+            id="modoAtual"
+            class="modo-atual modo-bot"
+          >
+            🤖 Atendimento automático
+          </div>
 
         </div>
 
@@ -548,6 +616,16 @@
             disabled
           >
             Editar nome
+          </button>
+
+
+          <button
+            id="botaoModo"
+            type="button"
+            class="assumir"
+            disabled
+          >
+            👤 Assumir atendimento
           </button>
 
         </div>
@@ -611,15 +689,15 @@ let atualizando = false;
 
 let enviando = false;
 
+let modoSelecionado = "bot";
+
 
 // ===========================================================
-// VERIFICAR LOGIN
+// LOGIN
 // ===========================================================
 
 async function verificarLogin() {
-
   try {
-
     const resposta =
       await fetch(
         "/api/panel-login",
@@ -633,7 +711,6 @@ async function verificarLogin() {
       await resposta.json();
 
     if (!dados.autenticado) {
-
       window.location.href =
         "/painel.html";
 
@@ -643,7 +720,6 @@ async function verificarLogin() {
     return true;
 
   } catch {
-
     window.location.href =
       "/painel.html";
 
@@ -653,26 +729,22 @@ async function verificarLogin() {
 
 
 // ===========================================================
-// FUNÇÕES AUXILIARES
+// AUXILIARES
 // ===========================================================
 
 function pegarInicial(nome) {
-
   const texto =
     String(
       nome || "?"
     ).trim();
 
   return texto
-    ? texto
-        .charAt(0)
-        .toUpperCase()
+    ? texto.charAt(0).toUpperCase()
     : "?";
 }
 
 
 function escaparHTML(valor) {
-
   const div =
     document.createElement(
       "div"
@@ -686,7 +758,6 @@ function escaparHTML(valor) {
 
 
 function formatarHora(data) {
-
   if (!data) {
     return "";
   }
@@ -714,9 +785,7 @@ function formatarHora(data) {
 
 
 function statusLabel(status) {
-
   const mapa = {
-
     novo:
       "Novo",
 
@@ -728,20 +797,70 @@ function statusLabel(status) {
 
     finalizado:
       "Finalizado"
-
   };
 
-  return mapa[status] ||
-    "Novo";
+  return mapa[status] || "Novo";
 }
 
 
 // ===========================================================
-// ERROS
+// MODO DE ATENDIMENTO NA TELA
+// ===========================================================
+
+function atualizarInterfaceModo(
+  modo
+) {
+  modoSelecionado =
+    modo || "bot";
+
+  const indicador =
+    document.getElementById(
+      "modoAtual"
+    );
+
+  const botao =
+    document.getElementById(
+      "botaoModo"
+    );
+
+
+  if (
+    modoSelecionado ===
+    "humano"
+  ) {
+    indicador.textContent =
+      "👤 Atendimento humano";
+
+    indicador.className =
+      "modo-atual modo-humano";
+
+    botao.textContent =
+      "🤖 Devolver ao bot";
+
+    botao.className =
+      "devolver";
+
+  } else {
+    indicador.textContent =
+      "🤖 Atendimento automático";
+
+    indicador.className =
+      "modo-atual modo-bot";
+
+    botao.textContent =
+      "👤 Assumir atendimento";
+
+    botao.className =
+      "assumir";
+  }
+}
+
+
+// ===========================================================
+// ERRO
 // ===========================================================
 
 function mostrarErro(texto) {
-
   const el =
     document.getElementById(
       "erroTopo"
@@ -762,7 +881,6 @@ function mostrarErro(texto) {
 // ===========================================================
 
 function aplicarBusca() {
-
   const termo =
     document
       .getElementById(
@@ -778,7 +896,6 @@ function aplicarBusca() {
     )
     .forEach(
       (cliente) => {
-
         cliente.style.display =
           cliente
             .textContent
@@ -786,18 +903,16 @@ function aplicarBusca() {
             .includes(termo)
             ? "flex"
             : "none";
-
       }
     );
 }
 
 
 // ===========================================================
-// CARREGAR LISTA DE CONVERSAS
+// CARREGAR CONVERSAS
 // ===========================================================
 
 async function carregarConversas() {
-
   const resposta =
     await fetch(
       "/api/conversations",
@@ -829,9 +944,7 @@ async function carregarConversas() {
     dados.conversations ||
     [];
 
-
   if (!conversas.length) {
-
     lista.innerHTML =
       `
       <div
@@ -848,14 +961,11 @@ async function carregarConversas() {
     return;
   }
 
-
   const fragmento =
     document.createDocumentFragment();
 
-
   conversas.forEach(
     (conversa) => {
-
       const telefone =
         conversa.telefone ||
         "";
@@ -863,6 +973,10 @@ async function carregarConversas() {
       const nome =
         conversa.nome ||
         telefone;
+
+      const modo =
+        conversa.modoAtendimento ||
+        "bot";
 
       const item =
         document.createElement(
@@ -880,7 +994,6 @@ async function carregarConversas() {
 
       item.dataset.telefone =
         telefone;
-
 
       item.innerHTML =
         `
@@ -919,8 +1032,7 @@ async function carregarConversas() {
 
           <span class="preview">
             ${escaparHTML(
-              conversa
-                .ultimaMensagem ||
+              conversa.ultimaMensagem ||
               ""
             )}
           </span>
@@ -935,11 +1047,24 @@ async function carregarConversas() {
               )}
             </span>
 
+            <span
+              class="modo-mini ${
+                modo === "humano"
+                  ? "modo-humano"
+                  : "modo-bot"
+              }"
+            >
+              ${
+                modo === "humano"
+                  ? "👤 Humano"
+                  : "🤖 Bot"
+              }
+            </span>
+
             <span>
               ${escaparHTML(
                 formatarHora(
-                  conversa
-                    .atualizadoEm
+                  conversa.atualizadoEm
                 )
               )}
             </span>
@@ -948,7 +1073,6 @@ async function carregarConversas() {
 
         </div>
         `;
-
 
       item.addEventListener(
         "click",
@@ -961,14 +1085,11 @@ async function carregarConversas() {
           )
       );
 
-
       fragmento.appendChild(
         item
       );
-
     }
   );
-
 
   lista.replaceChildren(
     fragmento
@@ -979,15 +1100,13 @@ async function carregarConversas() {
 
 
 // ===========================================================
-// MARCAR CONVERSA COMO LIDA
+// MARCAR LIDA
 // ===========================================================
 
 async function marcarComoLida(
   telefone
 ) {
-
   try {
-
     await fetch(
       "/api/conversations",
       {
@@ -1012,7 +1131,6 @@ async function marcarComoLida(
     );
 
   } catch (erro) {
-
     console.error(
       "Erro ao marcar como lida:",
       erro
@@ -1022,26 +1140,23 @@ async function marcarComoLida(
 
 
 // ===========================================================
-// BUSCAR HISTÓRICO
+// HISTÓRICO
 // ===========================================================
 
 async function buscarHistorico(
   telefone,
   forcarRolagem = false
 ) {
-
   const area =
     document.getElementById(
       "mensagens"
     );
-
 
   const pertoDoFim =
     area.scrollHeight -
     area.scrollTop -
     area.clientHeight <
     120;
-
 
   const resposta =
     await fetch(
@@ -1054,10 +1169,8 @@ async function buscarHistorico(
       }
     );
 
-
   const dados =
     await resposta.json();
-
 
   if (
     !resposta.ok ||
@@ -1069,11 +1182,9 @@ async function buscarHistorico(
     );
   }
 
-
   const mensagens =
     dados.mensagens ||
     [];
-
 
   const assinaturaNova =
     mensagens
@@ -1083,18 +1194,14 @@ async function buscarHistorico(
       )
       .join("§");
 
-
   if (
     assinaturaNova !==
     assinaturaHistorico
   ) {
-
     assinaturaHistorico =
       assinaturaNova;
 
-
     if (!mensagens.length) {
-
       area.innerHTML =
         `
         <div class="vazio">
@@ -1103,20 +1210,16 @@ async function buscarHistorico(
         `;
 
     } else {
-
       const fragmento =
         document
           .createDocumentFragment();
 
-
       mensagens.forEach(
         (mensagem) => {
-
           const bolha =
             document.createElement(
               "div"
             );
-
 
           bolha.className =
             mensagem.direcao ===
@@ -1125,7 +1228,6 @@ async function buscarHistorico(
               ? "mensagem atendente-msg"
 
               : "mensagem cliente-msg";
-
 
           bolha.innerHTML =
             `
@@ -1143,47 +1245,38 @@ async function buscarHistorico(
             </span>
             `;
 
-
           fragmento.appendChild(
             bolha
           );
-
         }
       );
-
 
       area.replaceChildren(
         fragmento
       );
     }
 
-
     if (
       forcarRolagem ||
       pertoDoFim
     ) {
-
       area.scrollTop =
         area.scrollHeight;
     }
   }
 
-
   const conversa =
     dados.conversa ||
     {};
-
 
   if (
     telefone ===
     telefoneSelecionado
   ) {
-
     nomeSelecionado =
       conversa.nome ||
       nomeSelecionado ||
       telefone;
-
 
     document
       .getElementById(
@@ -1191,7 +1284,6 @@ async function buscarHistorico(
       )
       .textContent =
         nomeSelecionado;
-
 
     document
       .getElementById(
@@ -1202,7 +1294,6 @@ async function buscarHistorico(
           nomeSelecionado
         );
 
-
     document
       .getElementById(
         "statusConversa"
@@ -1210,6 +1301,11 @@ async function buscarHistorico(
       .value =
         conversa.status ||
         "novo";
+
+    atualizarInterfaceModo(
+      conversa.modoAtendimento ||
+      "bot"
+    );
   }
 }
 
@@ -1224,7 +1320,6 @@ async function abrirConversa(
   elemento,
   marcarLida = true
 ) {
-
   telefoneSelecionado =
     telefone;
 
@@ -1234,7 +1329,6 @@ async function abrirConversa(
 
   assinaturaHistorico =
     "";
-
 
   document
     .querySelectorAll(
@@ -1249,16 +1343,13 @@ async function abrirConversa(
           )
     );
 
-
   if (elemento) {
-
     elemento
       .classList
       .add(
         "ativo"
       );
   }
-
 
   document
     .getElementById(
@@ -1267,14 +1358,12 @@ async function abrirConversa(
     .textContent =
       nomeSelecionado;
 
-
   document
     .getElementById(
       "telefoneConversa"
     )
     .textContent =
       telefone;
-
 
   document
     .getElementById(
@@ -1285,14 +1374,12 @@ async function abrirConversa(
         nomeSelecionado
       );
 
-
   document
     .getElementById(
       "mensagemResposta"
     )
     .disabled =
       false;
-
 
   document
     .getElementById(
@@ -1301,14 +1388,12 @@ async function abrirConversa(
     .disabled =
       false;
 
-
   document
     .getElementById(
       "statusConversa"
     )
     .disabled =
       false;
-
 
   document
     .getElementById(
@@ -1317,20 +1402,22 @@ async function abrirConversa(
     .disabled =
       false;
 
+  document
+    .getElementById(
+      "botaoModo"
+    )
+    .disabled =
+      false;
 
   try {
-
     mostrarErro("");
-
 
     await buscarHistorico(
       telefone,
       true
     );
 
-
     if (marcarLida) {
-
       await marcarComoLida(
         telefone
       );
@@ -1338,21 +1425,17 @@ async function abrirConversa(
       await carregarConversas();
     }
 
-
     document
       .getElementById(
         "mensagemResposta"
       )
       .focus();
 
-
   } catch (erro) {
-
     console.error(
       "Erro ao abrir conversa:",
       erro
     );
-
 
     mostrarErro(
       "Não foi possível carregar esta conversa."
@@ -1366,7 +1449,6 @@ async function abrirConversa(
 // ===========================================================
 
 async function enviarMensagem() {
-
   if (
     enviando ||
     !telefoneSelecionado
@@ -1374,44 +1456,34 @@ async function enviarMensagem() {
     return;
   }
 
-
   const campo =
     document.getElementById(
       "mensagemResposta"
     );
-
 
   const botao =
     document.getElementById(
       "botaoEnviar"
     );
 
-
   const texto =
     campo.value.trim();
-
 
   if (!texto) {
     return;
   }
 
-
   enviando =
     true;
-
 
   botao.disabled =
     true;
 
-
   botao.textContent =
     "Enviando...";
 
-
   try {
-
     mostrarErro("");
-
 
     const resposta =
       await fetch(
@@ -1438,67 +1510,52 @@ async function enviarMensagem() {
         }
       );
 
-
     const dados =
       await resposta.json();
-
 
     if (
       !resposta.ok ||
       !dados.ok
     ) {
-
       throw new Error(
         dados.erro ||
         "Erro ao enviar mensagem"
       );
     }
 
-
     campo.value =
       "";
 
-
     assinaturaHistorico =
       "";
-
 
     await buscarHistorico(
       telefoneSelecionado,
       true
     );
 
-
     await carregarConversas();
 
-
   } catch (erro) {
-
     console.error(
       "Erro ao enviar pelo CRM:",
       erro
     );
-
 
     mostrarErro(
       erro.message ||
       "Não foi possível enviar a mensagem."
     );
 
-
   } finally {
-
     enviando =
       false;
-
 
     botao.disabled =
       false;
 
-
     botao.textContent =
       "Enviar";
-
 
     campo.focus();
   }
@@ -1506,17 +1563,108 @@ async function enviarMensagem() {
 
 
 // ===========================================================
-// ATUALIZAR STATUS
+// ALTERAR MODO BOT/HUMANO
 // ===========================================================
 
-async function atualizarStatus() {
-
-  if (
-    !telefoneSelecionado
-  ) {
+async function alternarModoAtendimento() {
+  if (!telefoneSelecionado) {
     return;
   }
 
+  const botao =
+    document.getElementById(
+      "botaoModo"
+    );
+
+  botao.disabled =
+    true;
+
+  const acao =
+    modoSelecionado ===
+    "humano"
+      ? "devolver_bot"
+      : "assumir_atendimento";
+
+  try {
+    mostrarErro("");
+
+    const resposta =
+      await fetch(
+        "/api/conversations",
+        {
+          method: "POST",
+
+          credentials:
+            "same-origin",
+
+          headers: {
+            "Content-Type":
+              "application/json"
+          },
+
+          body:
+            JSON.stringify({
+              acao,
+              telefone:
+                telefoneSelecionado
+            })
+        }
+      );
+
+    const dados =
+      await resposta.json();
+
+    if (
+      !resposta.ok ||
+      !dados.ok
+    ) {
+      throw new Error(
+        dados.erro ||
+        "Erro ao alterar atendimento"
+      );
+    }
+
+    atualizarInterfaceModo(
+      dados.conversa
+        ?.modoAtendimento ||
+      "bot"
+    );
+
+    if (
+      dados.conversa
+        ?.status
+    ) {
+      document
+        .getElementById(
+          "statusConversa"
+        )
+        .value =
+          dados.conversa.status;
+    }
+
+    await carregarConversas();
+
+  } catch (erro) {
+    mostrarErro(
+      erro.message ||
+      "Não foi possível alterar o modo de atendimento."
+    );
+
+  } finally {
+    botao.disabled =
+      false;
+  }
+}
+
+
+// ===========================================================
+// STATUS
+// ===========================================================
+
+async function atualizarStatus() {
+  if (!telefoneSelecionado) {
+    return;
+  }
 
   const status =
     document
@@ -1525,9 +1673,7 @@ async function atualizarStatus() {
       )
       .value;
 
-
   try {
-
     const resposta =
       await fetch(
         "/api/conversations",
@@ -1556,28 +1702,22 @@ async function atualizarStatus() {
         }
       );
 
-
     const dados =
       await resposta.json();
-
 
     if (
       !resposta.ok ||
       !dados.ok
     ) {
-
       throw new Error(
         dados.erro ||
         "Erro ao atualizar status"
       );
     }
 
-
     await carregarConversas();
 
-
   } catch (erro) {
-
     mostrarErro(
       erro.message ||
       "Não foi possível atualizar o status."
@@ -1591,13 +1731,9 @@ async function atualizarStatus() {
 // ===========================================================
 
 async function editarNome() {
-
-  if (
-    !telefoneSelecionado
-  ) {
+  if (!telefoneSelecionado) {
     return;
   }
-
 
   const novoNome =
     prompt(
@@ -1606,16 +1742,13 @@ async function editarNome() {
       telefoneSelecionado
     );
 
-
   if (
     novoNome === null
   ) {
     return;
   }
 
-
   try {
-
     const resposta =
       await fetch(
         "/api/conversations",
@@ -1645,28 +1778,23 @@ async function editarNome() {
         }
       );
 
-
     const dados =
       await resposta.json();
-
 
     if (
       !resposta.ok ||
       !dados.ok
     ) {
-
       throw new Error(
         dados.erro ||
         "Erro ao atualizar nome"
       );
     }
 
-
     nomeSelecionado =
       dados.conversa
         ?.nome ||
       telefoneSelecionado;
-
 
     document
       .getElementById(
@@ -1674,7 +1802,6 @@ async function editarNome() {
       )
       .textContent =
         nomeSelecionado;
-
 
     document
       .getElementById(
@@ -1685,12 +1812,9 @@ async function editarNome() {
           nomeSelecionado
         );
 
-
     await carregarConversas();
 
-
   } catch (erro) {
-
     mostrarErro(
       erro.message ||
       "Não foi possível atualizar o nome."
@@ -1704,7 +1828,6 @@ async function editarNome() {
 // ===========================================================
 
 async function atualizarAutomaticamente() {
-
   if (
     atualizando ||
     enviando
@@ -1712,13 +1835,10 @@ async function atualizarAutomaticamente() {
     return;
   }
 
-
   atualizando =
     true;
 
-
   try {
-
     document
       .getElementById(
         "estadoAtualizacao"
@@ -1726,20 +1846,16 @@ async function atualizarAutomaticamente() {
       .textContent =
         "Atualizando...";
 
-
     await carregarConversas();
-
 
     if (
       telefoneSelecionado
     ) {
-
       await buscarHistorico(
         telefoneSelecionado,
         false
       );
     }
-
 
     document
       .getElementById(
@@ -1748,14 +1864,11 @@ async function atualizarAutomaticamente() {
       .textContent =
         "Atualização automática ativa";
 
-
   } catch (erro) {
-
     console.error(
       "Erro na atualização automática:",
       erro
     );
-
 
     document
       .getElementById(
@@ -1764,9 +1877,7 @@ async function atualizarAutomaticamente() {
       .textContent =
         "Falha temporária na atualização";
 
-
   } finally {
-
     atualizando =
       false;
   }
@@ -1819,18 +1930,26 @@ document
 
 document
   .getElementById(
+    "botaoModo"
+  )
+  .addEventListener(
+    "click",
+    alternarModoAtendimento
+  );
+
+
+document
+  .getElementById(
     "mensagemResposta"
   )
   .addEventListener(
     "keydown",
     (event) => {
-
       if (
         event.key ===
           "Enter" &&
         !event.shiftKey
       ) {
-
         event.preventDefault();
 
         enviarMensagem();
@@ -1844,32 +1963,25 @@ document
 // ===========================================================
 
 async function iniciarConversas() {
-
   const autenticado =
     await verificarLogin();
-
 
   if (!autenticado) {
     return;
   }
 
-
   try {
-
     await carregarConversas();
 
   } catch (erro) {
-
     console.error(
       erro
     );
-
 
     mostrarErro(
       "Não foi possível carregar as conversas."
     );
   }
-
 
   setInterval(
     atualizarAutomaticamente,
