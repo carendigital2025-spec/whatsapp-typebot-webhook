@@ -2,14 +2,19 @@ import crypto from "crypto";
 
 function usuarioAutenticado(req) {
   const cookies = req.headers.cookie || "";
+
   const cookieSessao = cookies
     .split(";")
     .map((cookie) => cookie.trim())
     .find((cookie) => cookie.startsWith("panel_session="));
 
-  if (!cookieSessao || !process.env.PANEL_PASSWORD) return false;
+  if (!cookieSessao || !process.env.PANEL_PASSWORD) {
+    return false;
+  }
 
-  const tokenRecebido = cookieSessao.substring("panel_session=".length);
+  const tokenRecebido =
+    cookieSessao.substring("panel_session=".length);
+
   const tokenEsperado = crypto
     .createHmac("sha256", process.env.PANEL_PASSWORD)
     .update("adcred-painel-autorizado")
@@ -39,7 +44,10 @@ function getRedisConfig() {
     throw new Error("Variáveis do Redis não configuradas.");
   }
 
-  return { url: url.replace(/\/$/, ""), token };
+  return {
+    url: url.replace(/\/$/, ""),
+    token
+  };
 }
 
 async function redisCommand(command) {
@@ -47,28 +55,39 @@ async function redisCommand(command) {
 
   const resposta = await fetch(url, {
     method: "POST",
+
     headers: {
       Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json",
+      "Content-Type": "application/json"
     },
-    body: JSON.stringify(command),
+
+    body: JSON.stringify(command)
   });
 
   const texto = await resposta.text();
 
   if (!resposta.ok) {
-    console.error("Erro Redis:", resposta.status, texto);
+    console.error(
+      "Erro Redis:",
+      resposta.status,
+      texto
+    );
+
     throw new Error("Erro ao consultar Redis.");
   }
 
   let dados;
+
   try {
     dados = JSON.parse(texto);
   } catch {
     throw new Error("Resposta inválida do Redis.");
   }
 
-  if (dados?.error) throw new Error(`Redis: ${dados.error}`);
+  if (dados?.error) {
+    throw new Error(`Redis: ${dados.error}`);
+  }
+
   return dados?.result;
 }
 
@@ -77,9 +96,14 @@ function normalizarTelefone(valor) {
 }
 
 async function obterConversa(telefone) {
-  const registro = await redisCommand(["GET", `crm:conversation:${telefone}`]);
+  const registro = await redisCommand([
+    "GET",
+    `crm:conversation:${telefone}`
+  ]);
 
-  if (!registro) return null;
+  if (!registro) {
+    return null;
+  }
 
   try {
     return JSON.parse(registro);
@@ -88,74 +112,112 @@ async function obterConversa(telefone) {
   }
 }
 
-async function salvarConversa(telefone, conversa) {
+async function salvarConversa(
+  telefone,
+  conversa
+) {
   await redisCommand([
     "SET",
     `crm:conversation:${telefone}`,
-    JSON.stringify(conversa),
+    JSON.stringify(conversa)
   ]);
 }
 
-export default async function handler(req, res) {
+export default async function handler(
+  req,
+  res
+) {
   if (!usuarioAutenticado(req)) {
     return res.status(401).json({
       ok: false,
-      erro: "Não autorizado. Faça login no painel.",
+      erro: "Não autorizado. Faça login no painel."
     });
   }
 
   try {
     if (req.method === "POST") {
-      const telefone = normalizarTelefone(req.body?.telefone);
-      const acao = String(req.body?.acao || "").trim();
+      const telefone =
+        normalizarTelefone(
+          req.body?.telefone
+        );
+
+      const acao =
+        String(
+          req.body?.acao || ""
+        ).trim();
 
       if (!telefone || !acao) {
         return res.status(400).json({
           ok: false,
-          erro: "Telefone e ação são obrigatórios.",
+          erro: "Telefone e ação são obrigatórios."
         });
       }
 
-      const conversaAtual = (await obterConversa(telefone)) || {
-        telefone,
-        nome: telefone,
-        status: "novo",
-        naoLidas: 0,
-      };
+      const conversaAtual =
+        (await obterConversa(telefone)) || {
+          telefone,
+          nome: telefone,
+          status: "novo",
+          naoLidas: 0,
+          modoAtendimento: "bot"
+        };
 
       if (acao === "marcar_lida") {
         conversaAtual.naoLidas = 0;
+      }
 
-      } else if (acao === "atualizar_status") {
+      else if (acao === "atualizar_status") {
         const statusPermitidos = [
           "novo",
           "em_atendimento",
           "aguardando_cliente",
-          "finalizado",
+          "finalizado"
         ];
 
-        const status = String(req.body?.status || "").trim();
+        const status =
+          String(
+            req.body?.status || ""
+          ).trim();
 
         if (!statusPermitidos.includes(status)) {
           return res.status(400).json({
             ok: false,
-            erro: "Status inválido.",
+            erro: "Status inválido."
           });
         }
 
         conversaAtual.status = status;
+      }
 
-      } else if (acao === "atualizar_nome") {
-        const nome = String(req.body?.nome || "")
-          .trim()
-          .slice(0, 80);
+      else if (acao === "atualizar_nome") {
+        const nome =
+          String(
+            req.body?.nome || ""
+          )
+            .trim()
+            .slice(0, 80);
 
-        conversaAtual.nome = nome || telefone;
+        conversaAtual.nome =
+          nome || telefone;
+      }
 
-      } else {
+      else if (acao === "assumir_atendimento") {
+        conversaAtual.modoAtendimento =
+          "humano";
+
+        conversaAtual.status =
+          "em_atendimento";
+      }
+
+      else if (acao === "devolver_bot") {
+        conversaAtual.modoAtendimento =
+          "bot";
+      }
+
+      else {
         return res.status(400).json({
           ok: false,
-          erro: "Ação inválida.",
+          erro: "Ação inválida."
         });
       }
 
@@ -166,14 +228,14 @@ export default async function handler(req, res) {
 
       return res.status(200).json({
         ok: true,
-        conversa: conversaAtual,
+        conversa: conversaAtual
       });
     }
 
     if (req.method !== "GET") {
       return res.status(405).json({
         ok: false,
-        erro: "Método não permitido",
+        erro: "Método não permitido"
       });
     }
 
@@ -188,7 +250,7 @@ export default async function handler(req, res) {
           "LRANGE",
           `crm:messages:${telefone}`,
           "0",
-          "99",
+          "99"
         ]);
 
       const mensagens =
@@ -205,13 +267,15 @@ export default async function handler(req, res) {
           : [];
 
       const conversa =
-        await obterConversa(telefone);
+        await obterConversa(
+          telefone
+        );
 
       return res.status(200).json({
         ok: true,
         telefone,
         conversa,
-        mensagens,
+        mensagens
       });
     }
 
@@ -220,7 +284,7 @@ export default async function handler(req, res) {
         "ZREVRANGE",
         "crm:conversations",
         "0",
-        "99",
+        "99"
       ]);
 
     if (
@@ -229,7 +293,7 @@ export default async function handler(req, res) {
     ) {
       return res.status(200).json({
         ok: true,
-        conversations: [],
+        conversations: []
       });
     }
 
@@ -239,10 +303,13 @@ export default async function handler(req, res) {
       const conversa =
         await obterConversa(numero);
 
-      if (!conversa) continue;
+      if (!conversa) {
+        continue;
+      }
 
       conversations.push({
         telefone: numero,
+
         nome:
           conversa.nome ||
           numero,
@@ -275,12 +342,16 @@ export default async function handler(req, res) {
         status:
           conversa.status ||
           "novo",
+
+        modoAtendimento:
+          conversa.modoAtendimento ||
+          "bot"
       });
     }
 
     return res.status(200).json({
       ok: true,
-      conversations,
+      conversations
     });
 
   } catch (erro) {
@@ -291,8 +362,7 @@ export default async function handler(req, res) {
 
     return res.status(500).json({
       ok: false,
-      erro:
-        "Erro ao carregar as conversas.",
+      erro: "Erro ao carregar as conversas."
     });
   }
 }
