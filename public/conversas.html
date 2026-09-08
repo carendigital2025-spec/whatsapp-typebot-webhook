@@ -734,6 +734,114 @@ document
 
 
 // ===========================================================
+// ENVIAR MENSAGEM PELO CRM
+// ===========================================================
+
+document
+  .getElementById("botaoEnviar")
+  .addEventListener(
+    "click",
+    async function () {
+
+      const telefone =
+        document
+          .getElementById(
+            "telefoneConversa"
+          )
+          .textContent
+          .trim();
+
+      const campo =
+        document.getElementById(
+          "mensagemResposta"
+        );
+
+      const texto =
+        campo.value.trim();
+
+      if (
+        !telefone ||
+        telefone === "WhatsApp" ||
+        !texto
+      ) {
+        return;
+      }
+
+      this.disabled = true;
+
+      try {
+        const resposta =
+          await fetch(
+            "/api/send-message",
+            {
+              method: "POST",
+              credentials:
+                "same-origin",
+
+              headers: {
+                "Content-Type":
+                  "application/json"
+              },
+
+              body:
+                JSON.stringify({
+                  telefone,
+                  texto
+                })
+            }
+          );
+
+        const dados =
+          await resposta.json();
+
+        if (
+          !resposta.ok ||
+          !dados.ok
+        ) {
+          throw new Error(
+            dados.erro ||
+            "Erro ao enviar mensagem"
+          );
+        }
+
+        campo.value = "";
+
+        // Atualiza o histórico
+        const itemAtivo =
+          document.querySelector(
+            ".cliente.ativo"
+          );
+
+        await abrirConversa(
+          telefone,
+          document
+            .getElementById(
+              "nomeConversa"
+            )
+            .textContent,
+          itemAtivo
+        );
+
+        // Atualiza lista lateral
+        await carregarConversas();
+
+      } catch (erro) {
+        console.error(
+          "Erro ao enviar pelo CRM:",
+          erro
+        );
+
+        alert(
+          "Não foi possível enviar a mensagem."
+        );
+
+      } finally {
+        this.disabled = false;
+        campo.focus();
+      }
+    }
+  );
+  // ===========================================================
 // INICIAR
 // ===========================================================
 
