@@ -69,8 +69,7 @@ export default async function handler(req, res) {
 
       res.setHeader(
         "Set-Cookie",
-        `panel_session=${token}; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=28800`
-      );
+`panel_session=${token}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=28800`      );
 
       return res.status(200).json({
         ok: true,
