@@ -9,8 +9,8 @@ function usuarioAutenticado(req) {
 
   const cookieSessao = cookies
     .split(";")
-    .map(cookie => cookie.trim())
-    .find(cookie =>
+    .map((cookie) => cookie.trim())
+    .find((cookie) =>
       cookie.startsWith("panel_session=")
     );
 
@@ -104,17 +104,49 @@ async function redisCommand(command) {
         JSON.stringify(command)
     });
 
-  const dados =
-    await resposta.json();
+  const texto =
+    await resposta.text();
 
-  if (!resposta.ok || dados?.error) {
+  if (!resposta.ok) {
+    console.error(
+      "Erro Redis:",
+      resposta.status,
+      texto
+    );
+
     throw new Error(
-      dados?.error ||
       "Erro ao acessar Redis."
     );
   }
 
+  let dados;
+
+  try {
+    dados = JSON.parse(texto);
+  } catch {
+    throw new Error(
+      "Resposta inválida do Redis."
+    );
+  }
+
+  if (dados?.error) {
+    throw new Error(
+      dados.error
+    );
+  }
+
   return dados?.result;
+}
+
+
+// ===========================================================
+// NORMALIZAR TELEFONE
+// ===========================================================
+
+function normalizarTelefone(valor) {
+  return String(
+    valor || ""
+  ).replace(/\D/g, "");
 }
 
 
@@ -127,8 +159,11 @@ async function salvarMensagemCrm(
   texto
 ) {
   const agora = Date.now();
+
   const dataIso =
-    new Date(agora).toISOString();
+    new Date(
+      agora
+    ).toISOString();
 
   const mensagem = {
     telefone,
@@ -142,7 +177,9 @@ async function salvarMensagemCrm(
   await redisCommand([
     "RPUSH",
     `crm:messages:${telefone}`,
-    JSON.stringify(mensagem)
+    JSON.stringify(
+      mensagem
+    )
   ]);
 
   await redisCommand([
@@ -152,7 +189,7 @@ async function salvarMensagemCrm(
     "-1"
   ]);
 
-  let conversa = null;
+  let conversa = {};
 
   const existente =
     await redisCommand([
@@ -163,24 +200,55 @@ async function salvarMensagemCrm(
   if (existente) {
     try {
       conversa =
-        JSON.parse(existente);
+        JSON.parse(
+          existente
+        );
     } catch {
-      conversa = null;
+      conversa = {};
     }
   }
 
   conversa = {
-    ...(conversa || {}),
+    ...conversa,
+
     telefone,
-    ultimaMensagem: texto,
-    ultimaData: dataIso,
-    timestamp: agora
+
+    nome:
+      conversa.nome ||
+      telefone,
+
+    ultimaMensagem:
+      texto,
+
+    ultimaDirecao:
+      "saida",
+
+    ultimaData:
+      dataIso,
+
+    atualizadoEm:
+      dataIso,
+
+    timestamp:
+      agora,
+
+    naoLidas:
+      Number(
+        conversa.naoLidas ||
+        0
+      ),
+
+    status:
+      conversa.status ||
+      "em_atendimento"
   };
 
   await redisCommand([
     "SET",
     `crm:conversation:${telefone}`,
-    JSON.stringify(conversa)
+    JSON.stringify(
+      conversa
+    )
   ]);
 
   await redisCommand([
@@ -222,16 +290,25 @@ export default async function handler(
 
   try {
     const telefone =
-      String(
-        req.body?.telefone || ""
-      ).trim();
+      normalizarTelefone(
+        req.body?.telefone
+      );
 
     const texto =
       String(
-        req.body?.texto || ""
-      ).trim();
+        req.body?.texto ||
+        ""
+      )
+        .trim()
+        .slice(
+          0,
+          4096
+        );
 
-    if (!telefone || !texto) {
+    if (
+      !telefone ||
+      !texto
+    ) {
       return res
         .status(400)
         .json({
@@ -241,56 +318,96 @@ export default async function handler(
         });
     }
 
+    if (
+      !process.env.GRAPH_API_VERSION ||
+      !process.env.PHONE_NUMBER_ID ||
+      !process.env.WHATSAPP_TOKEN
+    ) {
+      throw new Error(
+        "Variáveis da API do WhatsApp não configuradas."
+      );
+    }
+
     const url =
       `https://graph.facebook.com/${process.env.GRAPH_API_VERSION}/${process.env.PHONE_NUMBER_ID}/messages`;
 
     const resposta =
-      await fetch(url, {
-        method: "POST",
+      await fetch(
+        url,
+        {
+          method: "POST",
 
-        headers: {
-          Authorization:
-            `Bearer ${process.env.WHATSAPP_TOKEN}`,
+          headers: {
+            Authorization:
+              `Bearer ${process.env.WHATSAPP_TOKEN}`,
 
-          "Content-Type":
-            "application/json"
-        },
+            "Content-Type":
+              "application/json"
+          },
 
-        body:
-          JSON.stringify({
-            messaging_product:
-              "whatsapp",
+          body:
+            JSON.stringify({
+              messaging_product:
+                "whatsapp",
 
-            recipient_type:
-              "individual",
+              recipient_type:
+                "individual",
 
-            to: telefone,
+              to:
+                telefone,
 
-            type: "text",
+              type:
+                "text",
 
-            text: {
-              preview_url: false,
-              body: texto
-            }
-          })
-      });
+              text: {
+                preview_url:
+                  false,
 
-    const dados =
-      await resposta.json();
+                body:
+                  texto
+              }
+            })
+        }
+      );
+
+    const respostaTexto =
+      await resposta.text();
+
+    let dados = {};
+
+    try {
+      dados =
+        JSON.parse(
+          respostaTexto
+        );
+    } catch {
+      dados = {
+        raw:
+          respostaTexto
+      };
+    }
 
     if (!resposta.ok) {
       console.error(
         "Erro Meta:",
-        JSON.stringify(dados)
+        resposta.status,
+        JSON.stringify(
+          dados
+        )
       );
 
       return res
-        .status(resposta.status)
+        .status(
+          resposta.status
+        )
         .json({
           ok: false,
+
           erro:
             "Não foi possível enviar a mensagem.",
-          detalhes: dados
+
+          detalhes:
+            dados
         });
     }
 
@@ -303,9 +420,12 @@ export default async function handler(
       .status(200)
       .json({
         ok: true,
+
         mensagem:
           "Mensagem enviada com sucesso.",
-        meta: dados
+
+        meta:
+          dados
       });
 
   } catch (erro) {
@@ -318,6 +438,7 @@ export default async function handler(
       .status(500)
       .json({
         ok: false,
+
         erro:
           "Erro interno ao enviar mensagem."
       });
