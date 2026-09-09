@@ -371,7 +371,134 @@
 <script>
 
 let contatosProcessados = [];
+// ===========================================================
+// CARREGA OS TEMPLATES DO WHATSAPP DIRETAMENTE DA META
+// ===========================================================
 
+async function carregarTemplates() {
+
+  const campoTemplate =
+    document.getElementById("template");
+
+  if (!campoTemplate) {
+    return;
+  }
+
+  campoTemplate.innerHTML = `
+    <option value="">
+      Carregando templates...
+    </option>
+  `;
+
+  campoTemplate.disabled = true;
+
+  try {
+
+    const resposta =
+      await fetch(
+        "/api/templates",
+        {
+          method: "GET",
+          credentials: "same-origin"
+        }
+      );
+
+    const dados =
+      await resposta.json();
+
+
+    if (
+      !resposta.ok ||
+      !dados.ok
+    ) {
+      throw new Error(
+        dados.erro ||
+        "Não foi possível carregar os templates."
+      );
+    }
+
+
+    const templates =
+      Array.isArray(dados.templates)
+        ? dados.templates
+        : [];
+
+
+    const templatesAprovados =
+      templates.filter(
+        template =>
+          String(template.status)
+            .toUpperCase() === "APPROVED"
+      );
+
+
+    campoTemplate.innerHTML = `
+      <option value="">
+        Selecione um template
+      </option>
+    `;
+
+
+    templatesAprovados.forEach(
+      template => {
+
+        const opcao =
+          document.createElement(
+            "option"
+          );
+
+        opcao.value =
+          template.nome;
+
+        const categoria =
+          template.categoria || "";
+
+        const idioma =
+          template.idioma || "";
+
+        opcao.textContent =
+          `${template.nome} — ${categoria} — ${idioma}`;
+
+        campoTemplate.appendChild(
+          opcao
+        );
+
+      }
+    );
+
+
+    if (
+      templatesAprovados.length === 0
+    ) {
+
+      campoTemplate.innerHTML = `
+        <option value="">
+          Nenhum template aprovado encontrado
+        </option>
+      `;
+
+    }
+
+
+  } catch (erro) {
+
+    console.error(
+      "Erro ao carregar templates:",
+      erro
+    );
+
+    campoTemplate.innerHTML = `
+      <option value="">
+        Erro ao carregar templates
+      </option>
+    `;
+
+  } finally {
+
+    campoTemplate.disabled = false;
+
+  }
+}
 
 /* Detecta se o CSV usa ; , ou TAB */
 
@@ -1048,7 +1175,10 @@ function liberarPainel() {
   document
     .getElementById("conteudoPainel")
     .style.display = "block";
+
+  carregarTemplates();
 }
+ 
 
 
 function bloquearPainel() {
