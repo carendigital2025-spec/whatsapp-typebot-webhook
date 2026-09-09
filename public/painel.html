@@ -342,7 +342,7 @@
       <div class="status">
 
         <div class="numero">
-          <strong>0</strong>
+          <strong id="campanhaEnviados">0</strong>
           Enviados
         </div>
 
@@ -1071,9 +1071,13 @@ async function prepararCampanha() {
       );
     }
 
-    mostrarSucesso(
-      `Campanha "${nomeCampanha}" recebida pelo servidor com ${dados.quantidade} contatos válidos. Nenhuma mensagem foi enviada.`
-    );
+   document
+  .getElementById("campanhaEnviados")
+  .textContent = dados.enviados || 0;
+
+mostrarSucesso(
+  `Campanha "${nomeCampanha}" enviada com sucesso para ${dados.enviados || 0} contato(s).`
+);
 
   } catch (erro) {
 
