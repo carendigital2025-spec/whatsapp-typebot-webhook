@@ -1,5 +1,71 @@
 import crypto from "crypto";
+// ===========================================================
+// REDIS
+// ===========================================================
 
+function getRedisConfig() {
+  const url =
+    process.env.STORAGE_KV_REST_API_URL ||
+    process.env.KV_REST_API_URL ||
+    process.env.UPSTASH_REDIS_REST_URL;
+
+  const token =
+    process.env.STORAGE_KV_REST_API_TOKEN ||
+    process.env.KV_REST_API_TOKEN ||
+    process.env.UPSTASH_REDIS_REST_TOKEN;
+
+  if (!url || !token) {
+    throw new Error(
+      "Variáveis do Upstash Redis não encontradas."
+    );
+  }
+
+  return {
+    url: url.replace(/\/$/, ""),
+    token
+  };
+}
+
+async function redisCommand(command) {
+  const { url, token } =
+    getRedisConfig();
+
+  const response =
+    await fetch(url, {
+      method: "POST",
+
+      headers: {
+        Authorization:
+          `Bearer ${token}`,
+
+        "Content-Type":
+          "application/json"
+      },
+
+      body:
+        JSON.stringify(command)
+    });
+
+  const responseText =
+    await response.text();
+
+  if (!response.ok) {
+    throw new Error(
+      `Erro Redis: ${response.status}`
+    );
+  }
+
+  const data =
+    JSON.parse(responseText);
+
+  if (data?.error) {
+    throw new Error(
+      `Redis: ${data.error}`
+    );
+  }
+
+  return data?.result;
+}
 export default async function handler(req, res) {
   // ===========================================================
   // 1. PROTEÇÃO DA ROTA PELO LOGIN DO PAINEL
@@ -299,8 +365,31 @@ export default async function handler(req, res) {
         ?.[0]
         ?.id ||
       null;
-
-
+// Salva o vínculo entre a mensagem da Meta e a campanha
+if (messageId) {
+  await redisCommand([
+    "SET",
+    `campanha:mensagem:${messageId}`,
+    JSON.stringify({
+      campanha,
+      template,
+      telefone,
+      status: "sent"
+    })
+  ]);
+}
+// Salva os contadores da campanha
+await redisCommand([
+  "SET",
+  `campanha:status:${campanha}`,
+  JSON.stringify({
+    enviados: 1,
+    entregues: 0,
+    respondidos: 0,
+    descadastrados: 0,
+    atualizadoEm: new Date().toISOString()
+  })
+]);
     console.log(
       "Template enviado com sucesso.",
       "Message ID:",
