@@ -1,6 +1,10 @@
 import crypto from "crypto";
+
 export default async function handler(req, res) {
-  // Proteção da rota usando a mesma sessão do painel
+  // ===========================================================
+  // 1. PROTEÇÃO DA ROTA PELO LOGIN DO PAINEL
+  // ===========================================================
+
   const cookies = req.headers.cookie || "";
 
   const cookieSessao = cookies
@@ -10,7 +14,10 @@ export default async function handler(req, res) {
       cookie.startsWith("panel_session=")
     );
 
-  if (!cookieSessao || !process.env.PANEL_PASSWORD) {
+  if (
+    !cookieSessao ||
+    !process.env.PANEL_PASSWORD
+  ) {
     return res.status(401).json({
       ok: false,
       erro: "Não autorizado. Faça login no painel."
@@ -22,15 +29,16 @@ export default async function handler(req, res) {
       "panel_session=".length
     );
 
-  const tokenEsperado = crypto
-    .createHmac(
-      "sha256",
-      process.env.PANEL_PASSWORD
-    )
-    .update(
-      "adcred-painel-autorizado"
-    )
-    .digest("hex");
+  const tokenEsperado =
+    crypto
+      .createHmac(
+        "sha256",
+        process.env.PANEL_PASSWORD
+      )
+      .update(
+        "adcred-painel-autorizado"
+      )
+      .digest("hex");
 
   const recebido =
     Buffer.from(tokenRecebido);
@@ -51,9 +59,11 @@ export default async function handler(req, res) {
       erro: "Não autorizado. Faça login no painel."
     });
   }
-   
-  // Esta rota será usada pelo painel de campanhas da ADCred.
-  // Por enquanto ela NÃO envia nenhuma mensagem.
+
+
+  // ===========================================================
+  // 2. ACEITA SOMENTE POST
+  // ===========================================================
 
   if (req.method !== "POST") {
     return res.status(405).json({
@@ -62,8 +72,19 @@ export default async function handler(req, res) {
     });
   }
 
+
   try {
-    const { campanha, template, contatos } = req.body || {};
+
+    // =========================================================
+    // 3. RECEBE OS DADOS DO PAINEL
+    // =========================================================
+
+    const {
+      campanha,
+      template,
+      contatos
+    } = req.body || {};
+
 
     if (!campanha) {
       return res.status(400).json({
@@ -72,6 +93,7 @@ export default async function handler(req, res) {
       });
     }
 
+
     if (!template) {
       return res.status(400).json({
         ok: false,
@@ -79,28 +101,255 @@ export default async function handler(req, res) {
       });
     }
 
-    if (!Array.isArray(contatos) || contatos.length === 0) {
+
+    if (
+      !Array.isArray(contatos) ||
+      contatos.length === 0
+    ) {
       return res.status(400).json({
         ok: false,
         erro: "Nenhum contato válido recebido"
       });
     }
 
+
+    // =========================================================
+    // 4. TRAVA DE SEGURANÇA DO PRIMEIRO TESTE
+    // =========================================================
+
+    if (contatos.length !== 1) {
+      return res.status(400).json({
+        ok: false,
+        erro:
+          "Modo de teste ativo. Envie somente 1 contato por vez."
+      });
+    }
+
+
+    // =========================================================
+    // 5. PERMITE SOMENTE O TEMPLATE DA ADCRED NESTE TESTE
+    // =========================================================
+
+    if (
+      template !== "consulta_fgts_adcred"
+    ) {
+      return res.status(400).json({
+        ok: false,
+        erro:
+          "Neste teste somente o template consulta_fgts_adcred está autorizado."
+      });
+    }
+
+
+    // =========================================================
+    // 6. CONFERE VARIÁVEIS DA META
+    // =========================================================
+
+    if (!process.env.WHATSAPP_TOKEN) {
+      return res.status(500).json({
+        ok: false,
+        erro:
+          "WHATSAPP_TOKEN não configurado na Vercel."
+      });
+    }
+
+
+    if (!process.env.PHONE_NUMBER_ID) {
+      return res.status(500).json({
+        ok: false,
+        erro:
+          "PHONE_NUMBER_ID não configurado na Vercel."
+      });
+    }
+
+
+    const graphVersion =
+      process.env.GRAPH_API_VERSION ||
+      "v23.0";
+
+
+    // =========================================================
+    // 7. PEGA O ÚNICO CONTATO
+    // =========================================================
+
+    const contato =
+      contatos[0];
+
+    const telefone =
+      String(
+        contato?.telefone || ""
+      ).replace(/\D/g, "");
+
+
+    if (!telefone) {
+      return res.status(400).json({
+        ok: false,
+        erro:
+          "Telefone do contato não informado."
+      });
+    }
+
+
+    // =========================================================
+    // 8. URL DA CLOUD API
+    // =========================================================
+
+    const url =
+      `https://graph.facebook.com/${graphVersion}/${process.env.PHONE_NUMBER_ID}/messages`;
+
+
+    // =========================================================
+    // 9. ENVIA O TEMPLATE APROVADO
+    // =========================================================
+
+    console.log(
+      "Enviando template:",
+      template,
+      "para:",
+      telefone
+    );
+
+
+    const respostaMeta =
+      await fetch(
+        url,
+        {
+          method: "POST",
+
+          headers: {
+            Authorization:
+              `Bearer ${process.env.WHATSAPP_TOKEN}`,
+
+            "Content-Type":
+              "application/json"
+          },
+
+          body:
+            JSON.stringify({
+              messaging_product:
+                "whatsapp",
+
+              recipient_type:
+                "individual",
+
+              to:
+                telefone,
+
+              type:
+                "template",
+
+              template: {
+                name:
+                  "consulta_fgts_adcred",
+
+                language: {
+                  code:
+                    "pt_BR"
+                }
+              }
+            })
+        }
+      );
+
+
+    const dadosMeta =
+      await respostaMeta.json();
+
+
+    // =========================================================
+    // 10. ERRO DA META
+    // =========================================================
+
+    if (!respostaMeta.ok) {
+
+      console.error(
+        "Erro ao enviar template pela Meta:",
+        JSON.stringify(
+          dadosMeta
+        )
+      );
+
+
+      return res
+        .status(respostaMeta.status)
+        .json({
+          ok: false,
+
+          erro:
+            dadosMeta?.error?.message ||
+            "A Meta recusou o envio do template.",
+
+          codigoMeta:
+            dadosMeta?.error?.code ||
+            null,
+
+          detalhes:
+            dadosMeta
+        });
+    }
+
+
+    // =========================================================
+    // 11. ENVIO ACEITO
+    // =========================================================
+
+    const messageId =
+      dadosMeta
+        ?.messages
+        ?.[0]
+        ?.id ||
+      null;
+
+
+    console.log(
+      "Template enviado com sucesso.",
+      "Message ID:",
+      messageId
+    );
+
+
     return res.status(200).json({
       ok: true,
-      modo: "teste",
-      mensagem: "Campanha recebida com sucesso. Nenhuma mensagem foi enviada.",
+
+      modo:
+        "teste_real",
+
       campanha,
+
       template,
-      quantidade: contatos.length
+
+      quantidade:
+        1,
+
+      enviados:
+        1,
+
+      telefone,
+
+      messageId,
+
+      mensagem:
+        "Mensagem de teste enviada com sucesso pela Meta."
     });
 
+
   } catch (error) {
-    console.error("Erro em send-campaign:", error);
+
+    console.error(
+      "Erro em send-campaign:",
+      error
+    );
+
 
     return res.status(500).json({
       ok: false,
-      erro: "Erro interno ao preparar a campanha"
+
+      erro:
+        "Erro interno ao enviar a campanha de teste.",
+
+      detalhes:
+        error?.message ||
+        "Erro desconhecido"
     });
   }
 }
