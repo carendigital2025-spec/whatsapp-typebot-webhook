@@ -322,13 +322,109 @@ export default async function handler(
         change
           ?.messages?.[0];
 
-      if (!message) {
-        return res
-          .status(200)
-          .send(
-            "EVENTO_RECEBIDO"
-          );
+      const statusEvento =
+  change
+    ?.statuses?.[0];
+
+if (!message && statusEvento) {
+  try {
+    const messageId =
+      statusEvento.id;
+
+    const novoStatus =
+      statusEvento.status;
+
+    const registro =
+      await redisCommand([
+        "GET",
+        `campanha:mensagem:${messageId}`
+      ]);
+
+    if (registro) {
+      const vinculo =
+        JSON.parse(registro);
+
+      const statusAnterior =
+        vinculo.status || "";
+
+      const jaContadoComoEntregue =
+        statusAnterior === "delivered" ||
+        statusAnterior === "read";
+
+      const agoraEntregue =
+        novoStatus === "delivered" ||
+        novoStatus === "read";
+
+      if (
+        agoraEntregue &&
+        !jaContadoComoEntregue
+      ) {
+        const chaveCampanha =
+          `campanha:status:${vinculo.campanha}`;
+
+        const registroCampanha =
+          await redisCommand([
+            "GET",
+            chaveCampanha
+          ]);
+
+        if (registroCampanha) {
+          const statusCampanha =
+            JSON.parse(
+              registroCampanha
+            );
+
+          statusCampanha.entregues =
+            Number(
+              statusCampanha.entregues || 0
+            ) + 1;
+
+          statusCampanha.atualizadoEm =
+            new Date().toISOString();
+
+          await redisCommand([
+            "SET",
+            chaveCampanha,
+            JSON.stringify(
+              statusCampanha
+            )
+          ]);
+        }
       }
+
+      vinculo.status =
+        novoStatus;
+
+      await redisCommand([
+        "SET",
+        `campanha:mensagem:${messageId}`,
+        JSON.stringify(
+          vinculo
+        )
+      ]);
+    }
+
+  } catch (erroStatus) {
+    console.error(
+      "Erro ao processar status da campanha:",
+      erroStatus
+    );
+  }
+
+  return res
+    .status(200)
+    .send(
+      "EVENTO_RECEBIDO"
+    );
+}
+
+if (!message) {
+  return res
+    .status(200)
+    .send(
+      "EVENTO_RECEBIDO"
+    );
+}
 
       const from =
         message.from;
