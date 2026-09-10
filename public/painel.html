@@ -1094,6 +1094,59 @@ mostrarSucesso(
 
 }
 
+  // ===========================================================
+// CONSULTAR STATUS DA CAMPANHA
+// ===========================================================
+
+async function atualizarStatusCampanha(nomeCampanha) {
+  try {
+    const resposta =
+      await fetch(
+        `/api/campaign-status?campanha=${encodeURIComponent(nomeCampanha)}`,
+        {
+          method: "GET",
+          credentials: "same-origin"
+        }
+      );
+
+    const dados =
+      await resposta.json();
+
+    if (
+      !resposta.ok ||
+      !dados.ok
+    ) {
+      return;
+    }
+
+    document
+      .getElementById("campanhaEnviados")
+      .textContent =
+        dados.enviados || 0;
+
+    document
+      .getElementById("campanhaEntregues")
+      .textContent =
+        dados.entregues || 0;
+
+    document
+      .getElementById("campanhaRespondidos")
+      .textContent =
+        dados.respondidos || 0;
+
+    document
+      .getElementById("campanhaDescadastrados")
+      .textContent =
+        dados.descadastrados || 0;
+
+  } catch (erro) {
+    console.error(
+      "Erro ao consultar status da campanha:",
+      erro
+    );
+  }
+}
+
 /* Mensagens */
 
 function mostrarSucesso(texto) {
