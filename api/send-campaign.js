@@ -2,45 +2,44 @@ import crypto from "crypto";
 
 
 // ===========================================================
+// CONFIGURAÇÕES
+// ===========================================================
+
+const MAX_CONTATOS_POR_CAMPANHA = 100;
+const INTERVALO_ENTRE_ENVIOS_MS = 250;
+
+
+// ===========================================================
 // REDIS
 // ===========================================================
 
 function getRedisConfig() {
-
   const url =
     process.env.STORAGE_KV_REST_API_URL ||
     process.env.KV_REST_API_URL ||
     process.env.UPSTASH_REDIS_REST_URL;
-
 
   const token =
     process.env.STORAGE_KV_REST_API_TOKEN ||
     process.env.KV_REST_API_TOKEN ||
     process.env.UPSTASH_REDIS_REST_TOKEN;
 
-
   if (!url || !token) {
-
     throw new Error(
       "Variáveis do Upstash Redis não encontradas."
     );
-
   }
-
 
   return {
     url: url.replace(/\/$/, ""),
     token
   };
-
 }
 
 
 async function redisCommand(command) {
-
   const { url, token } =
     getRedisConfig();
-
 
   const response =
     await fetch(
@@ -61,67 +60,76 @@ async function redisCommand(command) {
       }
     );
 
-
   const responseText =
     await response.text();
 
-
   if (!response.ok) {
+    console.error(
+      "Erro Redis:",
+      response.status,
+      responseText
+    );
 
     throw new Error(
       `Erro Redis: ${response.status}`
     );
-
   }
 
+  let data;
 
-  const data =
-    JSON.parse(responseText);
-
+  try {
+    data =
+      JSON.parse(responseText);
+  } catch {
+    throw new Error(
+      "Resposta inválida do Redis."
+    );
+  }
 
   if (data?.error) {
-
     throw new Error(
       `Redis: ${data.error}`
     );
-
   }
 
-
   return data?.result;
-
 }
 
 
 // ===========================================================
-// PEQUENA PAUSA ENTRE OS ENVIOS
+// PAUSA ENTRE ENVIOS
 // ===========================================================
 
 function aguardar(ms) {
-
   return new Promise(
     resolve =>
       setTimeout(resolve, ms)
   );
-
 }
 
 
 // ===========================================================
-// HANDLER
+// NORMALIZAR TELEFONE
 // ===========================================================
 
-export default async function handler(req, res) {
+function normalizarTelefone(valor) {
+  return String(
+    valor ||
+    ""
+  )
+    .replace(/\D/g, "")
+    .trim();
+}
 
 
-  // =========================================================
-  // 1. PROTEÇÃO DA ROTA PELO LOGIN DO PAINEL
-  // =========================================================
+// ===========================================================
+// VERIFICAR LOGIN DO PAINEL
+// ===========================================================
 
+function autenticarPainel(req) {
   const cookies =
     req.headers.cookie ||
     "";
-
 
   const cookieSessao =
     cookies
@@ -137,28 +145,17 @@ export default async function handler(req, res) {
           )
       );
 
-
   if (
     !cookieSessao ||
     !process.env.PANEL_PASSWORD
   ) {
-
-    return res
-      .status(401)
-      .json({
-        ok: false,
-        erro:
-          "Não autorizado. Faça login no painel."
-      });
-
+    return false;
   }
-
 
   const tokenRecebido =
     cookieSessao.substring(
       "panel_session=".length
     );
-
 
   const tokenEsperado =
     crypto
@@ -171,30 +168,44 @@ export default async function handler(req, res) {
       )
       .digest("hex");
 
-
   const recebido =
     Buffer.from(
       tokenRecebido
     );
-
 
   const esperado =
     Buffer.from(
       tokenEsperado
     );
 
+  if (
+    recebido.length !==
+    esperado.length
+  ) {
+    return false;
+  }
 
-  const autenticado =
-    recebido.length ===
-      esperado.length &&
-    crypto.timingSafeEqual(
-      recebido,
-      esperado
-    );
+  return crypto.timingSafeEqual(
+    recebido,
+    esperado
+  );
+}
 
 
-  if (!autenticado) {
+// ===========================================================
+// HANDLER PRINCIPAL
+// ===========================================================
 
+export default async function handler(
+  req,
+  res
+) {
+
+  // =========================================================
+  // AUTENTICAÇÃO
+  // =========================================================
+
+  if (!autenticarPainel(req)) {
     return res
       .status(401)
       .json({
@@ -202,35 +213,28 @@ export default async function handler(req, res) {
         erro:
           "Não autorizado. Faça login no painel."
       });
-
   }
 
 
   // =========================================================
-  // 2. ACEITA SOMENTE POST
+  // SOMENTE POST
   // =========================================================
 
-  if (
-    req.method !==
-    "POST"
-  ) {
-
+  if (req.method !== "POST") {
     return res
       .status(405)
       .json({
         ok: false,
         erro:
-          "Método não permitido"
+          "Método não permitido."
       });
-
   }
 
 
   try {
 
-
     // =======================================================
-    // 3. RECEBE OS DADOS DO PAINEL
+    // DADOS RECEBIDOS DO PAINEL
     // =======================================================
 
     const {
@@ -257,28 +261,24 @@ export default async function handler(req, res) {
 
 
     if (!nomeCampanha) {
-
       return res
         .status(400)
         .json({
           ok: false,
           erro:
-            "Nome da campanha não informado"
+            "Digite o nome da campanha."
         });
-
     }
 
 
     if (!nomeTemplate) {
-
       return res
         .status(400)
         .json({
           ok: false,
           erro:
-            "Template não informado"
+            "Selecione um template."
         });
-
     }
 
 
@@ -286,88 +286,70 @@ export default async function handler(req, res) {
       !Array.isArray(contatos) ||
       contatos.length === 0
     ) {
-
       return res
         .status(400)
         .json({
           ok: false,
           erro:
-            "Nenhum contato válido recebido"
+            "Nenhum contato válido recebido."
         });
-
     }
 
 
     // =======================================================
-    // 4. TEMPLATE AUTORIZADO
+    // TEMPLATE PERMITIDO
     // =======================================================
 
     if (
       nomeTemplate !==
       "consulta_fgts_adcred"
     ) {
-
       return res
         .status(400)
         .json({
           ok: false,
           erro:
-            "Somente o template consulta_fgts_adcred está autorizado neste envio."
+            "Somente o template consulta_fgts_adcred está autorizado."
         });
-
     }
 
 
     // =======================================================
-    // 5. CONFERE VARIÁVEIS DA META
+    // VARIÁVEIS META
     // =======================================================
 
     if (
       !process.env.WHATSAPP_TOKEN
     ) {
-
       return res
         .status(500)
         .json({
           ok: false,
           erro:
-            "WHATSAPP_TOKEN não configurado na Vercel."
+            "WHATSAPP_TOKEN não configurado."
         });
-
     }
 
 
     if (
       !process.env.PHONE_NUMBER_ID
     ) {
-
       return res
         .status(500)
         .json({
           ok: false,
           erro:
-            "PHONE_NUMBER_ID não configurado na Vercel."
+            "PHONE_NUMBER_ID não configurado."
         });
-
     }
 
 
-    const graphVersion =
-      process.env.GRAPH_API_VERSION ||
-      "v23.0";
-
-
-    const url =
-      `https://graph.facebook.com/${graphVersion}/${process.env.PHONE_NUMBER_ID}/messages`;
-
-
     // =======================================================
-    // 6. NORMALIZA E REMOVE TELEFONES REPETIDOS
+    // PREPARA CONTATOS
     // =======================================================
 
     const contatosPreparados =
       [];
-
 
     const telefonesVistos =
       new Set();
@@ -378,14 +360,9 @@ export default async function handler(req, res) {
     ) {
 
       const telefone =
-        String(
-          contato?.telefone ||
-          ""
-        )
-          .replace(
-            /\D/g,
-            ""
-          );
+        normalizarTelefone(
+          contato?.telefone
+        );
 
 
       if (!telefone) {
@@ -412,11 +389,10 @@ export default async function handler(req, res) {
           String(
             contato?.nome ||
             ""
-          ),
+          ).trim(),
 
         telefone
       });
-
     }
 
 
@@ -424,25 +400,65 @@ export default async function handler(req, res) {
       contatosPreparados.length ===
       0
     ) {
-
       return res
         .status(400)
         .json({
           ok: false,
           erro:
-            "Nenhum telefone válido foi recebido."
+            "Nenhum telefone válido encontrado."
         });
-
     }
 
 
     // =======================================================
-    // 7. CRIA O STATUS INICIAL DA CAMPANHA
+    // LIMITE DE SEGURANÇA
+    // =======================================================
+
+    if (
+      contatosPreparados.length >
+      MAX_CONTATOS_POR_CAMPANHA
+    ) {
+      return res
+        .status(400)
+        .json({
+          ok: false,
+
+          erro:
+            `Esta versão aceita até ${MAX_CONTATOS_POR_CAMPANHA} contatos por campanha.`
+        });
+    }
+
+
+    // =======================================================
+    // CAMPANHA NÃO PODE USAR NOME JÁ EXISTENTE
     // =======================================================
 
     const chaveStatusCampanha =
       `campanha:status:${nomeCampanha}`;
 
+
+    const campanhaExistente =
+      await redisCommand([
+        "GET",
+        chaveStatusCampanha
+      ]);
+
+
+    if (campanhaExistente) {
+      return res
+        .status(409)
+        .json({
+          ok: false,
+
+          erro:
+            "Já existe uma campanha com esse nome. Digite um nome novo para evitar misturar os contadores."
+        });
+    }
+
+
+    // =======================================================
+    // CRIA STATUS INICIAL
+    // =======================================================
 
     await redisCommand([
       "SET",
@@ -459,23 +475,46 @@ export default async function handler(req, res) {
 
 
     // =======================================================
-    // 8. ENVIA OS CONTATOS
+    // GRAPH API
+    // =======================================================
+
+    const graphVersion =
+      process.env.GRAPH_API_VERSION ||
+      "v23.0";
+
+
+    const url =
+      `https://graph.facebook.com/${graphVersion}/${process.env.PHONE_NUMBER_ID}/messages`;
+
+
+    // =======================================================
+    // CONTADORES
     // =======================================================
 
     let enviados =
       0;
 
-
     let falhas =
+      0;
+
+    let ignorados =
       0;
 
 
     const erros =
       [];
 
+    const ignoradosDetalhes =
+      [];
+
+
+    // =======================================================
+    // ENVIA CONTATO POR CONTATO
+    // =======================================================
 
     for (
-      const contato of contatosPreparados
+      const contato of
+      contatosPreparados
     ) {
 
       const telefone =
@@ -484,10 +523,58 @@ export default async function handler(req, res) {
 
       try {
 
+        // ===================================================
+        // VERIFICA SE O CONTATO JÁ PEDIU DESCADASTRO
+        // ===================================================
+
+        const vinculoAnterior =
+          await redisCommand([
+            "GET",
+            `campanha:telefone:${telefone}`
+          ]);
+
+
+        if (vinculoAnterior) {
+          try {
+            const dadosAnteriores =
+              JSON.parse(
+                vinculoAnterior
+              );
+
+            if (
+              dadosAnteriores
+                ?.descadastrado ===
+              true
+            ) {
+              ignorados++;
+
+              ignoradosDetalhes.push({
+                telefone,
+                motivo:
+                  "Contato já solicitou descadastro."
+              });
+
+              console.log(
+                "Campanha - contato ignorado por descadastro:",
+                telefone
+              );
+
+              continue;
+            }
+
+          } catch {
+            // Se o registro anterior estiver inválido,
+            // continua normalmente.
+          }
+        }
+
+
+        // ===================================================
+        // ENVIA TEMPLATE
+        // ===================================================
+
         console.log(
-          "Enviando template:",
-          nomeTemplate,
-          "para:",
+          "Campanha - enviando para:",
           telefone
         );
 
@@ -539,43 +626,52 @@ export default async function handler(req, res) {
           await respostaMeta.json();
 
 
-        if (
-          !respostaMeta.ok
-        ) {
+        // ===================================================
+        // META RECUSOU
+        // ===================================================
 
+        if (!respostaMeta.ok) {
           falhas++;
+
+          const mensagemErro =
+            dadosMeta
+              ?.error
+              ?.message ||
+            "A Meta recusou o envio.";
 
 
           console.error(
-            "Erro ao enviar template pela Meta:",
+            "Campanha - erro Meta:",
             telefone,
-            JSON.stringify(
-              dadosMeta
-            )
+            mensagemErro
           );
 
 
           erros.push({
             telefone,
 
-            codigoMeta:
+            codigo:
               dadosMeta
                 ?.error
                 ?.code ||
               null,
 
             erro:
-              dadosMeta
-                ?.error
-                ?.message ||
-              "A Meta recusou o envio."
+              mensagemErro
           });
 
 
-          continue;
+          await aguardar(
+            INTERVALO_ENTRE_ENVIOS_MS
+          );
 
+          continue;
         }
 
+
+        // ===================================================
+        // ENVIO ACEITO
+        // ===================================================
 
         const messageId =
           dadosMeta
@@ -588,12 +684,20 @@ export default async function handler(req, res) {
         enviados++;
 
 
+        console.log(
+          "Campanha - envio aceito:",
+          telefone,
+          messageId
+        );
+
+
         // ===================================================
-        // 9. VÍNCULO MESSAGE ID -> CAMPANHA
+        // MESSAGE ID -> CAMPANHA
+        //
+        // Necessário para contabilizar ENTREGA.
         // ===================================================
 
         if (messageId) {
-
           await redisCommand([
             "SET",
             `campanha:mensagem:${messageId}`,
@@ -607,18 +711,19 @@ export default async function handler(req, res) {
               telefone,
 
               status:
-                "sent"
+                "sent",
+
+              criadoEm:
+                new Date().toISOString()
             })
           ]);
-
         }
 
 
         // ===================================================
-        // 10. VÍNCULO TELEFONE -> CAMPANHA
+        // TELEFONE -> CAMPANHA
         //
-        // Este vínculo permitirá ao webhook descobrir
-        // de qual campanha veio uma resposta recebida.
+        // Necessário para RESPONDIDOS e DESCADASTRADOS.
         // ===================================================
 
         await redisCommand([
@@ -632,6 +737,9 @@ export default async function handler(req, res) {
               nomeTemplate,
 
             telefone,
+
+            nome:
+              contato.nome,
 
             messageId,
 
@@ -648,73 +756,11 @@ export default async function handler(req, res) {
 
 
         // ===================================================
-        // 11. ATUALIZA QUANTIDADE DE ENVIADOS
+        // PEQUENO INTERVALO
         // ===================================================
 
-        const registroStatus =
-          await redisCommand([
-            "GET",
-            chaveStatusCampanha
-          ]);
-
-
-        let statusCampanha = {
-          enviados: 0,
-          entregues: 0,
-          respondidos: 0,
-          descadastrados: 0
-        };
-
-
-        if (registroStatus) {
-
-          try {
-
-            statusCampanha =
-              JSON.parse(
-                registroStatus
-              );
-
-          } catch {
-
-            statusCampanha = {
-              enviados: 0,
-              entregues: 0,
-              respondidos: 0,
-              descadastrados: 0
-            };
-
-          }
-
-        }
-
-
-        statusCampanha.enviados =
-          enviados;
-
-
-        statusCampanha.atualizadoEm =
-          new Date().toISOString();
-
-
-        await redisCommand([
-          "SET",
-          chaveStatusCampanha,
-          JSON.stringify(
-            statusCampanha
-          )
-        ]);
-
-
-        /*
-          Pequeno intervalo entre os contatos.
-          Não é uma forma de contornar limites da Meta;
-          apenas evita que esta função dispare todas as
-          requisições simultaneamente.
-        */
-
         await aguardar(
-          250
+          INTERVALO_ENTRE_ENVIOS_MS
         );
 
 
@@ -724,7 +770,7 @@ export default async function handler(req, res) {
 
 
         console.error(
-          "Erro ao processar contato:",
+          "Campanha - erro ao processar contato:",
           telefone,
           erroContato
         );
@@ -732,59 +778,60 @@ export default async function handler(req, res) {
 
         erros.push({
           telefone,
-          codigoMeta:
+
+          codigo:
             null,
+
           erro:
             erroContato
               ?.message ||
-            "Erro desconhecido"
+            "Erro desconhecido."
         });
 
-      }
 
+        await aguardar(
+          INTERVALO_ENTRE_ENVIOS_MS
+        );
+      }
     }
 
 
     // =======================================================
-    // 12. GARANTE O STATUS FINAL DA CAMPANHA
+    // ATUALIZA ENVIADOS SEM APAGAR ENTREGA / RESPOSTA
     // =======================================================
 
-    const registroFinal =
+    const statusAtualRegistro =
       await redisCommand([
         "GET",
         chaveStatusCampanha
       ]);
 
 
-    let statusFinal = {
-      enviados,
+    let statusAtual = {
+      enviados: 0,
       entregues: 0,
       respondidos: 0,
       descadastrados: 0
     };
 
 
-    if (registroFinal) {
-
+    if (statusAtualRegistro) {
       try {
-
-        statusFinal =
+        statusAtual =
           JSON.parse(
-            registroFinal
+            statusAtualRegistro
           );
-
       } catch {
         // mantém os valores padrão
       }
-
     }
 
 
-    statusFinal.enviados =
+    statusAtual.enviados =
       enviados;
 
 
-    statusFinal.atualizadoEm =
+    statusAtual.atualizadoEm =
       new Date().toISOString();
 
 
@@ -792,19 +839,16 @@ export default async function handler(req, res) {
       "SET",
       chaveStatusCampanha,
       JSON.stringify(
-        statusFinal
+        statusAtual
       )
     ]);
 
 
     // =======================================================
-    // 13. RETORNO PARA O PAINEL
+    // NENHUM ENVIO ACEITO
     // =======================================================
 
-    if (
-      enviados === 0
-    ) {
-
+    if (enviados === 0) {
       return res
         .status(400)
         .json({
@@ -819,19 +863,25 @@ export default async function handler(req, res) {
           quantidade:
             contatosPreparados.length,
 
-          enviados:
-            0,
+          enviados,
 
           falhas,
 
+          ignorados,
+
           erros,
+
+          ignoradosDetalhes,
 
           erro:
             "Nenhuma mensagem da campanha foi aceita pela Meta."
         });
-
     }
 
+
+    // =======================================================
+    // RETORNO PARA O PAINEL
+    // =======================================================
 
     return res
       .status(200)
@@ -854,11 +904,16 @@ export default async function handler(req, res) {
 
         falhas,
 
+        ignorados,
+
         erros,
 
+        ignoradosDetalhes,
+
         mensagem:
-          falhas > 0
-            ? `Campanha processada. ${enviados} enviada(s) e ${falhas} com falha.`
+          falhas > 0 ||
+          ignorados > 0
+            ? `Campanha concluída: ${enviados} enviada(s), ${falhas} falha(s) e ${ignorados} ignorado(s).`
             : `Campanha enviada com sucesso para ${enviados} contato(s).`
       });
 
@@ -881,9 +936,7 @@ export default async function handler(req, res) {
 
         detalhes:
           error?.message ||
-          "Erro desconhecido"
+          "Erro desconhecido."
       });
-
   }
-
 }
