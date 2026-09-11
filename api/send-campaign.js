@@ -1,13 +1,7 @@
 import crypto from "crypto";
 
-
-// ===========================================================
-// CONFIGURAÇÕES
-// ===========================================================
-
 const MAX_CONTATOS_POR_CAMPANHA = 100;
 const INTERVALO_ENTRE_ENVIOS_MS = 250;
-
 
 // ===========================================================
 // REDIS
@@ -24,80 +18,54 @@ function getRedisConfig() {
     process.env.KV_REST_API_TOKEN ||
     process.env.UPSTASH_REDIS_REST_TOKEN;
 
-  if (!url || !token) {
-    throw new Error(
-      "Variáveis do Upstash Redis não encontradas."
-    );
-  }
-
   return {
-    url: url.replace(/\/$/, ""),
+    url,
     token
   };
 }
-
 
 async function redisCommand(command) {
   const { url, token } =
     getRedisConfig();
 
-  const response =
-    await fetch(
-      url,
-      {
-        method: "POST",
-
-        headers: {
-          Authorization:
-            `Bearer ${token}`,
-
-          "Content-Type":
-            "application/json"
-        },
-
-        body:
-          JSON.stringify(command)
-      }
-    );
-
-  const responseText =
-    await response.text();
-
-  if (!response.ok) {
-    console.error(
-      "Erro Redis:",
-      response.status,
-      responseText
-    );
-
+  if (!url || !token) {
     throw new Error(
-      `Erro Redis: ${response.status}`
+      "Configuração do Redis não encontrada."
     );
   }
 
-  let data;
+  const resposta =
+    await fetch(url, {
+      method: "POST",
 
-  try {
-    data =
-      JSON.parse(responseText);
-  } catch {
+      headers: {
+        Authorization:
+          `Bearer ${token}`,
+
+        "Content-Type":
+          "application/json"
+      },
+
+      body:
+        JSON.stringify(command)
+    });
+
+  const dados =
+    await resposta.json();
+
+  if (!resposta.ok) {
     throw new Error(
-      "Resposta inválida do Redis."
+      dados?.error ||
+      "Erro ao acessar Redis."
     );
   }
 
-  if (data?.error) {
-    throw new Error(
-      `Redis: ${data.error}`
-    );
-  }
-
-  return data?.result;
+  return dados.result;
 }
 
 
 // ===========================================================
-// PAUSA ENTRE ENVIOS
+// UTILIDADES
 // ===========================================================
 
 function aguardar(ms) {
@@ -108,41 +76,30 @@ function aguardar(ms) {
 }
 
 
-// ===========================================================
-// NORMALIZAR TELEFONE
-// ===========================================================
-
 function normalizarTelefone(valor) {
-  return String(
-    valor ||
-    ""
-  )
-    .replace(/\D/g, "")
-    .trim();
+  return String(valor || "")
+    .replace(/\D/g, "");
 }
 
 
 // ===========================================================
-// VERIFICAR LOGIN DO PAINEL
+// AUTENTICAÇÃO DO PAINEL
 // ===========================================================
 
 function autenticarPainel(req) {
   const cookies =
-    req.headers.cookie ||
-    "";
+    req.headers.cookie || "";
 
   const cookieSessao =
     cookies
       .split(";")
-      .map(
-        cookie =>
-          cookie.trim()
+      .map(cookie =>
+        cookie.trim()
       )
-      .find(
-        cookie =>
-          cookie.startsWith(
-            "panel_session="
-          )
+      .find(cookie =>
+        cookie.startsWith(
+          "panel_session="
+        )
       );
 
   if (
@@ -168,32 +125,28 @@ function autenticarPainel(req) {
       )
       .digest("hex");
 
-  const recebido =
-    Buffer.from(
-      tokenRecebido
-    );
+  const bufferRecebido =
+    Buffer.from(tokenRecebido);
 
-  const esperado =
-    Buffer.from(
-      tokenEsperado
-    );
+  const bufferEsperado =
+    Buffer.from(tokenEsperado);
 
   if (
-    recebido.length !==
-    esperado.length
+    bufferRecebido.length !==
+    bufferEsperado.length
   ) {
     return false;
   }
 
   return crypto.timingSafeEqual(
-    recebido,
-    esperado
+    bufferRecebido,
+    bufferEsperado
   );
 }
 
 
 // ===========================================================
-// HANDLER PRINCIPAL
+// HANDLER
 // ===========================================================
 
 export default async function handler(
@@ -201,9 +154,9 @@ export default async function handler(
   res
 ) {
 
-  // =========================================================
+  // ---------------------------------------------------------
   // AUTENTICAÇÃO
-  // =========================================================
+  // ---------------------------------------------------------
 
   if (!autenticarPainel(req)) {
     return res
@@ -216,9 +169,9 @@ export default async function handler(
   }
 
 
-  // =========================================================
-  // SOMENTE POST
-  // =========================================================
+  // ---------------------------------------------------------
+  // MÉTODO
+  // ---------------------------------------------------------
 
   if (req.method !== "POST") {
     return res
@@ -233,32 +186,31 @@ export default async function handler(
 
   try {
 
-    // =======================================================
-    // DADOS RECEBIDOS DO PAINEL
-    // =======================================================
-
-    const {
-      campanha,
-      template,
-      contatos
-    } =
-      req.body ||
-      {};
-
+    // -------------------------------------------------------
+    // DADOS RECEBIDOS
+    // -------------------------------------------------------
 
     const nomeCampanha =
       String(
-        campanha ||
-        ""
+        req.body?.campanha || ""
       ).trim();
-
 
     const nomeTemplate =
       String(
-        template ||
-        ""
+        req.body?.template || ""
       ).trim();
 
+    const contatosRecebidos =
+      Array.isArray(
+        req.body?.contatos
+      )
+        ? req.body.contatos
+        : [];
+
+
+    // -------------------------------------------------------
+    // VALIDAÇÕES
+    // -------------------------------------------------------
 
     if (!nomeCampanha) {
       return res
@@ -266,7 +218,7 @@ export default async function handler(
         .json({
           ok: false,
           erro:
-            "Digite o nome da campanha."
+            "Informe o nome da campanha."
         });
     }
 
@@ -283,24 +235,6 @@ export default async function handler(
 
 
     if (
-      !Array.isArray(contatos) ||
-      contatos.length === 0
-    ) {
-      return res
-        .status(400)
-        .json({
-          ok: false,
-          erro:
-            "Nenhum contato válido recebido."
-        });
-    }
-
-
-    // =======================================================
-    // TEMPLATE PERMITIDO
-    // =======================================================
-
-    if (
       nomeTemplate !==
       "consulta_fgts_adcred"
     ) {
@@ -309,29 +243,40 @@ export default async function handler(
         .json({
           ok: false,
           erro:
-            "Somente o template consulta_fgts_adcred está autorizado."
+            "Template não autorizado para este envio."
         });
     }
 
 
-    // =======================================================
-    // VARIÁVEIS META
-    // =======================================================
-
     if (
-      !process.env.WHATSAPP_TOKEN
+      contatosRecebidos.length === 0
     ) {
       return res
-        .status(500)
+        .status(400)
         .json({
           ok: false,
           erro:
-            "WHATSAPP_TOKEN não configurado."
+            "Nenhum contato recebido."
         });
     }
 
 
     if (
+      contatosRecebidos.length >
+      MAX_CONTATOS_POR_CAMPANHA
+    ) {
+      return res
+        .status(400)
+        .json({
+          ok: false,
+          erro:
+            `O limite atual é de ${MAX_CONTATOS_POR_CAMPANHA} contatos por campanha.`
+        });
+    }
+
+
+    if (
+      !process.env.WHATSAPP_TOKEN ||
       !process.env.PHONE_NUMBER_ID
     ) {
       return res
@@ -339,36 +284,56 @@ export default async function handler(
         .json({
           ok: false,
           erro:
-            "PHONE_NUMBER_ID não configurado."
+            "Configuração do WhatsApp incompleta."
         });
     }
 
 
-    // =======================================================
-    // PREPARA CONTATOS
-    // =======================================================
+    // -------------------------------------------------------
+    // EVITA NOME DE CAMPANHA REPETIDO
+    // -------------------------------------------------------
 
-    const contatosPreparados =
-      [];
+    const chaveStatus =
+      `campanha:status:${nomeCampanha}`;
+
+    const campanhaExistente =
+      await redisCommand([
+        "GET",
+        chaveStatus
+      ]);
+
+    if (campanhaExistente) {
+      return res
+        .status(409)
+        .json({
+          ok: false,
+          erro:
+            "Já existe uma campanha com esse nome. Use outro nome."
+        });
+    }
+
+
+    // -------------------------------------------------------
+    // REMOVE DUPLICADOS
+    // -------------------------------------------------------
 
     const telefonesVistos =
       new Set();
 
+    const contatos = [];
 
     for (
-      const contato of contatos
+      const contato of
+      contatosRecebidos
     ) {
-
       const telefone =
         normalizarTelefone(
           contato?.telefone
         );
 
-
       if (!telefone) {
         continue;
       }
-
 
       if (
         telefonesVistos.has(
@@ -378,17 +343,14 @@ export default async function handler(
         continue;
       }
 
-
       telefonesVistos.add(
         telefone
       );
 
-
-      contatosPreparados.push({
+      contatos.push({
         nome:
           String(
-            contato?.nome ||
-            ""
+            contato?.nome || ""
           ).trim(),
 
         telefone
@@ -397,194 +359,157 @@ export default async function handler(
 
 
     if (
-      contatosPreparados.length ===
-      0
+      contatos.length === 0
     ) {
       return res
         .status(400)
         .json({
           ok: false,
           erro:
-            "Nenhum telefone válido encontrado."
+            "Nenhum telefone válido para envio."
         });
     }
 
 
-    // =======================================================
-    // LIMITE DE SEGURANÇA
-    // =======================================================
+    // -------------------------------------------------------
+    // STATUS INICIAL
+    // -------------------------------------------------------
 
-    if (
-      contatosPreparados.length >
-      MAX_CONTATOS_POR_CAMPANHA
-    ) {
-      return res
-        .status(400)
-        .json({
-          ok: false,
+    const criadoEm =
+      new Date().toISOString();
 
-          erro:
-            `Esta versão aceita até ${MAX_CONTATOS_POR_CAMPANHA} contatos por campanha.`
-        });
-    }
+    const statusInicial = {
+      campanha:
+        nomeCampanha,
 
+      template:
+        nomeTemplate,
 
-    // =======================================================
-    // CAMPANHA NÃO PODE USAR NOME JÁ EXISTENTE
-    // =======================================================
+      total:
+        contatos.length,
 
-    const chaveStatusCampanha =
-      `campanha:status:${nomeCampanha}`;
+      enviados: 0,
 
+      entregues: 0,
 
-    const campanhaExistente =
-      await redisCommand([
-        "GET",
-        chaveStatusCampanha
-      ]);
+      respondidos: 0,
 
+      descadastrados: 0,
 
-    if (campanhaExistente) {
-      return res
-        .status(409)
-        .json({
-          ok: false,
+      falhas: 0,
 
-          erro:
-            "Já existe uma campanha com esse nome. Digite um nome novo para evitar misturar os contadores."
-        });
-    }
+      ignorados: 0,
 
+      criadoEm,
 
-    // =======================================================
-    // CRIA STATUS INICIAL
-    // =======================================================
+      atualizadoEm:
+        criadoEm
+    };
+
 
     await redisCommand([
       "SET",
-      chaveStatusCampanha,
-      JSON.stringify({
-        enviados: 0,
-        entregues: 0,
-        respondidos: 0,
-        descadastrados: 0,
-        atualizadoEm:
-          new Date().toISOString()
-      })
+      chaveStatus,
+      JSON.stringify(
+        statusInicial
+      )
     ]);
 
 
-    // =======================================================
-    // GRAPH API
-    // =======================================================
+    // -------------------------------------------------------
+    // ENVIO
+    // -------------------------------------------------------
 
-    const graphVersion =
-      process.env.GRAPH_API_VERSION ||
+    let enviados = 0;
+    let falhas = 0;
+    let ignorados = 0;
+
+    const erros = [];
+    const ignoradosDetalhes = [];
+
+
+    const versaoGraph =
+      process.env
+        .GRAPH_API_VERSION ||
       "v23.0";
 
 
-    const url =
-      `https://graph.facebook.com/${graphVersion}/${process.env.PHONE_NUMBER_ID}/messages`;
+    const urlWhatsApp =
+      `https://graph.facebook.com/${versaoGraph}/${process.env.PHONE_NUMBER_ID}/messages`;
 
-
-    // =======================================================
-    // CONTADORES
-    // =======================================================
-
-    let enviados =
-      0;
-
-    let falhas =
-      0;
-
-    let ignorados =
-      0;
-
-
-    const erros =
-      [];
-
-    const ignoradosDetalhes =
-      [];
-
-
-    // =======================================================
-    // ENVIA CONTATO POR CONTATO
-    // =======================================================
 
     for (
-      const contato of
-      contatosPreparados
+      let indice = 0;
+      indice < contatos.length;
+      indice++
     ) {
+
+      const contato =
+        contatos[indice];
 
       const telefone =
         contato.telefone;
 
 
+      // -----------------------------------------------------
+      // VERIFICA DESCADASTRO ANTERIOR
+      // -----------------------------------------------------
+
       try {
-
-        // ===================================================
-        // VERIFICA SE O CONTATO JÁ PEDIU DESCADASTRO
-        // ===================================================
-
-        const vinculoAnterior =
+        const registroTelefone =
           await redisCommand([
             "GET",
             `campanha:telefone:${telefone}`
           ]);
 
-
-        if (vinculoAnterior) {
+        if (registroTelefone) {
           try {
-            const dadosAnteriores =
+            const dadosTelefone =
               JSON.parse(
-                vinculoAnterior
+                registroTelefone
               );
 
             if (
-              dadosAnteriores
+              dadosTelefone
                 ?.descadastrado ===
               true
             ) {
               ignorados++;
 
-              ignoradosDetalhes.push({
-                telefone,
-                motivo:
-                  "Contato já solicitou descadastro."
-              });
-
-              console.log(
-                "Campanha - contato ignorado por descadastro:",
-                telefone
-              );
+              ignoradosDetalhes
+                .push({
+                  telefone,
+                  motivo:
+                    "Contato descadastrado."
+                });
 
               continue;
             }
 
           } catch {
-            // Se o registro anterior estiver inválido,
-            // continua normalmente.
+            // registro antigo inválido:
+            // segue envio normalmente
           }
         }
 
-
-        // ===================================================
-        // ENVIA TEMPLATE
-        // ===================================================
-
-        console.log(
-          "Campanha - enviando para:",
-          telefone
+      } catch (erro) {
+        console.error(
+          "Erro ao consultar descadastro:",
+          erro
         );
+      }
 
 
+      // -----------------------------------------------------
+      // ENVIA PARA META
+      // -----------------------------------------------------
+
+      try {
         const respostaMeta =
           await fetch(
-            url,
+            urlWhatsApp,
             {
-              method:
-                "POST",
+              method: "POST",
 
               headers: {
                 Authorization:
@@ -626,105 +551,75 @@ export default async function handler(
           await respostaMeta.json();
 
 
-        // ===================================================
-        // META RECUSOU
-        // ===================================================
-
         if (!respostaMeta.ok) {
           falhas++;
-
-          const mensagemErro =
-            dadosMeta
-              ?.error
-              ?.message ||
-            "A Meta recusou o envio.";
-
-
-          console.error(
-            "Campanha - erro Meta:",
-            telefone,
-            mensagemErro
-          );
-
 
           erros.push({
             telefone,
 
-            codigo:
+            erro:
               dadosMeta
                 ?.error
-                ?.code ||
-              null,
-
-            erro:
-              mensagemErro
+                ?.message ||
+              "Falha no envio."
           });
-
-
-          await aguardar(
-            INTERVALO_ENTRE_ENVIOS_MS
-          );
 
           continue;
         }
 
 
-        // ===================================================
-        // ENVIO ACEITO
-        // ===================================================
-
         const messageId =
           dadosMeta
-            ?.messages
-            ?.[0]
-            ?.id ||
-          null;
+            ?.messages?.[0]
+            ?.id;
+
+
+        if (!messageId) {
+          falhas++;
+
+          erros.push({
+            telefone,
+
+            erro:
+              "A Meta não retornou o ID da mensagem."
+          });
+
+          continue;
+        }
 
 
         enviados++;
 
 
-        console.log(
-          "Campanha - envio aceito:",
-          telefone,
-          messageId
-        );
-
-
-        // ===================================================
+        // ---------------------------------------------------
         // MESSAGE ID -> CAMPANHA
-        //
-        // Necessário para contabilizar ENTREGA.
-        // ===================================================
+        // ---------------------------------------------------
 
-        if (messageId) {
-          await redisCommand([
-            "SET",
-            `campanha:mensagem:${messageId}`,
-            JSON.stringify({
-              campanha:
-                nomeCampanha,
+        await redisCommand([
+          "SET",
+          `campanha:mensagem:${messageId}`,
+          JSON.stringify({
+            campanha:
+              nomeCampanha,
 
-              template:
-                nomeTemplate,
+            template:
+              nomeTemplate,
 
-              telefone,
+            telefone,
 
-              status:
-                "sent",
+            status:
+              "sent",
 
-              criadoEm:
-                new Date().toISOString()
-            })
-          ]);
-        }
+            criadoEm:
+              new Date()
+                .toISOString()
+          })
+        ]);
 
 
-        // ===================================================
+        // ---------------------------------------------------
         // TELEFONE -> CAMPANHA
-        //
-        // Necessário para RESPONDIDOS e DESCADASTRADOS.
-        // ===================================================
+        // ---------------------------------------------------
 
         await redisCommand([
           "SET",
@@ -750,45 +645,78 @@ export default async function handler(
               false,
 
             criadoEm:
-              new Date().toISOString()
+              new Date()
+                .toISOString()
           })
         ]);
 
 
-        // ===================================================
-        // PEQUENO INTERVALO
-        // ===================================================
+        // ---------------------------------------------------
+        // ATUALIZA ENVIADOS SEM APAGAR ENTREGA/RESPOSTA
+        // ---------------------------------------------------
 
-        await aguardar(
-          INTERVALO_ENTRE_ENVIOS_MS
-        );
+        const registroAtual =
+          await redisCommand([
+            "GET",
+            chaveStatus
+          ]);
+
+        if (registroAtual) {
+          try {
+            const statusAtual =
+              JSON.parse(
+                registroAtual
+              );
+
+            statusAtual.enviados =
+              enviados;
+
+            statusAtual.falhas =
+              falhas;
+
+            statusAtual.ignorados =
+              ignorados;
+
+            statusAtual.atualizadoEm =
+              new Date()
+                .toISOString();
+
+            await redisCommand([
+              "SET",
+              chaveStatus,
+              JSON.stringify(
+                statusAtual
+              )
+            ]);
+
+          } catch {
+            // segue campanha
+          }
+        }
 
 
-      } catch (erroContato) {
+      } catch (erroEnvio) {
 
         falhas++;
-
-
-        console.error(
-          "Campanha - erro ao processar contato:",
-          telefone,
-          erroContato
-        );
-
 
         erros.push({
           telefone,
 
-          codigo:
-            null,
-
           erro:
-            erroContato
-              ?.message ||
-            "Erro desconhecido."
+            erroEnvio?.message ||
+            "Erro inesperado no envio."
         });
+      }
 
 
+      // -----------------------------------------------------
+      // PEQUENO INTERVALO ENTRE ENVIOS
+      // -----------------------------------------------------
+
+      if (
+        indice <
+        contatos.length - 1
+      ) {
         await aguardar(
           INTERVALO_ENTRE_ENVIOS_MS
         );
@@ -796,72 +724,82 @@ export default async function handler(
     }
 
 
-    // =======================================================
-    // ATUALIZA ENVIADOS SEM APAGAR ENTREGA / RESPOSTA
-    // =======================================================
+    // -------------------------------------------------------
+    // STATUS FINAL
+    // -------------------------------------------------------
 
-    const statusAtualRegistro =
+    const registroFinal =
       await redisCommand([
         "GET",
-        chaveStatusCampanha
+        chaveStatus
       ]);
 
+    let statusFinal =
+      statusInicial;
 
-    let statusAtual = {
-      enviados: 0,
-      entregues: 0,
-      respondidos: 0,
-      descadastrados: 0
-    };
-
-
-    if (statusAtualRegistro) {
+    if (registroFinal) {
       try {
-        statusAtual =
+        statusFinal =
           JSON.parse(
-            statusAtualRegistro
+            registroFinal
           );
       } catch {
-        // mantém os valores padrão
+        statusFinal =
+          statusInicial;
       }
     }
 
 
-    statusAtual.enviados =
+    statusFinal.total =
+      contatos.length;
+
+    statusFinal.enviados =
       enviados;
 
+    statusFinal.falhas =
+      falhas;
 
-    statusAtual.atualizadoEm =
-      new Date().toISOString();
+    statusFinal.ignorados =
+      ignorados;
+
+    statusFinal.finalizadoEm =
+      new Date()
+        .toISOString();
+
+    statusFinal.atualizadoEm =
+      statusFinal.finalizadoEm;
 
 
     await redisCommand([
       "SET",
-      chaveStatusCampanha,
+      chaveStatus,
       JSON.stringify(
-        statusAtual
+        statusFinal
       )
     ]);
 
 
-    // =======================================================
-    // NENHUM ENVIO ACEITO
-    // =======================================================
+    // -------------------------------------------------------
+    // SE NADA FOI ENVIADO
+    // -------------------------------------------------------
 
-    if (enviados === 0) {
+    if (
+      enviados === 0 &&
+      falhas > 0
+    ) {
       return res
         .status(400)
         .json({
           ok: false,
 
+          erro:
+            "Nenhuma mensagem foi enviada.",
+
           campanha:
             nomeCampanha,
 
-          template:
-            nomeTemplate,
-
-          quantidade:
-            contatosPreparados.length,
+          total:
+            contatos.length,
 
           enviados,
 
@@ -871,25 +809,19 @@ export default async function handler(
 
           erros,
 
-          ignoradosDetalhes,
-
-          erro:
-            "Nenhuma mensagem da campanha foi aceita pela Meta."
+          ignoradosDetalhes
         });
     }
 
 
-    // =======================================================
-    // RETORNO PARA O PAINEL
-    // =======================================================
+    // -------------------------------------------------------
+    // SUCESSO
+    // -------------------------------------------------------
 
     return res
       .status(200)
       .json({
         ok: true,
-
-        modo:
-          "campanha",
 
         campanha:
           nomeCampanha,
@@ -898,7 +830,7 @@ export default async function handler(
           nomeTemplate,
 
         quantidade:
-          contatosPreparados.length,
+          contatos.length,
 
         enviados,
 
@@ -908,23 +840,16 @@ export default async function handler(
 
         erros,
 
-        ignoradosDetalhes,
-
-        mensagem:
-          falhas > 0 ||
-          ignorados > 0
-            ? `Campanha concluída: ${enviados} enviada(s), ${falhas} falha(s) e ${ignorados} ignorado(s).`
-            : `Campanha enviada com sucesso para ${enviados} contato(s).`
+        ignoradosDetalhes
       });
 
 
-  } catch (error) {
+  } catch (erro) {
 
     console.error(
-      "Erro em send-campaign:",
-      error
+      "Erro send-campaign:",
+      erro
     );
-
 
     return res
       .status(500)
@@ -932,11 +857,8 @@ export default async function handler(
         ok: false,
 
         erro:
-          "Erro interno ao enviar a campanha.",
-
-        detalhes:
-          error?.message ||
-          "Erro desconhecido."
+          erro?.message ||
+          "Erro interno ao enviar campanha."
       });
   }
 }
