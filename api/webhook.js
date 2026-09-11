@@ -229,6 +229,198 @@ async function saveCrmMessage({
 
 
 // ===========================================================
+// CAMPANHAS - RESPOSTAS E DESCADASTRO
+// ===========================================================
+
+function normalizarTextoCampanha(texto) {
+  return String(texto || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim()
+    .toLowerCase();
+}
+
+
+function ehPedidoDescadastro(texto) {
+  const mensagem =
+    normalizarTextoCampanha(texto);
+
+  const comandos = new Set([
+    "sair",
+    "pare",
+    "parar",
+    "stop",
+    "cancelar",
+    "descadastrar",
+    "descadastro",
+    "nao quero",
+    "nao quero obrigada",
+    "nao quero obrigado",
+    "remover",
+    "remova"
+  ]);
+
+  return comandos.has(mensagem);
+}
+
+
+async function registrarRespostaCampanha(
+  telefone,
+  texto
+) {
+  const retorno = {
+    vinculado: false,
+    respondido: false,
+    descadastrado: false
+  };
+
+  try {
+    const registroVinculo =
+      await redisCommand([
+        "GET",
+        `campanha:telefone:${telefone}`
+      ]);
+
+    if (!registroVinculo) {
+      return retorno;
+    }
+
+    let vinculo;
+
+    try {
+      vinculo =
+        JSON.parse(
+          registroVinculo
+        );
+    } catch {
+      return retorno;
+    }
+
+    const campanha =
+      String(
+        vinculo?.campanha ||
+        ""
+      ).trim();
+
+    if (!campanha) {
+      return retorno;
+    }
+
+    retorno.vinculado = true;
+
+    const chaveCampanha =
+      `campanha:status:${campanha}`;
+
+    const registroCampanha =
+      await redisCommand([
+        "GET",
+        chaveCampanha
+      ]);
+
+    if (!registroCampanha) {
+      return retorno;
+    }
+
+    let statusCampanha;
+
+    try {
+      statusCampanha =
+        JSON.parse(
+          registroCampanha
+        );
+    } catch {
+      return retorno;
+    }
+
+    let alterouStatus = false;
+
+    const primeiraResposta =
+      await redisCommand([
+        "SET",
+        `campanha:respondido:${campanha}:${telefone}`,
+        "1",
+        "NX"
+      ]);
+
+    if (
+      primeiraResposta ===
+      "OK"
+    ) {
+      statusCampanha.respondidos =
+        Number(
+          statusCampanha.respondidos ||
+          0
+        ) + 1;
+
+      retorno.respondido = true;
+      alterouStatus = true;
+    }
+
+    const pediuDescadastro =
+      ehPedidoDescadastro(texto);
+
+    if (pediuDescadastro) {
+      const primeiroDescadastro =
+        await redisCommand([
+          "SET",
+          `campanha:descadastrado:${campanha}:${telefone}`,
+          "1",
+          "NX"
+        ]);
+
+      if (
+        primeiroDescadastro ===
+        "OK"
+      ) {
+        statusCampanha.descadastrados =
+          Number(
+            statusCampanha.descadastrados ||
+            0
+          ) + 1;
+
+        alterouStatus = true;
+      }
+
+      retorno.descadastrado = true;
+
+      vinculo.descadastrado = true;
+      vinculo.descadastradoEm =
+        new Date().toISOString();
+
+      await redisCommand([
+        "SET",
+        `campanha:telefone:${telefone}`,
+        JSON.stringify(vinculo)
+      ]);
+    }
+
+    if (alterouStatus) {
+      statusCampanha.atualizadoEm =
+        new Date().toISOString();
+
+      await redisCommand([
+        "SET",
+        chaveCampanha,
+        JSON.stringify(
+          statusCampanha
+        )
+      ]);
+    }
+
+    return retorno;
+
+  } catch (erro) {
+    console.error(
+      "Erro ao registrar resposta da campanha:",
+      erro
+    );
+
+    return retorno;
+  }
+}
+
+
+// ===========================================================
 // TYPEBOT SESSION
 // ===========================================================
 
@@ -279,6 +471,10 @@ export default async function handler(
   res
 ) {
 
+  // =========================================================
+  // VERIFICAÇÃO DO WEBHOOK META
+  // =========================================================
+
   if (req.method === "GET") {
     const mode =
       req.query["hub.mode"];
@@ -310,6 +506,10 @@ export default async function handler(
   }
 
 
+  // =========================================================
+  // EVENTOS RECEBIDOS DA META
+  // =========================================================
+
   if (req.method === "POST") {
     try {
       const change =
@@ -323,108 +523,120 @@ export default async function handler(
           ?.messages?.[0];
 
       const statusEvento =
-  change
-    ?.statuses?.[0];
+        change
+          ?.statuses?.[0];
 
-if (!message && statusEvento) {
-  try {
-    const messageId =
-      statusEvento.id;
 
-    const novoStatus =
-      statusEvento.status;
+      // =====================================================
+      // STATUS DA CAMPANHA: ENTREGUE / LIDO
+      // =====================================================
 
-    const registro =
-      await redisCommand([
-        "GET",
-        `campanha:mensagem:${messageId}`
-      ]);
+      if (!message && statusEvento) {
+        try {
+          const messageId =
+            statusEvento.id;
 
-    if (registro) {
-      const vinculo =
-        JSON.parse(registro);
+          const novoStatus =
+            statusEvento.status;
 
-      const statusAnterior =
-        vinculo.status || "";
+          const registro =
+            await redisCommand([
+              "GET",
+              `campanha:mensagem:${messageId}`
+            ]);
 
-      const jaContadoComoEntregue =
-        statusAnterior === "delivered" ||
-        statusAnterior === "read";
+          if (registro) {
+            const vinculo =
+              JSON.parse(registro);
 
-      const agoraEntregue =
-        novoStatus === "delivered" ||
-        novoStatus === "read";
+            const statusAnterior =
+              vinculo.status || "";
 
-      if (
-        agoraEntregue &&
-        !jaContadoComoEntregue
-      ) {
-        const chaveCampanha =
-          `campanha:status:${vinculo.campanha}`;
+            const jaContadoComoEntregue =
+              statusAnterior === "delivered" ||
+              statusAnterior === "read";
 
-        const registroCampanha =
-          await redisCommand([
-            "GET",
-            chaveCampanha
-          ]);
+            const agoraEntregue =
+              novoStatus === "delivered" ||
+              novoStatus === "read";
 
-        if (registroCampanha) {
-          const statusCampanha =
-            JSON.parse(
-              registroCampanha
-            );
+            if (
+              agoraEntregue &&
+              !jaContadoComoEntregue
+            ) {
+              const chaveCampanha =
+                `campanha:status:${vinculo.campanha}`;
 
-          statusCampanha.entregues =
-            Number(
-              statusCampanha.entregues || 0
-            ) + 1;
+              const registroCampanha =
+                await redisCommand([
+                  "GET",
+                  chaveCampanha
+                ]);
 
-          statusCampanha.atualizadoEm =
-            new Date().toISOString();
+              if (registroCampanha) {
+                const statusCampanha =
+                  JSON.parse(
+                    registroCampanha
+                  );
 
-          await redisCommand([
-            "SET",
-            chaveCampanha,
-            JSON.stringify(
-              statusCampanha
-            )
-          ]);
+                statusCampanha.entregues =
+                  Number(
+                    statusCampanha.entregues ||
+                    0
+                  ) + 1;
+
+                statusCampanha.atualizadoEm =
+                  new Date().toISOString();
+
+                await redisCommand([
+                  "SET",
+                  chaveCampanha,
+                  JSON.stringify(
+                    statusCampanha
+                  )
+                ]);
+              }
+            }
+
+            vinculo.status =
+              novoStatus;
+
+            await redisCommand([
+              "SET",
+              `campanha:mensagem:${messageId}`,
+              JSON.stringify(
+                vinculo
+              )
+            ]);
+          }
+
+        } catch (erroStatus) {
+          console.error(
+            "Erro ao processar status da campanha:",
+            erroStatus
+          );
         }
+
+        return res
+          .status(200)
+          .send(
+            "EVENTO_RECEBIDO"
+          );
       }
 
-      vinculo.status =
-        novoStatus;
 
-      await redisCommand([
-        "SET",
-        `campanha:mensagem:${messageId}`,
-        JSON.stringify(
-          vinculo
-        )
-      ]);
-    }
+      // =====================================================
+      // IGNORA EVENTOS SEM MENSAGEM
+      // =====================================================
 
-  } catch (erroStatus) {
-    console.error(
-      "Erro ao processar status da campanha:",
-      erroStatus
-    );
-  }
+      if (!message) {
+        return res
+          .status(200)
+          .send(
+            "EVENTO_RECEBIDO"
+          );
+      }
 
-  return res
-    .status(200)
-    .send(
-      "EVENTO_RECEBIDO"
-    );
-}
-
-if (!message) {
-  return res
-    .status(200)
-    .send(
-      "EVENTO_RECEBIDO"
-    );
-}
 
       const from =
         message.from;
@@ -438,7 +650,10 @@ if (!message) {
       let userMessage = "";
 
 
+      // =====================================================
       // TEXTO
+      // =====================================================
+
       if (
         message.type ===
         "text"
@@ -450,11 +665,15 @@ if (!message) {
       }
 
 
+      // =====================================================
       // BOTÃO / LISTA
+      // =====================================================
+
       if (
         message.type ===
         "interactive"
       ) {
+
         if (
           message.interactive
             ?.type ===
@@ -487,12 +706,14 @@ if (!message) {
                 buttonReply?.title ||
                 "";
             }
+
           } else {
             userMessage =
               buttonReply?.title ||
               "";
           }
         }
+
 
         if (
           message.interactive
@@ -509,6 +730,10 @@ if (!message) {
       }
 
 
+      // =====================================================
+      // IGNORA MENSAGEM SEM CONTEÚDO
+      // =====================================================
+
       if (!userMessage) {
         return res
           .status(200)
@@ -518,7 +743,21 @@ if (!message) {
       }
 
 
-      // SALVA NO CRM
+      // =====================================================
+      // REGISTRA RESPOSTA DA CAMPANHA
+      // =====================================================
+
+      const resultadoCampanha =
+        await registrarRespostaCampanha(
+          from,
+          userMessage
+        );
+
+
+      // =====================================================
+      // SALVA MENSAGEM RECEBIDA NO CRM
+      // =====================================================
+
       try {
         await saveCrmMessage({
           telefone:
@@ -536,11 +775,40 @@ if (!message) {
           tipo:
             message.type
         });
+
       } catch (erroCrm) {
         console.error(
           "Erro CRM:",
           erroCrm
         );
+      }
+
+
+      // =====================================================
+      // DESCADASTRO
+      //
+      // Se o cliente pediu para sair,
+      // registra no painel e não continua o Typebot.
+      // =====================================================
+
+      if (
+        resultadoCampanha
+          ?.descadastrado
+      ) {
+        await deleteSession(
+          from
+        );
+
+        console.log(
+          "Descadastro registrado para:",
+          from
+        );
+
+        return res
+          .status(200)
+          .send(
+            "EVENTO_RECEBIDO"
+          );
       }
 
 
@@ -630,6 +898,7 @@ if (!message) {
 
       let typebotResponse;
 
+
       if (!sessionId) {
         typebotResponse =
           await startTypebot(
@@ -705,6 +974,7 @@ if (!message) {
         .send(
           "EVENTO_RECEBIDO"
         );
+
 
     } catch (error) {
       console.error(
@@ -821,7 +1091,7 @@ async function continueTypebot(
 
 
 // ===========================================================
-// PROCESSAR TYPEBOT
+// PROCESSAR RESPOSTA DO TYPEBOT
 // ===========================================================
 
 async function processTypebotResponse(
@@ -842,6 +1112,10 @@ async function processTypebotResponse(
 
 
   for (const message of messages) {
+
+    // =======================================================
+    // TEXTO
+    // =======================================================
 
     if (
       message.type ===
@@ -880,6 +1154,10 @@ async function processTypebotResponse(
       continue;
     }
 
+
+    // =======================================================
+    // VÍDEO
+    // =======================================================
 
     if (
       message.type ===
@@ -942,10 +1220,18 @@ async function processTypebotResponse(
   }
 
 
+  // =========================================================
+  // SEM INPUT
+  // =========================================================
+
   if (!input) {
     return;
   }
 
+
+  // =========================================================
+  // CHOICE INPUT
+  // =========================================================
 
   if (
     input.type ===
@@ -963,6 +1249,10 @@ async function processTypebotResponse(
     return;
   }
 
+
+  // =========================================================
+  // TEXT INPUT
+  // =========================================================
 
   if (
     input.type ===
@@ -1000,7 +1290,7 @@ async function processTypebotResponse(
 
 
 // ===========================================================
-// EXTRAIR TEXTO
+// EXTRAIR TEXTO DO TYPEBOT
 // ===========================================================
 
 function extractTypebotText(
@@ -1075,7 +1365,7 @@ function extractTypebotText(
 
 
 // ===========================================================
-// VÍDEO
+// EXTRAIR URL DO VÍDEO
 // ===========================================================
 
 function extractTypebotVideoUrl(
@@ -1194,7 +1484,7 @@ function isHttpUrl(value) {
 
 
 // ===========================================================
-// BOTÕES
+// OBTER TEXTO DAS OPÇÕES
 // ===========================================================
 
 function getChoiceText(
@@ -1231,6 +1521,10 @@ function getChoiceText(
   return `Opção ${index + 1}`;
 }
 
+
+// ===========================================================
+// ENVIAR BOTÕES
+// ===========================================================
 
 async function sendWhatsAppButtons(
   to,
@@ -1269,8 +1563,12 @@ async function sendWhatsAppButtons(
       }
     );
 
+  const graphVersion =
+    process.env.GRAPH_API_VERSION ||
+    "v23.0";
+
   const url =
-    `https://graph.facebook.com/${process.env.GRAPH_API_VERSION}/${process.env.PHONE_NUMBER_ID}/messages`;
+    `https://graph.facebook.com/${graphVersion}/${process.env.PHONE_NUMBER_ID}/messages`;
 
   const response =
     await fetch(
@@ -1321,6 +1619,11 @@ async function sendWhatsAppButtons(
     await response.json();
 
   if (!response.ok) {
+    console.error(
+      "Erro Meta ao enviar botões:",
+      data
+    );
+
     throw new Error(
       "Falha ao enviar botões pelo WhatsApp"
     );
@@ -1338,8 +1641,12 @@ async function sendWhatsAppVideo(
   to,
   videoUrl
 ) {
+  const graphVersion =
+    process.env.GRAPH_API_VERSION ||
+    "v23.0";
+
   const url =
-    `https://graph.facebook.com/${process.env.GRAPH_API_VERSION}/${process.env.PHONE_NUMBER_ID}/messages`;
+    `https://graph.facebook.com/${graphVersion}/${process.env.PHONE_NUMBER_ID}/messages`;
 
   const response =
     await fetch(
@@ -1395,6 +1702,11 @@ async function sendWhatsAppVideo(
   }
 
   if (!response.ok) {
+    console.error(
+      "Erro Meta ao enviar vídeo:",
+      data
+    );
+
     throw new Error(
       `Falha ao enviar vídeo: ${response.status}`
     );
@@ -1412,8 +1724,12 @@ async function sendWhatsAppText(
   to,
   text
 ) {
+  const graphVersion =
+    process.env.GRAPH_API_VERSION ||
+    "v23.0";
+
   const url =
-    `https://graph.facebook.com/${process.env.GRAPH_API_VERSION}/${process.env.PHONE_NUMBER_ID}/messages`;
+    `https://graph.facebook.com/${graphVersion}/${process.env.PHONE_NUMBER_ID}/messages`;
 
   const response =
     await fetch(
@@ -1458,6 +1774,11 @@ async function sendWhatsAppText(
     await response.json();
 
   if (!response.ok) {
+    console.error(
+      "Erro Meta ao enviar mensagem:",
+      data
+    );
+
     throw new Error(
       "Falha ao enviar mensagem pelo WhatsApp"
     );
