@@ -243,6 +243,34 @@ function normalizarTextoCampanha(texto) {
 
 function ehPedidoDescadastro(texto) {
   const mensagem =
+    String(texto || "")
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase()
+      .replace(/[^\w\s]/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+
+  const comandos = new Set([
+    "sair",
+    "pare",
+    "parar",
+    "stop",
+    "cancelar",
+    "descadastrar",
+    "descadastro",
+    "nao quero",
+    "nao quero obrigada",
+    "nao quero obrigado",
+    "nao obrigada",
+    "nao obrigado",
+    "remover",
+    "remova"
+  ]);
+
+  return comandos.has(mensagem);
+}
+  const mensagem =
     normalizarTextoCampanha(texto);
 
   const comandos = new Set([
