@@ -45,7 +45,8 @@
       font-weight: bold;
     }
 
-    input, select {
+    input,
+    select {
       width: 100%;
       padding: 12px;
       margin-top: 8px;
@@ -115,7 +116,8 @@
       border-collapse: collapse;
     }
 
-    th, td {
+    th,
+    td {
       border-bottom: 1px solid #e5e7eb;
       padding: 10px;
       text-align: left;
@@ -144,25 +146,35 @@
 </head>
 
 <body>
-<div id="telaLogin" style="
-  min-height:100vh;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  background:#f4f6f8;
-  font-family:Arial,sans-serif;
-">
-  <div style="
-    width:100%;
-    max-width:380px;
-    background:white;
-    padding:30px;
-    border-radius:14px;
-    box-shadow:0 8px 30px rgba(0,0,0,0.08);
-  ">
-    <h2 style="margin-top:0;">ADCred</h2>
 
-    <p>Digite a senha para acessar o painel de campanhas.</p>
+<div
+  id="telaLogin"
+  style="
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:#f4f6f8;
+    font-family:Arial,sans-serif;
+  "
+>
+  <div
+    style="
+      width:100%;
+      max-width:380px;
+      background:white;
+      padding:30px;
+      border-radius:14px;
+      box-shadow:0 8px 30px rgba(0,0,0,0.08);
+    "
+  >
+    <h2 style="margin-top:0;">
+      ADCred
+    </h2>
+
+    <p>
+      Digite a senha para acessar o painel de campanhas.
+    </p>
 
     <input
       id="senhaPainel"
@@ -203,34 +215,50 @@
   </div>
 </div>
 
-<div id="conteudoPainel" style="display:none;">
-  <div class="topo">
-    <h1>ADCred</h1>
-    <p>Painel de Campanhas</p>
-    <a
-  href="/conversas.html"
-  style="
-    display:inline-block;
-    margin-top:12px;
-    padding:10px 18px;
-    background:white;
-    color:#111827;
-    text-decoration:none;
-    border-radius:8px;
-    font-weight:bold;
-  "
+
+<div
+  id="conteudoPainel"
+  style="display:none;"
 >
-  Conversas
-</a>
+
+  <div class="topo">
+
+    <h1>ADCred</h1>
+
+    <p>
+      Painel de Campanhas
+    </p>
+
+    <a
+      href="/conversas.html"
+      style="
+        display:inline-block;
+        margin-top:12px;
+        padding:10px 18px;
+        background:white;
+        color:#111827;
+        text-decoration:none;
+        border-radius:8px;
+        font-weight:bold;
+      "
+    >
+      Conversas
+    </a>
+
   </div>
+
 
   <div class="container">
 
     <div class="card">
 
-      <h2>Nova campanha</h2>
+      <h2>
+        Nova campanha
+      </h2>
 
-      <label>Nome da campanha</label>
+      <label>
+        Nome da campanha
+      </label>
 
       <input
         id="nomeCampanha"
@@ -238,7 +266,9 @@
         placeholder="Ex.: Campanha FGTS Setembro"
       >
 
-      <label>Importar lista de contatos CSV</label>
+      <label>
+        Importar lista de contatos CSV
+      </label>
 
       <input
         id="arquivoCSV"
@@ -246,12 +276,16 @@
         accept=".csv,text/csv"
       >
 
-      <label>Template do WhatsApp</label>
+      <label>
+        Template do WhatsApp
+      </label>
 
       <select id="template">
+
         <option value="">
           Selecione um template
         </option>
+
       </select>
 
       <button
@@ -271,27 +305,37 @@
 
     <div class="card">
 
-      <h2>Análise da lista</h2>
+      <h2>
+        Análise da lista
+      </h2>
 
       <div class="status">
 
         <div class="numero">
-          <strong id="totalContatos">0</strong>
+          <strong id="totalContatos">
+            0
+          </strong>
           Total
         </div>
 
         <div class="numero">
-          <strong id="validos">0</strong>
+          <strong id="validos">
+            0
+          </strong>
           Válidos
         </div>
 
         <div class="numero">
-          <strong id="duplicados">0</strong>
+          <strong id="duplicados">
+            0
+          </strong>
           Duplicados
         </div>
 
         <div class="numero">
-          <strong id="invalidos">0</strong>
+          <strong id="invalidos">
+            0
+          </strong>
           Inválidos
         </div>
 
@@ -306,7 +350,9 @@
       style="display:none;"
     >
 
-      <h2>Prévia dos contatos</h2>
+      <h2>
+        Prévia dos contatos
+      </h2>
 
       <p>
         Mostrando os primeiros 20 registros da lista.
@@ -317,12 +363,14 @@
         <table>
 
           <thead>
+
             <tr>
               <th>Nome</th>
               <th>Telefone original</th>
               <th>Telefone tratado</th>
               <th>Status</th>
             </tr>
+
           </thead>
 
           <tbody id="previewTabela">
@@ -337,28 +385,50 @@
 
     <div class="card">
 
-      <h2>Status da campanha</h2>
+      <h2>
+        Status da campanha
+      </h2>
 
       <div class="status">
 
         <div class="numero">
-          <strong id="campanhaEnviados">0</strong>
+
+          <strong id="campanhaEnviados">
+            0
+          </strong>
+
           Enviados
+
         </div>
 
         <div class="numero">
-  <strong id="campanhaEntregues">0</strong>
-  Entregues
-</div>
+
+          <strong id="campanhaEntregues">
+            0
+          </strong>
+
+          Entregues
+
+        </div>
 
         <div class="numero">
-         <strong id="campanhaRespondidos">0</strong>
+
+          <strong id="campanhaRespondidos">
+            0
+          </strong>
+
           Respondidos
+
         </div>
 
         <div class="numero">
-          <strong id="campanhaDescadastrados">0</strong>
+
+          <strong id="campanhaDescadastrados">
+            0
+          </strong>
+
           Descadastrados
+
         </div>
 
       </div>
@@ -368,9 +438,15 @@
   </div>
 
 </div>
+
+
 <script>
 
 let contatosProcessados = [];
+
+let intervaloStatusCampanha = null;
+
+
 // ===========================================================
 // CARREGA OS TEMPLATES DO WHATSAPP DIRETAMENTE DA META
 // ===========================================================
@@ -378,11 +454,14 @@ let contatosProcessados = [];
 async function carregarTemplates() {
 
   const campoTemplate =
-    document.getElementById("template");
+    document.getElementById(
+      "template"
+    );
 
   if (!campoTemplate) {
     return;
   }
+
 
   campoTemplate.innerHTML = `
     <option value="">
@@ -390,7 +469,10 @@ async function carregarTemplates() {
     </option>
   `;
 
-  campoTemplate.disabled = true;
+
+  campoTemplate.disabled =
+    true;
+
 
   try {
 
@@ -398,10 +480,14 @@ async function carregarTemplates() {
       await fetch(
         "/api/templates",
         {
-          method: "GET",
-          credentials: "same-origin"
+          method:
+            "GET",
+
+          credentials:
+            "same-origin"
         }
       );
+
 
     const dados =
       await resposta.json();
@@ -411,15 +497,19 @@ async function carregarTemplates() {
       !resposta.ok ||
       !dados.ok
     ) {
+
       throw new Error(
         dados.erro ||
         "Não foi possível carregar os templates."
       );
+
     }
 
 
     const templates =
-      Array.isArray(dados.templates)
+      Array.isArray(
+        dados.templates
+      )
         ? dados.templates
         : [];
 
@@ -427,8 +517,11 @@ async function carregarTemplates() {
     const templatesAprovados =
       templates.filter(
         template =>
-          String(template.status)
-            .toUpperCase() === "APPROVED"
+          String(
+            template.status
+          )
+            .toUpperCase() ===
+          "APPROVED"
       );
 
 
@@ -447,17 +540,24 @@ async function carregarTemplates() {
             "option"
           );
 
+
         opcao.value =
           template.nome;
 
+
         const categoria =
-          template.categoria || "";
+          template.categoria ||
+          "";
+
 
         const idioma =
-          template.idioma || "";
+          template.idioma ||
+          "";
+
 
         opcao.textContent =
           `${template.nome} — ${categoria} — ${idioma}`;
+
 
         campoTemplate.appendChild(
           opcao
@@ -468,7 +568,8 @@ async function carregarTemplates() {
 
 
     if (
-      templatesAprovados.length === 0
+      templatesAprovados.length ===
+      0
     ) {
 
       campoTemplate.innerHTML = `
@@ -479,13 +580,13 @@ async function carregarTemplates() {
 
     }
 
-
   } catch (erro) {
 
     console.error(
       "Erro ao carregar templates:",
       erro
     );
+
 
     campoTemplate.innerHTML = `
       <option value="">
@@ -495,61 +596,101 @@ async function carregarTemplates() {
 
   } finally {
 
-    campoTemplate.disabled = false;
+    campoTemplate.disabled =
+      false;
 
   }
+
 }
 
-/* Detecta se o CSV usa ; , ou TAB */
 
-function detectarSeparador(linha) {
+// ===========================================================
+// DETECTA SE O CSV USA ; , OU TAB
+// ===========================================================
+
+function detectarSeparador(
+  linha
+) {
 
   const pontoVirgula =
-    (linha.match(/;/g) || []).length;
+    (
+      linha.match(/;/g) ||
+      []
+    ).length;
+
 
   const virgula =
-    (linha.match(/,/g) || []).length;
+    (
+      linha.match(/,/g) ||
+      []
+    ).length;
+
 
   const tab =
-    (linha.match(/\t/g) || []).length;
+    (
+      linha.match(/\t/g) ||
+      []
+    ).length;
 
 
   if (
     pontoVirgula >= virgula &&
     pontoVirgula >= tab
   ) {
+
     return ";";
+
   }
+
 
   if (
     tab >= virgula &&
     tab >= pontoVirgula
   ) {
+
     return "\t";
+
   }
 
+
   return ",";
+
 }
 
 
-/* Remove aspas */
+// ===========================================================
+// REMOVE ASPAS
+// ===========================================================
 
-function limparCampo(valor) {
+function limparCampo(
+  valor
+) {
 
   if (!valor) {
+
     return "";
+
   }
+
 
   return valor
     .trim()
-    .replace(/^"(.*)"$/, "$1")
+    .replace(
+      /^"(.*)"$/,
+      "$1"
+    )
     .trim();
+
 }
 
 
-/* Procura a coluna do telefone */
+// ===========================================================
+// PROCURA A COLUNA DO TELEFONE
+// ===========================================================
 
-function localizarColunaTelefone(cabecalhos) {
+function localizarColunaTelefone(
+  cabecalhos
+) {
 
   const nomesPossiveis = [
     "telefone",
@@ -563,24 +704,36 @@ function localizarColunaTelefone(cabecalhos) {
     "celular1"
   ];
 
-  return cabecalhos.findIndex(cabecalho => {
 
-    const nome =
-      cabecalho
-        .toLowerCase()
-        .trim();
+  return cabecalhos.findIndex(
+    cabecalho => {
 
-    return nomesPossiveis.some(
-      opcao => nome.includes(opcao)
-    );
+      const nome =
+        cabecalho
+          .toLowerCase()
+          .trim();
 
-  });
+
+      return nomesPossiveis.some(
+        opcao =>
+          nome.includes(
+            opcao
+          )
+      );
+
+    }
+  );
+
 }
 
 
-/* Procura a coluna do nome */
+// ===========================================================
+// PROCURA A COLUNA DO NOME
+// ===========================================================
 
-function localizarColunaNome(cabecalhos) {
+function localizarColunaNome(
+  cabecalhos
+) {
 
   const nomesPossiveis = [
     "nome",
@@ -588,103 +741,155 @@ function localizarColunaNome(cabecalhos) {
     "name"
   ];
 
-  return cabecalhos.findIndex(cabecalho => {
 
-    const nome =
-      cabecalho
-        .toLowerCase()
-        .trim();
+  return cabecalhos.findIndex(
+    cabecalho => {
 
-    return nomesPossiveis.some(
-      opcao => nome === opcao
-    );
+      const nome =
+        cabecalho
+          .toLowerCase()
+          .trim();
 
-  });
+
+      return nomesPossiveis.some(
+        opcao =>
+          nome === opcao
+      );
+
+    }
+  );
+
 }
 
 
-/* Padroniza telefone brasileiro */
+// ===========================================================
+// PADRONIZA TELEFONE BRASILEIRO
+// ===========================================================
 
-function normalizarTelefone(telefone) {
+function normalizarTelefone(
+  telefone
+) {
 
   let numero =
-    String(telefone || "")
-      .replace(/\D/g, "");
+    String(
+      telefone ||
+      ""
+    )
+      .replace(
+        /\D/g,
+        ""
+      );
 
 
-  /* Remove zeros à esquerda */
+  if (!numero) {
 
-  numero =
-    numero.replace(/^0+/, "");
+    return "";
+
+  }
 
 
-  /*
-    Se vier:
-    DDD + número
-    acrescentamos Brasil 55
-  */
+  if (
+    numero.startsWith(
+      "00"
+    )
+  ) {
+
+    numero =
+      numero.substring(
+        2
+      );
+
+  }
+
+
+  if (
+    numero.startsWith(
+      "55"
+    )
+  ) {
+
+    return numero;
+
+  }
+
 
   if (
     numero.length === 10 ||
     numero.length === 11
   ) {
-    numero = "55" + numero;
+
+    return "55" + numero;
+
   }
 
 
   return numero;
+
 }
 
 
-/* Validação básica */
+// ===========================================================
+// CONFERE SE O TELEFONE É VÁLIDO
+// ===========================================================
 
-function telefoneValido(numero) {
+function telefoneValido(
+  telefone
+) {
 
-  /*
-    Brasil:
-    55 + DDD + telefone
-    normalmente 12 ou 13 dígitos
-  */
+  if (!telefone) {
+
+    return false;
+
+  }
+
 
   if (
-    numero.length !== 12 &&
-    numero.length !== 13
+    !telefone.startsWith(
+      "55"
+    )
   ) {
+
     return false;
+
   }
 
-  if (!numero.startsWith("55")) {
-    return false;
-  }
-
-  const ddd =
-    parseInt(numero.substring(2, 4));
 
   if (
-    !ddd ||
-    ddd < 11 ||
-    ddd > 99
+    telefone.length < 12 ||
+    telefone.length > 13
   ) {
+
     return false;
+
   }
+
 
   return true;
+
 }
 
 
-/* Lê o arquivo escolhido */
+// ===========================================================
+// LÊ O ARQUIVO CSV
+// ===========================================================
 
 document
-  .getElementById("arquivoCSV")
+  .getElementById(
+    "arquivoCSV"
+  )
   .addEventListener(
     "change",
-    function(event) {
+    function(evento) {
 
       const arquivo =
-        event.target.files[0];
+        evento.target
+          .files?.[0];
+
 
       if (!arquivo) {
+
         return;
+
       }
 
 
@@ -693,10 +898,26 @@ document
 
 
       leitor.onload =
-        function(e) {
+        function(eventoLeitura) {
+
+          const texto =
+            eventoLeitura
+              .target
+              .result;
+
 
           processarCSV(
-            e.target.result
+            texto
+          );
+
+        };
+
+
+      leitor.onerror =
+        function() {
+
+          mostrarErro(
+            "Não foi possível ler o arquivo CSV."
           );
 
         };
@@ -711,27 +932,56 @@ document
   );
 
 
-/* Processa o CSV */
+// ===========================================================
+// PROCESSA O CSV
+// ===========================================================
 
-function processarCSV(texto) {
+function processarCSV(
+  texto
+) {
+
+  if (!texto) {
+
+    mostrarErro(
+      "O arquivo CSV está vazio."
+    );
+
+    zerarContadores();
+
+    return;
+
+  }
+
 
   const linhas =
     texto
-      .replace(/\r/g, "")
-      .split("\n")
+      .replace(
+        /^\uFEFF/,
+        ""
+      )
+      .split(
+        /\r?\n/
+      )
       .filter(
         linha =>
-          linha.trim() !== ""
+          linha.trim() !==
+          ""
       );
 
 
-  if (linhas.length < 2) {
+  if (
+    linhas.length <
+    2
+  ) {
 
     mostrarErro(
-      "O arquivo CSV está vazio ou não possui contatos."
+      "O CSV precisa possuir cabeçalho e pelo menos um contato."
     );
 
+    zerarContadores();
+
     return;
+
   }
 
 
@@ -743,8 +993,12 @@ function processarCSV(texto) {
 
   const cabecalhos =
     linhas[0]
-      .split(separador)
-      .map(limparCampo);
+      .split(
+        separador
+      )
+      .map(
+        limparCampo
+      );
 
 
   const colunaTelefone =
@@ -759,7 +1013,10 @@ function processarCSV(texto) {
     );
 
 
-  if (colunaTelefone === -1) {
+  if (
+    colunaTelefone ===
+    -1
+  ) {
 
     mostrarErro(
       "Não encontrei uma coluna de telefone. O CSV precisa possuir uma coluna como TELEFONE, CELULAR ou WHATSAPP."
@@ -768,6 +1025,7 @@ function processarCSV(texto) {
     zerarContadores();
 
     return;
+
   }
 
 
@@ -775,12 +1033,18 @@ function processarCSV(texto) {
     new Set();
 
 
-  contatosProcessados = [];
+  contatosProcessados =
+    [];
 
 
-  let validos = 0;
-  let duplicados = 0;
-  let invalidos = 0;
+  let validos =
+    0;
+
+  let duplicados =
+    0;
+
+  let invalidos =
+    0;
 
 
   for (
@@ -791,12 +1055,19 @@ function processarCSV(texto) {
 
     const campos =
       linhas[i]
-        .split(separador)
-        .map(limparCampo);
+        .split(
+          separador
+        )
+        .map(
+          limparCampo
+        );
 
 
     const telefoneOriginal =
-      campos[colunaTelefone] || "";
+      campos[
+        colunaTelefone
+      ] ||
+      "";
 
 
     const telefone =
@@ -807,11 +1078,17 @@ function processarCSV(texto) {
 
     const nome =
       colunaNome >= 0
-        ? campos[colunaNome] || ""
+        ? (
+            campos[
+              colunaNome
+            ] ||
+            ""
+          )
         : "";
 
 
-    let status = "";
+    let status =
+      "";
 
 
     if (
@@ -820,29 +1097,29 @@ function processarCSV(texto) {
       )
     ) {
 
-      status = "Inválido";
+      status =
+        "Inválido";
 
       invalidos++;
 
-    }
-
-    else if (
+    } else if (
       telefonesVistos.has(
         telefone
       )
     ) {
 
-      status = "Duplicado";
+      status =
+        "Duplicado";
 
       duplicados++;
 
-    }
+    } else {
 
-    else {
-
-      status = "Válido";
+      status =
+        "Válido";
 
       validos++;
+
 
       telefonesVistos.add(
         telefone
@@ -852,12 +1129,10 @@ function processarCSV(texto) {
 
 
     contatosProcessados.push({
-
       nome,
       telefoneOriginal,
       telefone,
       status
-
     });
 
   }
@@ -905,7 +1180,9 @@ function processarCSV(texto) {
 }
 
 
-/* Mostra os primeiros contatos */
+// ===========================================================
+// MOSTRA OS PRIMEIROS CONTATOS
+// ===========================================================
 
 function mostrarPreview() {
 
@@ -915,7 +1192,8 @@ function mostrarPreview() {
     );
 
 
-  tabela.innerHTML = "";
+  tabela.innerHTML =
+    "";
 
 
   const primeiros =
@@ -935,7 +1213,8 @@ function mostrarPreview() {
 
 
       const classeStatus =
-        contato.status === "Válido"
+        contato.status ===
+        "Válido"
           ? "valido"
           : "invalido";
 
@@ -943,15 +1222,21 @@ function mostrarPreview() {
       linha.innerHTML = `
 
         <td>
-          ${escaparHTML(contato.nome)}
+          ${escaparHTML(
+            contato.nome
+          )}
         </td>
 
         <td>
-          ${escaparHTML(contato.telefoneOriginal)}
+          ${escaparHTML(
+            contato.telefoneOriginal
+          )}
         </td>
 
         <td>
-          ${escaparHTML(contato.telefone)}
+          ${escaparHTML(
+            contato.telefone
+          )}
         </td>
 
         <td class="${classeStatus}">
@@ -965,7 +1250,8 @@ function mostrarPreview() {
         linha
       );
 
-    });
+    }
+  );
 
 
   document
@@ -978,49 +1264,73 @@ function mostrarPreview() {
 }
 
 
-/* Botão preparar campanha */
+// ===========================================================
+// PREPARAR / ENVIAR CAMPANHA
+// ===========================================================
 
 async function prepararCampanha() {
 
   const nomeCampanha =
     document
-      .getElementById("nomeCampanha")
+      .getElementById(
+        "nomeCampanha"
+      )
       .value
       .trim();
 
+
   if (!nomeCampanha) {
+
     mostrarErro(
       "Digite o nome da campanha."
     );
+
     return;
+
   }
 
+
   if (
-    contatosProcessados.length === 0
+    contatosProcessados.length ===
+    0
   ) {
+
     mostrarErro(
       "Importe uma lista CSV antes de preparar a campanha."
     );
+
     return;
+
   }
+
 
   const contatosValidos =
     contatosProcessados.filter(
       contato =>
-        contato.status === "Válido"
+        contato.status ===
+        "Válido"
     );
 
+
   if (
-    contatosValidos.length === 0
+    contatosValidos.length ===
+    0
   ) {
+
     mostrarErro(
       "A lista não possui contatos válidos."
     );
+
     return;
+
   }
 
+
   const campoTemplate =
-    document.getElementById("template");
+    document.getElementById(
+      "template"
+    );
+
 
   const templateSelecionado =
     campoTemplate &&
@@ -1028,9 +1338,11 @@ async function prepararCampanha() {
       ? campoTemplate.value
       : "teste_local";
 
+
   mostrarSucesso(
     "Preparando campanha em modo de teste..."
   );
+
 
   try {
 
@@ -1038,46 +1350,93 @@ async function prepararCampanha() {
       await fetch(
         "/api/send-campaign",
         {
-          method: "POST",
+          method:
+            "POST",
 
           headers: {
             "Content-Type":
               "application/json"
           },
 
-          body: JSON.stringify({
-            campanha:
-              nomeCampanha,
+          credentials:
+            "same-origin",
 
-            template:
-              templateSelecionado,
+          body:
+            JSON.stringify({
+              campanha:
+                nomeCampanha,
 
-            contatos:
-              contatosValidos
-          })
+              template:
+                templateSelecionado,
+
+              contatos:
+                contatosValidos
+            })
         }
       );
 
+
     const dados =
       await resposta.json();
+
 
     if (
       !resposta.ok ||
       !dados.ok
     ) {
+
       throw new Error(
         dados.erro ||
         "Erro ao preparar campanha"
       );
+
     }
 
-   document
-  .getElementById("campanhaEnviados")
-  .textContent = dados.enviados || 0;
 
-mostrarSucesso(
-  `Campanha "${nomeCampanha}" enviada com sucesso para ${dados.enviados || 0} contato(s).`
-);
+    document
+      .getElementById(
+        "campanhaEnviados"
+      )
+      .textContent =
+        dados.enviados ||
+        0;
+
+
+    /*
+      Guarda o nome da última campanha.
+      Assim o painel consegue recuperar
+      o status depois de Ctrl+F5.
+    */
+
+    localStorage.setItem(
+      "adcredUltimaCampanha",
+      nomeCampanha
+    );
+
+
+    /*
+      Consulta imediatamente os dados
+      gravados no Redis.
+    */
+
+    await atualizarStatusCampanha(
+      nomeCampanha
+    );
+
+
+    /*
+      Continua atualizando os números
+      automaticamente.
+    */
+
+    iniciarAtualizacaoStatus(
+      nomeCampanha
+    );
+
+
+    mostrarSucesso(
+      `Campanha "${nomeCampanha}" enviada com sucesso para ${dados.enviados || 0} contato(s).`
+    );
 
   } catch (erro) {
 
@@ -1086,98 +1445,205 @@ mostrarSucesso(
       erro
     );
 
+
     mostrarErro(
       "Não foi possível comunicar com o servidor: " +
       erro.message
     );
+
   }
 
 }
 
-  // ===========================================================
-// CONSULTAR STATUS DA CAMPANHA
+
+// ===========================================================
+// INICIA ATUALIZAÇÃO AUTOMÁTICA DO STATUS
 // ===========================================================
 
-async function atualizarStatusCampanha(nomeCampanha) {
+function iniciarAtualizacaoStatus(
+  nomeCampanha
+) {
+
+  if (!nomeCampanha) {
+
+    return;
+
+  }
+
+
+  if (
+    intervaloStatusCampanha
+  ) {
+
+    clearInterval(
+      intervaloStatusCampanha
+    );
+
+  }
+
+
+  atualizarStatusCampanha(
+    nomeCampanha
+  );
+
+
+  intervaloStatusCampanha =
+    setInterval(
+      function() {
+
+        atualizarStatusCampanha(
+          nomeCampanha
+        );
+
+      },
+      5000
+    );
+
+}
+
+
+// ===========================================================
+// CONSULTA STATUS DA CAMPANHA NO SERVIDOR
+// ===========================================================
+
+async function atualizarStatusCampanha(
+  nomeCampanha
+) {
+
+  if (!nomeCampanha) {
+
+    return;
+
+  }
+
+
   try {
+
     const resposta =
       await fetch(
         `/api/campaign-status?campanha=${encodeURIComponent(nomeCampanha)}`,
         {
-          method: "GET",
-          credentials: "same-origin"
+          method:
+            "GET",
+
+          credentials:
+            "same-origin"
         }
       );
 
+
     const dados =
       await resposta.json();
+
 
     if (
       !resposta.ok ||
       !dados.ok
     ) {
+
       return;
+
     }
 
-    document
-      .getElementById("campanhaEnviados")
-      .textContent =
-        dados.enviados || 0;
 
     document
-      .getElementById("campanhaEntregues")
+      .getElementById(
+        "campanhaEnviados"
+      )
       .textContent =
-        dados.entregues || 0;
+        dados.enviados ||
+        0;
+
 
     document
-      .getElementById("campanhaRespondidos")
+      .getElementById(
+        "campanhaEntregues"
+      )
       .textContent =
-        dados.respondidos || 0;
+        dados.entregues ||
+        0;
+
 
     document
-      .getElementById("campanhaDescadastrados")
+      .getElementById(
+        "campanhaRespondidos"
+      )
       .textContent =
-        dados.descadastrados || 0;
+        dados.respondidos ||
+        0;
+
+
+    document
+      .getElementById(
+        "campanhaDescadastrados"
+      )
+      .textContent =
+        dados.descadastrados ||
+        0;
 
   } catch (erro) {
+
     console.error(
       "Erro ao consultar status da campanha:",
       erro
     );
+
   }
+
 }
 
-/* Mensagens */
 
-function mostrarSucesso(texto) {
+// ===========================================================
+// MENSAGEM DE SUCESSO
+// ===========================================================
+
+function mostrarSucesso(
+  texto
+) {
 
   const elemento =
     document.getElementById(
       "mensagem"
     );
+
 
   elemento.className =
     "mensagem sucesso";
 
+
   elemento.textContent =
     texto;
+
 }
 
 
-function mostrarErro(texto) {
+// ===========================================================
+// MENSAGEM DE ERRO
+// ===========================================================
+
+function mostrarErro(
+  texto
+) {
 
   const elemento =
     document.getElementById(
       "mensagem"
     );
 
+
   elemento.className =
     "mensagem erro";
 
+
   elemento.textContent =
     texto;
+
 }
 
+
+// ===========================================================
+// ZERA CONTADORES DA ANÁLISE DO CSV
+// ===========================================================
 
 function zerarContadores() {
 
@@ -1185,157 +1651,326 @@ function zerarContadores() {
     .getElementById(
       "totalContatos"
     )
-    .textContent = "0";
+    .textContent =
+      "0";
+
 
   document
     .getElementById(
       "validos"
     )
-    .textContent = "0";
+    .textContent =
+      "0";
+
 
   document
     .getElementById(
       "duplicados"
     )
-    .textContent = "0";
+    .textContent =
+      "0";
+
 
   document
     .getElementById(
       "invalidos"
     )
-    .textContent = "0";
+    .textContent =
+      "0";
+
 }
 
 
-/* Evita que conteúdo do CSV seja interpretado como HTML */
+// ===========================================================
+// EVITA QUE CONTEÚDO DO CSV SEJA INTERPRETADO COMO HTML
+// ===========================================================
 
-function escaparHTML(valor) {
+function escaparHTML(
+  valor
+) {
 
   const div =
     document.createElement(
       "div"
     );
 
+
   div.textContent =
-    valor || "";
+    valor ||
+    "";
+
 
   return div.innerHTML;
+
 }
 
-  /* Proteção do painel */
+
+// ===========================================================
+// LIBERA O PAINEL APÓS LOGIN
+// ===========================================================
 
 function liberarPainel() {
-  document
-    .getElementById("telaLogin")
-    .style.display = "none";
 
   document
-    .getElementById("conteudoPainel")
-    .style.display = "block";
+    .getElementById(
+      "telaLogin"
+    )
+    .style.display =
+      "none";
+
+
+  document
+    .getElementById(
+      "conteudoPainel"
+    )
+    .style.display =
+      "block";
+
 
   carregarTemplates();
-}
- 
 
+
+  /*
+    Recupera a última campanha.
+    Isso permite atualizar a página
+    sem perder os contadores.
+  */
+
+  const ultimaCampanha =
+    localStorage.getItem(
+      "adcredUltimaCampanha"
+    );
+
+
+  if (
+    ultimaCampanha
+  ) {
+
+    const campoNomeCampanha =
+      document.getElementById(
+        "nomeCampanha"
+      );
+
+
+    if (
+      campoNomeCampanha &&
+      !campoNomeCampanha
+        .value
+        .trim()
+    ) {
+
+      campoNomeCampanha.value =
+        ultimaCampanha;
+
+    }
+
+
+    iniciarAtualizacaoStatus(
+      ultimaCampanha
+    );
+
+  }
+
+}
+
+
+// ===========================================================
+// BLOQUEIA O PAINEL
+// ===========================================================
 
 function bloquearPainel() {
-  document
-    .getElementById("telaLogin")
-    .style.display = "flex";
 
   document
-    .getElementById("conteudoPainel")
-    .style.display = "none";
+    .getElementById(
+      "telaLogin"
+    )
+    .style.display =
+      "flex";
+
+
+  document
+    .getElementById(
+      "conteudoPainel"
+    )
+    .style.display =
+      "none";
+
 }
 
 
+// ===========================================================
+// VERIFICA SE JÁ EXISTE LOGIN
+// ===========================================================
+
 async function verificarLoginPainel() {
+
   try {
-    const resposta = await fetch("/api/panel-login", {
-      method: "GET",
-      credentials: "same-origin"
-    });
 
-    const dados = await resposta.json();
+    const resposta =
+      await fetch(
+        "/api/panel-login",
+        {
+          method:
+            "GET",
 
-    if (resposta.ok && dados.autenticado) {
+          credentials:
+            "same-origin"
+        }
+      );
+
+
+    const dados =
+      await resposta.json();
+
+
+    if (
+      resposta.ok &&
+      dados.autenticado
+    ) {
+
       liberarPainel();
+
     } else {
+
       bloquearPainel();
+
     }
 
   } catch (erro) {
+
     bloquearPainel();
+
   }
+
 }
 
 
+// ===========================================================
+// FAZ LOGIN NO PAINEL
+// ===========================================================
+
 async function entrarPainel() {
+
   const campoSenha =
-    document.getElementById("senhaPainel");
+    document.getElementById(
+      "senhaPainel"
+    );
+
 
   const erroLogin =
-    document.getElementById("erroLogin");
+    document.getElementById(
+      "erroLogin"
+    );
+
 
   const senha =
-    campoSenha.value.trim();
+    campoSenha
+      .value
+      .trim();
 
-  erroLogin.style.display = "none";
-  erroLogin.textContent = "";
+
+  erroLogin.style.display =
+    "none";
+
+
+  erroLogin.textContent =
+    "";
+
 
   if (!senha) {
+
     erroLogin.textContent =
       "Digite a senha.";
+
 
     erroLogin.style.display =
       "block";
 
+
     return;
+
   }
 
+
   try {
-    const resposta = await fetch("/api/panel-login", {
-      method: "POST",
 
-      headers: {
-        "Content-Type": "application/json"
-      },
+    const resposta =
+      await fetch(
+        "/api/panel-login",
+        {
+          method:
+            "POST",
 
-      credentials: "same-origin",
+          headers: {
+            "Content-Type":
+              "application/json"
+          },
 
-      body: JSON.stringify({
-        senha: senha
-      })
-    });
+          credentials:
+            "same-origin",
 
-    const dados = await resposta.json();
+          body:
+            JSON.stringify({
+              senha:
+                senha
+            })
+        }
+      );
 
-    if (!resposta.ok || !dados.ok) {
+
+    const dados =
+      await resposta.json();
+
+
+    if (
+      !resposta.ok ||
+      !dados.ok
+    ) {
+
       erroLogin.textContent =
-        dados.erro || "Senha incorreta.";
+        dados.erro ||
+        "Senha incorreta.";
+
 
       erroLogin.style.display =
         "block";
 
-      campoSenha.value = "";
+
+      campoSenha.value =
+        "";
+
+
       campoSenha.focus();
 
+
       return;
+
     }
 
-    campoSenha.value = "";
+
+    campoSenha.value =
+      "";
+
 
     liberarPainel();
 
   } catch (erro) {
+
     erroLogin.textContent =
       "Não foi possível acessar o servidor.";
 
+
     erroLogin.style.display =
       "block";
+
   }
+
 }
 
+
+// ===========================================================
+// INICIA O PAINEL
+// ===========================================================
 
 verificarLoginPainel();
 
