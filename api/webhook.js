@@ -270,26 +270,9 @@ function ehPedidoDescadastro(texto) {
 
   return comandos.has(mensagem);
 }
-  const mensagem =
-    normalizarTextoCampanha(texto);
 
-  const comandos = new Set([
-    "sair",
-    "pare",
-    "parar",
-    "stop",
-    "cancelar",
-    "descadastrar",
-    "descadastro",
-    "nao quero",
-    "nao quero obrigada",
-    "nao quero obrigado",
-    "remover",
-    "remova"
-  ]);
 
-  return comandos.has(mensagem);
-}
+async function registrarRespostaCampanha(
 
 
 async function registrarRespostaCampanha(
