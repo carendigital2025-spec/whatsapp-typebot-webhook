@@ -1,5 +1,6 @@
 import crypto from "crypto";
 
+
 // ===========================================================
 // REDIS
 // ===========================================================
@@ -15,23 +16,24 @@ function getRedisConfig() {
     process.env.KV_REST_API_TOKEN ||
     process.env.UPSTASH_REDIS_REST_TOKEN;
 
-  if (!url || !token) {
-    throw new Error(
-      "Variáveis do Upstash Redis não encontradas."
-    );
-  }
-
   return {
-    url: url.replace(/\/$/, ""),
+    url,
     token
   };
 }
+
 
 async function redisCommand(command) {
   const { url, token } =
     getRedisConfig();
 
-  const response =
+  if (!url || !token) {
+    throw new Error(
+      "Configuração do Redis não encontrada."
+    );
+  }
+
+  const resposta =
     await fetch(url, {
       method: "POST",
 
@@ -47,45 +49,34 @@ async function redisCommand(command) {
         JSON.stringify(command)
     });
 
-  const responseText =
-    await response.text();
+  const dados =
+    await resposta.json();
 
-  if (!response.ok) {
+  if (!resposta.ok) {
     throw new Error(
-      `Erro Redis: ${response.status}`
+      dados?.error ||
+      "Erro ao acessar Redis."
     );
   }
 
-  const data =
-    JSON.parse(responseText);
-
-  if (data?.error) {
-    throw new Error(
-      `Redis: ${data.error}`
-    );
-  }
-
-  return data?.result;
+  return dados.result;
 }
 
 
 // ===========================================================
-// ROTA PRINCIPAL
+// AUTENTICAÇÃO
 // ===========================================================
 
-export default async function handler(req, res) {
-
-  // =========================================================
-  // 1. PROTEÇÃO PELO LOGIN DO PAINEL
-  // =========================================================
-
+function autenticarPainel(req) {
   const cookies =
     req.headers.cookie || "";
 
   const cookieSessao =
     cookies
       .split(";")
-      .map(cookie => cookie.trim())
+      .map(cookie =>
+        cookie.trim()
+      )
       .find(cookie =>
         cookie.startsWith(
           "panel_session="
@@ -96,11 +87,7 @@ export default async function handler(req, res) {
     !cookieSessao ||
     !process.env.PANEL_PASSWORD
   ) {
-    return res.status(401).json({
-      ok: false,
-      erro:
-        "Não autorizado. Faça login no painel."
-    });
+    return false;
   }
 
   const tokenRecebido =
@@ -119,62 +106,78 @@ export default async function handler(req, res) {
       )
       .digest("hex");
 
-  const recebido =
-    Buffer.from(
-      tokenRecebido
-    );
 
-  const esperado =
-    Buffer.from(
-      tokenEsperado
-    );
+  const bufferRecebido =
+    Buffer.from(tokenRecebido);
 
-  const autenticado =
-    recebido.length === esperado.length &&
-    crypto.timingSafeEqual(
-      recebido,
-      esperado
-    );
+  const bufferEsperado =
+    Buffer.from(tokenEsperado);
 
-  if (!autenticado) {
-    return res.status(401).json({
-      ok: false,
-      erro:
-        "Não autorizado. Faça login no painel."
-    });
+
+  if (
+    bufferRecebido.length !==
+    bufferEsperado.length
+  ) {
+    return false;
   }
 
 
-  // =========================================================
-  // 2. SOMENTE GET
-  // =========================================================
+  return crypto.timingSafeEqual(
+    bufferRecebido,
+    bufferEsperado
+  );
+}
+
+
+// ===========================================================
+// HANDLER
+// ===========================================================
+
+export default async function handler(
+  req,
+  res
+) {
+
+  if (!autenticarPainel(req)) {
+    return res
+      .status(401)
+      .json({
+        ok: false,
+        erro:
+          "Não autorizado. Faça login no painel."
+      });
+  }
+
 
   if (req.method !== "GET") {
-    return res.status(405).json({
-      ok: false,
-      erro:
-        "Método não permitido"
-    });
+    return res
+      .status(405)
+      .json({
+        ok: false,
+        erro:
+          "Método não permitido."
+      });
   }
 
 
-  // =========================================================
-  // 3. BUSCA STATUS DA CAMPANHA
-  // =========================================================
-
   try {
+
     const campanha =
       String(
         req.query?.campanha || ""
       ).trim();
 
+
     if (!campanha) {
-      return res.status(400).json({
-        ok: false,
-        erro:
-          "Nome da campanha não informado"
-      });
+      return res
+        .status(400)
+        .json({
+          ok: false,
+          erro:
+            "Informe a campanha."
+        });
     }
+
 
     const registro =
       await redisCommand([
@@ -182,60 +185,104 @@ export default async function handler(req, res) {
         `campanha:status:${campanha}`
       ]);
 
+
     if (!registro) {
-      return res.status(200).json({
-        ok: true,
-        campanha,
-        enviados: 0,
-        entregues: 0,
-        respondidos: 0,
-        descadastrados: 0
-      });
+      return res
+        .status(404)
+        .json({
+          ok: false,
+          erro:
+            "Campanha não encontrada."
+        });
     }
 
-    const statusCampanha =
-      JSON.parse(registro);
 
-    return res.status(200).json({
-      ok: true,
+    let status;
 
-      campanha,
+    try {
+      status =
+        JSON.parse(registro);
+    } catch {
+      return res
+        .status(500)
+        .json({
+          ok: false,
+          erro:
+            "Status da campanha inválido."
+        });
+    }
 
-      enviados:
-        Number(
-          statusCampanha.enviados || 0
-        ),
 
-      entregues:
-        Number(
-          statusCampanha.entregues || 0
-        ),
+    return res
+      .status(200)
+      .json({
+        ok: true,
 
-      respondidos:
-        Number(
-          statusCampanha.respondidos || 0
-        ),
+        campanha,
 
-      descadastrados:
-        Number(
-          statusCampanha.descadastrados || 0
-        ),
+        template:
+          status.template || "",
 
-      atualizadoEm:
-        statusCampanha.atualizadoEm ||
-        null
-    });
+        total:
+          Number(
+            status.total || 0
+          ),
 
-  } catch (error) {
+        enviados:
+          Number(
+            status.enviados || 0
+          ),
+
+        entregues:
+          Number(
+            status.entregues || 0
+          ),
+
+        respondidos:
+          Number(
+            status.respondidos || 0
+          ),
+
+        descadastrados:
+          Number(
+            status.descadastrados || 0
+          ),
+
+        falhas:
+          Number(
+            status.falhas || 0
+          ),
+
+        ignorados:
+          Number(
+            status.ignorados || 0
+          ),
+
+        criadoEm:
+          status.criadoEm || null,
+
+        finalizadoEm:
+          status.finalizadoEm || null,
+
+        atualizadoEm:
+          status.atualizadoEm || null
+      });
+
+
+  } catch (erro) {
+
     console.error(
-      "Erro em campaign-status:",
-      error
+      "Erro campaign-status:",
+      erro
     );
 
-    return res.status(500).json({
-      ok: false,
-      erro:
-        "Erro interno ao consultar status da campanha"
-    });
+    return res
+      .status(500)
+      .json({
+        ok: false,
+        erro:
+          erro?.message ||
+          "Erro interno."
+      });
   }
 }
