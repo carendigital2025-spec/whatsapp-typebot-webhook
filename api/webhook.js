@@ -275,15 +275,72 @@ async function registrarRespostaCampanha(
   };
 
   try {
+
+    // =======================================================
+    // DIAGNÓSTICO DO TELEFONE RECEBIDO
+    // =======================================================
+
+    const telefoneRecebido =
+      String(
+        telefone ||
+        ""
+      ).trim();
+
+    const telefoneSomenteNumeros =
+      telefoneRecebido.replace(
+        /\D/g,
+        ""
+      );
+
+    console.log(
+      "CAMPANHA - telefone recebido:",
+      telefoneRecebido
+    );
+
+    console.log(
+      "CAMPANHA - telefone normalizado:",
+      telefoneSomenteNumeros
+    );
+
+    console.log(
+      "CAMPANHA - chave procurada:",
+      `campanha:telefone:${telefoneSomenteNumeros}`
+    );
+
+
+    // =======================================================
+    // PROCURA O VÍNCULO TELEFONE -> CAMPANHA
+    // =======================================================
+
     const registroVinculo =
       await redisCommand([
         "GET",
-        `campanha:telefone:${telefone}`
+        `campanha:telefone:${telefoneSomenteNumeros}`
       ]);
 
+
+    console.log(
+      "CAMPANHA - vínculo encontrado:",
+      registroVinculo
+        ? "SIM"
+        : "NÃO"
+    );
+
+
     if (!registroVinculo) {
+
+      console.log(
+        "CAMPANHA - nenhuma campanha encontrada para:",
+        telefoneSomenteNumeros
+      );
+
       return retorno;
     }
+
+
+    // =======================================================
+    // LÊ OS DADOS DO VÍNCULO
+    // =======================================================
 
     let vinculo;
 
@@ -292,9 +349,17 @@ async function registrarRespostaCampanha(
         JSON.parse(
           registroVinculo
         );
-    } catch {
+
+    } catch (erroParseVinculo) {
+
+      console.error(
+        "CAMPANHA - erro ao interpretar vínculo:",
+        erroParseVinculo
+      );
+
       return retorno;
     }
+
 
     const campanha =
       String(
@@ -302,14 +367,40 @@ async function registrarRespostaCampanha(
         ""
       ).trim();
 
+
+    console.log(
+      "CAMPANHA - campanha encontrada:",
+      campanha ||
+      "SEM NOME"
+    );
+
+
     if (!campanha) {
+
+      console.log(
+        "CAMPANHA - vínculo existe, mas não possui nome de campanha."
+      );
+
       return retorno;
     }
 
+
     retorno.vinculado = true;
+
+
+    // =======================================================
+    // BUSCA O STATUS ATUAL DA CAMPANHA
+    // =======================================================
 
     const chaveCampanha =
       `campanha:status:${campanha}`;
+
+
+    console.log(
+      "CAMPANHA - chave de status:",
+      chaveCampanha
+    );
+
 
     const registroCampanha =
       await redisCommand([
@@ -317,9 +408,25 @@ async function registrarRespostaCampanha(
         chaveCampanha
       ]);
 
+
+    console.log(
+      "CAMPANHA - status encontrado:",
+      registroCampanha
+        ? "SIM"
+        : "NÃO"
+    );
+
+
     if (!registroCampanha) {
+
+      console.log(
+        "CAMPANHA - status da campanha não encontrado:",
+        campanha
+      );
+
       return retorno;
     }
+
 
     let statusCampanha;
 
@@ -328,75 +435,182 @@ async function registrarRespostaCampanha(
         JSON.parse(
           registroCampanha
         );
-    } catch {
+
+    } catch (erroParseStatus) {
+
+      console.error(
+        "CAMPANHA - erro ao interpretar status:",
+        erroParseStatus
+      );
+
       return retorno;
     }
 
-    let alterouStatus = false;
+
+    let alterouStatus =
+      false;
+
+
+    // =======================================================
+    // REGISTRA A PRIMEIRA RESPOSTA DO CONTATO
+    // =======================================================
+
+    const chaveRespondido =
+      `campanha:respondido:${campanha}:${telefoneSomenteNumeros}`;
+
+
+    console.log(
+      "CAMPANHA - verificando primeira resposta:",
+      chaveRespondido
+    );
+
 
     const primeiraResposta =
       await redisCommand([
         "SET",
-        `campanha:respondido:${campanha}:${telefone}`,
+        chaveRespondido,
         "1",
         "NX"
       ]);
+
+
+    console.log(
+      "CAMPANHA - resultado SET NX respondido:",
+      primeiraResposta
+    );
+
 
     if (
       primeiraResposta ===
       "OK"
     ) {
+
       statusCampanha.respondidos =
         Number(
           statusCampanha.respondidos ||
           0
         ) + 1;
 
-      retorno.respondido = true;
-      alterouStatus = true;
+
+      retorno.respondido =
+        true;
+
+
+      alterouStatus =
+        true;
+
+
+      console.log(
+        "CAMPANHA - resposta contabilizada. Total:",
+        statusCampanha.respondidos
+      );
+
+    } else {
+
+      console.log(
+        "CAMPANHA - contato já havia sido contabilizado como respondido."
+      );
     }
 
+
+    // =======================================================
+    // VERIFICA PEDIDO DE DESCADASTRO
+    // =======================================================
+
     const pediuDescadastro =
-      ehPedidoDescadastro(texto);
+      ehPedidoDescadastro(
+        texto
+      );
+
+
+    console.log(
+      "CAMPANHA - pedido de descadastro:",
+      pediuDescadastro
+        ? "SIM"
+        : "NÃO"
+    );
+
 
     if (pediuDescadastro) {
+
+      const chaveDescadastro =
+        `campanha:descadastrado:${campanha}:${telefoneSomenteNumeros}`;
+
+
       const primeiroDescadastro =
         await redisCommand([
           "SET",
-          `campanha:descadastrado:${campanha}:${telefone}`,
+          chaveDescadastro,
           "1",
           "NX"
         ]);
+
+
+      console.log(
+        "CAMPANHA - resultado SET NX descadastro:",
+        primeiroDescadastro
+      );
+
 
       if (
         primeiroDescadastro ===
         "OK"
       ) {
+
         statusCampanha.descadastrados =
           Number(
             statusCampanha.descadastrados ||
             0
           ) + 1;
 
-        alterouStatus = true;
+
+        alterouStatus =
+          true;
+
+
+        console.log(
+          "CAMPANHA - descadastro contabilizado. Total:",
+          statusCampanha.descadastrados
+        );
       }
 
-      retorno.descadastrado = true;
 
-      vinculo.descadastrado = true;
+      retorno.descadastrado =
+        true;
+
+
+      vinculo.descadastrado =
+        true;
+
+
       vinculo.descadastradoEm =
         new Date().toISOString();
 
+
       await redisCommand([
         "SET",
-        `campanha:telefone:${telefone}`,
-        JSON.stringify(vinculo)
+        `campanha:telefone:${telefoneSomenteNumeros}`,
+        JSON.stringify(
+          vinculo
+        )
       ]);
+
+
+      console.log(
+        "CAMPANHA - vínculo atualizado como descadastrado."
+      );
     }
 
+
+    // =======================================================
+    // SALVA OS NOVOS CONTADORES
+    // =======================================================
+
     if (alterouStatus) {
+
       statusCampanha.atualizadoEm =
         new Date().toISOString();
+
 
       await redisCommand([
         "SET",
@@ -405,15 +619,53 @@ async function registrarRespostaCampanha(
           statusCampanha
         )
       ]);
+
+
+      console.log(
+        "CAMPANHA - status atualizado:",
+        JSON.stringify({
+          campanha,
+          enviados:
+            Number(
+              statusCampanha.enviados ||
+              0
+            ),
+          entregues:
+            Number(
+              statusCampanha.entregues ||
+              0
+            ),
+          respondidos:
+            Number(
+              statusCampanha.respondidos ||
+              0
+            ),
+          descadastrados:
+            Number(
+              statusCampanha.descadastrados ||
+              0
+            )
+        })
+      );
+
+    } else {
+
+      console.log(
+        "CAMPANHA - nenhum contador precisou ser alterado."
+      );
     }
+
 
     return retorno;
 
+
   } catch (erro) {
+
     console.error(
-      "Erro ao registrar resposta da campanha:",
+      "CAMPANHA - erro ao registrar resposta:",
       erro
     );
+
 
     return retorno;
   }
