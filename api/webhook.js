@@ -272,7 +272,6 @@ function ehPedidoDescadastro(texto) {
 }
 
 
-async function registrarRespostaCampanha(
 
 
 async function registrarRespostaCampanha(
