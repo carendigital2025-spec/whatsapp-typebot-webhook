@@ -316,110 +316,6 @@ th {
 }
 
 
-/* ========================================================= */
-/* CONFIRMAÇÃO DE CAMPANHA */
-/* ========================================================= */
-
-.modal-confirmacao {
-  display: none;
-
-  position: fixed;
-
-  inset: 0;
-
-  z-index: 9999;
-
-  background:
-    rgba(17, 24, 39, 0.72);
-
-  align-items: center;
-
-  justify-content: center;
-
-  padding: 20px;
-}
-
-
-.modal-confirmacao.ativo {
-  display: flex;
-}
-
-
-.modal-conteudo {
-  width: 100%;
-
-  max-width: 520px;
-
-  background: white;
-
-  border-radius: 14px;
-
-  padding: 28px;
-
-  box-shadow:
-    0 20px 60px
-    rgba(0, 0, 0, 0.25);
-}
-
-
-.modal-conteudo h2 {
-  margin-bottom: 8px;
-}
-
-
-.modal-alerta {
-  background: #fef3c7;
-
-  color: #92400e;
-
-  padding: 14px;
-
-  border-radius: 8px;
-
-  margin: 18px 0;
-}
-
-
-.resumo-confirmacao {
-  background: #f4f6f8;
-
-  border-radius: 9px;
-
-  padding: 16px;
-
-  margin-top: 18px;
-}
-
-
-.resumo-confirmacao p {
-  margin:
-    7px 0;
-}
-
-
-.acoes-confirmacao {
-  display: flex;
-
-  justify-content: flex-end;
-
-  gap: 10px;
-
-  margin-top: 22px;
-}
-
-
-.botao-cancelar {
-  background: #e5e7eb;
-
-  color: #111827;
-}
-
-
-.botao-confirmar {
-  background: #166534;
-}
-
-
 @media (
   max-width: 900px
 ) {
@@ -450,782 +346,83 @@ th {
   .acoes-historico button {
     margin-top: 10px;
   }
-
-
-  .acoes-confirmacao {
-    display: block;
-  }
-
-
-  .acoes-confirmacao button {
-    width: 100%;
-
-    margin-top: 8px;
-  }
-}
-
-</style>
-
-</head>
-
-
-<body>
-
-
-<!-- ===================================================== -->
-<!-- LOGIN -->
-<!-- ===================================================== -->
-
-<div
-  id="telaLogin"
-  style="
-    min-height:100vh;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    padding:20px;
-  "
->
-
-  <div
-    style="
-      width:100%;
-      max-width:380px;
-      background:white;
-      padding:30px;
-      border-radius:14px;
-      box-shadow:0 8px 30px rgba(0,0,0,0.08);
-    "
-  >
-
-    <h2>
-      ADCred
-    </h2>
-
-    <p>
-      Digite a senha para acessar o painel.
-    </p>
-
-
-    <input
-      id="senhaPainel"
-      type="password"
-      placeholder="Senha"
-    >
-
-
-    <button
-      onclick="entrarPainel()"
-      style="width:100%;"
-    >
-      Entrar
-    </button>
-
-
-    <div
-      id="erroLogin"
-      style="
-        margin-top:12px;
-        color:#b00020;
-        display:none;
-      "
-    ></div>
-
-  </div>
-
-</div>
-
-
-<!-- ===================================================== -->
-<!-- PAINEL -->
-<!-- ===================================================== -->
-
-<div
-  id="conteudoPainel"
-  style="display:none;"
->
-
-
-<div class="topo">
-
-  <h1>
-    ADCred
-  </h1>
-
-  <p>
-    Painel de Campanhas
-  </p>
-
-  <a
-    href="/conversas.html"
-    class="link-conversas"
-  >
-    Conversas
-  </a>
-
-  <a
-    href="/base.html"
-    class="link-conversas"
-    style="
-      margin-left:8px;
-      background:#d7aa4b;
-      color:#071426;
-    "
-  >
-    Minha Base
-  </a>
-
-</div>
-
-
-<div class="container">
-
-
-<!-- ===================================================== -->
-<!-- NOVA CAMPANHA -->
-<!-- ===================================================== -->
-
-<div class="card">
-
-  <h2>
-    Nova campanha
-  </h2>
-
-
-  <label>
-    Nome da campanha
-  </label>
-
-  <input
-    id="nomeCampanha"
-    type="text"
-    placeholder="Ex.: FGTS Setembro 01"
-  >
-
-
-  <label>
-    Importar lista de contatos CSV
-  </label>
-
-  <input
-    id="arquivoCSV"
-    type="file"
-    accept=".csv,text/csv"
-  >
-
-
-  <label>
-    Template do WhatsApp
-  </label>
-
-  <select id="template">
-
-    <option value="">
-      Selecione um template
-    </option>
-
-  </select>
-
-
-  <button
-    id="botaoCampanha"
-    type="button"
-    onclick="prepararCampanha()"
-  >
-    Preparar campanha
-  </button>
-
-
-  <div
-    id="mensagem"
-    class="mensagem"
-  ></div>
-
-</div>
-
-
-<!-- ===================================================== -->
-<!-- ANÁLISE DA LISTA -->
-<!-- ===================================================== -->
-
-<div class="card">
-
-  <h2>
-    Análise da lista
-  </h2>
-
-
-  <div class="status">
-
-    <div class="numero">
-
-      <strong id="totalContatos">
-        0
-      </strong>
-
-      Total
-
-    </div>
-
-
-    <div class="numero">
-
-      <strong id="validos">
-        0
-      </strong>
-
-      Válidos
-
-    </div>
-
-
-    <div class="numero">
-
-      <strong id="duplicados">
-        0
-      </strong>
-
-      Duplicados
-
-    </div>
-
-
-    <div class="numero">
-
-      <strong id="invalidos">
-        0
-      </strong>
-
-      Inválidos
-
-    </div>
-
-  </div>
-
-</div>
-
-
-<!-- ===================================================== -->
-<!-- PRÉVIA -->
-<!-- ===================================================== -->
-
-<div
-  id="previewCard"
-  class="card"
-  style="display:none;"
->
-
-  <h2>
-    Prévia dos contatos
-  </h2>
-
-  <p class="subtitulo">
-    Mostrando os primeiros 20 registros.
-  </p>
-
-
-  <div class="tabela-container">
-
-    <table>
-
-      <thead>
-
-        <tr>
-
-          <th>
-            Nome
-          </th>
-
-          <th>
-            Telefone original
-          </th>
-
-          <th>
-            Telefone tratado
-          </th>
-
-          <th>
-            Status
-          </th>
-
-        </tr>
-
-      </thead>
-
-
-      <tbody
-        id="previewTabela"
-      >
-      </tbody>
-
-    </table>
-
-  </div>
-
-</div>
-<!DOCTYPE html>
-<html lang="pt-BR">
-
-<head>
-
-<meta charset="UTF-8">
-
-<meta
-  name="viewport"
-  content="width=device-width, initial-scale=1.0"
->
-
-<title>
-  ADCred - Painel de Campanhas
-</title>
-
-
-<style>
-
-* {
-  box-sizing: border-box;
 }
 
 
-body {
-  font-family: Arial, sans-serif;
-  background: #f4f6f8;
-  margin: 0;
-  color: #111827;
+/* ===========================================================
+   CONFIRMAÇÃO DE CAMPANHA
+   =========================================================== */
+
+.modal-confirmacao {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(17, 24, 39, 0.65);
+  padding: 20px;
+  align-items: center;
+  justify-content: center;
 }
 
-
-.topo {
-  background: #111827;
-  color: white;
-  padding: 22px;
-  text-align: center;
+.modal-confirmacao.ativo {
+  display: flex;
 }
 
-
-.topo h1 {
-  margin: 0;
+.modal-confirmacao-conteudo {
+  width: 100%;
+  max-width: 520px;
+  background: white;
+  border-radius: 14px;
+  padding: 28px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
 }
 
-
-.topo p {
+.modal-confirmacao-conteudo h2 {
   margin-bottom: 10px;
 }
 
-
-.link-conversas {
-  display: inline-block;
-  margin-top: 8px;
-  padding: 10px 18px;
-  background: white;
-  color: #111827;
-  text-decoration: none;
-  border-radius: 8px;
-  font-weight: bold;
-}
-
-
-.container {
-  max-width: 1150px;
-  margin: 30px auto;
-  padding: 20px;
-}
-
-
-.card {
-  background: white;
-  border-radius: 12px;
-  padding: 25px;
-  margin-bottom: 20px;
-
-  box-shadow:
-    0 2px 8px
-    rgba(0, 0, 0, 0.08);
-}
-
-
-h2 {
-  margin-top: 0;
-}
-
-
-label {
-  display: block;
-  margin-top: 10px;
-  font-weight: bold;
-}
-
-
-input,
-select {
-  width: 100%;
-  padding: 12px;
-
-  margin-top: 8px;
-  margin-bottom: 18px;
-
-  border:
-    1px solid #d1d5db;
-
-  border-radius: 7px;
-}
-
-
-button {
-  background: #111827;
-  color: white;
-
-  border: none;
-
-  padding: 13px 20px;
-
-  border-radius: 8px;
-
-  cursor: pointer;
-
-  font-size: 15px;
-  font-weight: bold;
-}
-
-
-button:hover {
-  opacity: 0.9;
-}
-
-
-button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-
-.status {
-  display: grid;
-
-  grid-template-columns:
-    repeat(4, 1fr);
-
-  gap: 12px;
-}
-
-
-.status-detalhado {
-  display: grid;
-
-  grid-template-columns:
-    repeat(6, 1fr);
-
-  gap: 12px;
-}
-
-
-.numero {
+.resumo-confirmacao {
   background: #f4f6f8;
-
-  padding: 18px 10px;
-
-  border-radius: 8px;
-
-  text-align: center;
-}
-
-
-.numero strong {
-  display: block;
-
-  font-size: 25px;
-
-  margin-bottom: 5px;
-}
-
-
-.mensagem {
-  display: none;
-
-  padding: 15px;
-
-  margin-top: 15px;
-
-  border-radius: 8px;
-}
-
-
-.sucesso {
-  display: block;
-
-  background: #dcfce7;
-
-  color: #166534;
-}
-
-
-.erro {
-  display: block;
-
-  background: #fee2e2;
-
-  color: #991b1b;
-}
-
-
-.aviso {
-  display: block;
-
-  background: #fef3c7;
-
-  color: #92400e;
-}
-
-
-.tabela-container {
-  width: 100%;
-
-  overflow-x: auto;
-
-  margin-top: 18px;
-}
-
-
-table {
-  width: 100%;
-
-  border-collapse:
-    collapse;
-}
-
-
-th,
-td {
-  padding: 11px;
-
-  text-align: left;
-
-  border-bottom:
-    1px solid #e5e7eb;
-
-  white-space: nowrap;
-}
-
-
-th {
-  background: #f9fafb;
-}
-
-
-.valido {
-  color: green;
-
-  font-weight: bold;
-}
-
-
-.invalido {
-  color: #b91c1c;
-
-  font-weight: bold;
-}
-
-
-.selecionar-campanha {
-  background: #374151;
-
-  padding: 8px 12px;
-
-  font-size: 13px;
-}
-
-
-.subtitulo {
-  color: #6b7280;
-
-  margin-top: -7px;
-}
-
-
-.campanha-atual {
-  margin-bottom: 15px;
-
-  font-weight: bold;
-
-  color: #374151;
-}
-
-
-.sem-registros {
-  padding: 20px;
-
-  text-align: center;
-
-  color: #6b7280;
-}
-
-
-.acoes-historico {
-  display: flex;
-
-  justify-content:
-    space-between;
-
-  align-items: center;
-
-  gap: 15px;
-
-  margin-bottom: 15px;
-}
-
-
-.data-campanha {
-  font-size: 13px;
-
-  color: #6b7280;
-}
-
-
-/* ========================================================= */
-/* CONFIRMAÇÃO DE CAMPANHA */
-/* ========================================================= */
-
-.modal-confirmacao {
-  display: none;
-
-  position: fixed;
-
-  inset: 0;
-
-  z-index: 9999;
-
-  background:
-    rgba(17, 24, 39, 0.72);
-
-  align-items: center;
-
-  justify-content: center;
-
-  padding: 20px;
-}
-
-
-.modal-confirmacao.ativo {
-  display: flex;
-}
-
-
-.modal-conteudo {
-  width: 100%;
-
-  max-width: 520px;
-
-  background: white;
-
-  border-radius: 14px;
-
-  padding: 28px;
-
-  box-shadow:
-    0 20px 60px
-    rgba(0, 0, 0, 0.25);
-}
-
-
-.modal-conteudo h2 {
-  margin-bottom: 8px;
-}
-
-
-.modal-alerta {
-  background: #fef3c7;
-
-  color: #92400e;
-
-  padding: 14px;
-
-  border-radius: 8px;
-
+  border-radius: 10px;
+  padding: 16px;
   margin: 18px 0;
 }
 
-
-.resumo-confirmacao {
-  background: #f4f6f8;
-
-  border-radius: 9px;
-
-  padding: 16px;
-
-  margin-top: 18px;
-}
-
-
 .resumo-confirmacao p {
-  margin:
-    7px 0;
+  margin: 8px 0;
 }
 
+.aviso-confirmacao {
+  background: #fef3c7;
+  color: #92400e;
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 18px;
+  font-weight: bold;
+}
 
 .acoes-confirmacao {
   display: flex;
-
-  justify-content: flex-end;
-
   gap: 10px;
-
-  margin-top: 22px;
+  justify-content: flex-end;
 }
-
 
 .botao-cancelar {
   background: #e5e7eb;
-
   color: #111827;
 }
 
-
-.botao-confirmar {
-  background: #166534;
+.botao-confirmar-envio {
+  background: #b91c1c;
 }
 
-
-@media (
-  max-width: 900px
-) {
-
-  .status-detalhado {
-    grid-template-columns:
-      repeat(3, 1fr);
-  }
-}
-
-
-@media (
-  max-width: 700px
-) {
-
-  .status,
-  .status-detalhado {
-    grid-template-columns:
-      repeat(2, 1fr);
-  }
-
-
-  .acoes-historico {
-    display: block;
-  }
-
-
-  .acoes-historico button {
-    margin-top: 10px;
-  }
-
-
+@media (max-width: 600px) {
   .acoes-confirmacao {
-    display: block;
+    flex-direction: column;
   }
-
 
   .acoes-confirmacao button {
     width: 100%;
-
-    margin-top: 8px;
   }
 }
 
@@ -1528,9 +725,981 @@ th {
   </div>
 
 </div>
+
+
+<!-- ===================================================== -->
+<!-- STATUS DA CAMPANHA -->
+<!-- ===================================================== -->
+
+<div class="card">
+
+  <h2>
+    Status da campanha
+  </h2>
+
+
+  <div
+    id="nomeCampanhaAtual"
+    class="campanha-atual"
+  >
+    Nenhuma campanha selecionada
+  </div>
+
+
+  <div class="status-detalhado">
+
+    <div class="numero">
+
+      <strong
+        id="campanhaEnviados"
+      >
+        0
+      </strong>
+
+      Enviados
+
+    </div>
+
+
+    <div class="numero">
+
+      <strong
+        id="campanhaEntregues"
+      >
+        0
+      </strong>
+
+      Entregues
+
+    </div>
+
+
+    <div class="numero">
+
+      <strong
+        id="campanhaRespondidos"
+      >
+        0
+      </strong>
+
+      Respondidos
+
+    </div>
+
+
+    <div class="numero">
+
+      <strong
+        id="campanhaDescadastrados"
+      >
+        0
+      </strong>
+
+      Descadastrados
+
+    </div>
+
+
+    <div class="numero">
+
+      <strong
+        id="campanhaFalhas"
+      >
+        0
+      </strong>
+
+      Falhas
+
+    </div>
+
+
+    <div class="numero">
+
+      <strong
+        id="campanhaIgnorados"
+      >
+        0
+      </strong>
+
+      Ignorados
+
+    </div>
+
+  </div>
+
+
+  <p
+    id="ultimaAtualizacao"
+    class="data-campanha"
+    style="margin-top:15px;"
+  >
+  </p>
+
+</div>
+
+
+<!-- ===================================================== -->
+<!-- HISTÓRICO -->
+<!-- ===================================================== -->
+
+<div class="card">
+
+  <div class="acoes-historico">
+
+    <div>
+
+      <h2
+        style="margin-bottom:5px;"
+      >
+        Histórico de campanhas
+      </h2>
+
+      <div class="subtitulo">
+        Consulte campanhas enviadas anteriormente.
+      </div>
+
+    </div>
+
+
+    <button
+      type="button"
+      onclick="carregarHistorico()"
+    >
+      Atualizar histórico
+    </button>
+
+  </div>
+
+
+  <div class="tabela-container">
+
+    <table>
+
+      <thead>
+
+        <tr>
+
+          <th>
+            Campanha
+          </th>
+
+          <th>
+            Enviados
+          </th>
+
+          <th>
+            Entregues
+          </th>
+
+          <th>
+            Respondidos
+          </th>
+
+          <th>
+            Descadastrados
+          </th>
+
+          <th>
+            Falhas
+          </th>
+
+          <th>
+            Ignorados
+          </th>
+
+          <th>
+            Atualização
+          </th>
+
+          <th>
+            Abrir
+          </th>
+
+        </tr>
+
+      </thead>
+
+
+      <tbody
+        id="historicoTabela"
+      >
+
+        <tr>
+
+          <td
+            colspan="9"
+            class="sem-registros"
+          >
+            Carregando histórico...
+          </td>
+
+        </tr>
+
+      </tbody>
+
+    </table>
+
+  </div>
+
+</div>
+
+
+</div>
+
+</div>
+
+
+
+<!-- ===================================================== -->
+<!-- CONFIRMAÇÃO DE ENVIO -->
+<!-- ===================================================== -->
+
+<div
+  id="modalConfirmacaoCampanha"
+  class="modal-confirmacao"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="tituloConfirmacaoCampanha"
+>
+  <div class="modal-confirmacao-conteudo">
+
+    <h2 id="tituloConfirmacaoCampanha">
+      Confirmar envio da campanha
+    </h2>
+
+    <p>
+      Confira os dados antes de autorizar o disparo.
+    </p>
+
+    <div class="resumo-confirmacao">
+
+      <p>
+        <strong>Campanha:</strong>
+        <span id="confirmacaoNomeCampanha">-</span>
+      </p>
+
+      <p>
+        <strong>Template:</strong>
+        <span id="confirmacaoTemplate">-</span>
+      </p>
+
+      <p>
+        <strong>Contatos válidos:</strong>
+        <span id="confirmacaoQuantidade">0</span>
+      </p>
+
+    </div>
+
+    <div class="aviso-confirmacao">
+      Nenhuma mensagem foi enviada ainda. O envio só começará após clicar em “Confirmar e enviar”.
+    </div>
+
+    <div class="acoes-confirmacao">
+
+      <button
+        id="botaoCancelarEnvio"
+                type="button"
+        class="botao-cancelar"
+        onclick="cancelarEnvioCampanha()"
+      >
+        Cancelar
+      </button>
+
+      <button
+        id="botaoConfirmarEnvio"
+        type="button"
+        class="botao-confirmar-envio"
+        onclick="confirmarEnvioCampanha()"
+      >
+        Confirmar e enviar
+      </button>
+
+    </div>
+
+  </div>
+</div>
+
+<script>
+
 // ===========================================================
-// PREPARAR CAMPANHA
+// VARIÁVEIS
 // ===========================================================
+
+let contatosProcessados = [];
+
+let campanhaSelecionada =
+  localStorage.getItem(
+    "adcredUltimaCampanha"
+  ) || "";
+
+let intervaloStatus = null;
+
+let intervaloHistorico = null;
+
+
+// ===========================================================
+// TEMPLATES
+// ===========================================================
+
+async function carregarTemplates() {
+
+  const campo =
+    document.getElementById(
+      "template"
+    );
+
+
+  campo.disabled =
+    true;
+
+
+  campo.innerHTML =
+    `<option value="">
+       Carregando templates...
+     </option>`;
+
+
+  try {
+
+    const resposta =
+      await fetch(
+        "/api/templates",
+        {
+          method: "GET",
+          credentials:
+            "same-origin"
+        }
+      );
+
+
+    const dados =
+      await resposta.json();
+
+
+    if (
+      !resposta.ok ||
+      !dados.ok
+    ) {
+      throw new Error(
+        dados.erro ||
+        "Erro ao carregar templates."
+      );
+    }
+
+
+    const templates =
+      Array.isArray(
+        dados.templates
+      )
+        ? dados.templates
+        : [];
+
+
+    const aprovados =
+      templates.filter(
+        item =>
+          String(
+            item.status || ""
+          ).toUpperCase() ===
+          "APPROVED"
+      );
+
+
+    campo.innerHTML =
+      `<option value="">
+         Selecione um template
+       </option>`;
+
+
+    aprovados.forEach(
+      item => {
+
+        const opcao =
+          document.createElement(
+            "option"
+          );
+
+
+        opcao.value =
+          item.nome;
+
+
+        opcao.textContent =
+          `${item.nome} — ${item.categoria || ""} — ${item.idioma || ""}`;
+
+
+        campo.appendChild(
+          opcao
+        );
+      }
+    );
+
+
+  } catch (erro) {
+
+    console.error(
+      erro
+    );
+
+
+    campo.innerHTML =
+      `<option value="">
+         Erro ao carregar templates
+       </option>`;
+
+  } finally {
+
+    campo.disabled =
+      false;
+  }
+}
+
+
+// ===========================================================
+// CSV
+// ===========================================================
+
+function detectarSeparador(linha) {
+
+  const pv =
+    (
+      linha.match(/;/g) ||
+      []
+    ).length;
+
+
+  const virgula =
+    (
+      linha.match(/,/g) ||
+      []
+    ).length;
+
+
+  const tab =
+    (
+      linha.match(/\t/g) ||
+      []
+    ).length;
+
+
+  if (
+    pv >= virgula &&
+    pv >= tab
+  ) {
+    return ";";
+  }
+
+
+  if (
+    tab >= virgula &&
+    tab >= pv
+  ) {
+    return "\t";
+  }
+
+
+  return ",";
+}
+
+
+function limparCampo(valor) {
+
+  return String(
+    valor || ""
+  )
+    .trim()
+    .replace(
+      /^"(.*)"$/,
+      "$1"
+    )
+    .trim();
+}
+
+
+function localizarColunaTelefone(
+  cabecalhos
+) {
+
+  const nomes = [
+    "telefone",
+    "celular",
+    "whatsapp",
+    "fone",
+    "phone",
+    "numero",
+    "número",
+    "telefone1",
+    "celular1"
+  ];
+
+
+  return cabecalhos
+    .findIndex(
+      cabecalho => {
+
+        const valor =
+          cabecalho
+            .toLowerCase()
+            .trim();
+
+
+        return nomes.some(
+          nome =>
+            valor.includes(
+              nome
+            )
+        );
+      }
+    );
+}
+
+
+function localizarColunaNome(
+  cabecalhos
+) {
+
+  const nomes = [
+    "nome",
+    "cliente",
+    "name"
+  ];
+
+
+  return cabecalhos
+    .findIndex(
+      cabecalho => {
+
+        const valor =
+          cabecalho
+            .toLowerCase()
+            .trim();
+
+
+        return nomes.includes(
+          valor
+        );
+      }
+    );
+}
+
+
+function normalizarTelefone(
+  telefone
+) {
+
+  let numero =
+    String(
+      telefone || ""
+    )
+      .replace(
+        /\D/g,
+        ""
+      );
+
+
+  numero =
+    numero.replace(
+      /^0+/,
+      ""
+    );
+
+
+  if (
+    numero.length === 10 ||
+    numero.length === 11
+  ) {
+    numero =
+      "55" + numero;
+  }
+
+
+  return numero;
+}
+
+
+function telefoneValido(
+  numero
+) {
+
+  if (
+    numero.length !== 12 &&
+    numero.length !== 13
+  ) {
+    return false;
+  }
+
+
+  if (
+    !numero.startsWith(
+      "55"
+    )
+  ) {
+    return false;
+  }
+
+
+  const ddd =
+    parseInt(
+      numero.substring(
+        2,
+        4
+      )
+    );
+
+
+  if (
+    !ddd ||
+    ddd < 11 ||
+    ddd > 99
+  ) {
+    return false;
+  }
+
+
+  return true;
+}
+
+
+// ===========================================================
+// IMPORTAÇÃO
+// ===========================================================
+
+document
+  .getElementById(
+    "arquivoCSV"
+  )
+  .addEventListener(
+    "change",
+    function(event) {
+
+      const arquivo =
+        event.target
+          .files?.[0];
+
+
+      if (!arquivo) {
+        return;
+      }
+
+
+      const leitor =
+        new FileReader();
+
+
+      leitor.onload =
+        function(e) {
+
+          processarCSV(
+            e.target.result
+          );
+        };
+
+
+      leitor.readAsText(
+        arquivo,
+        "UTF-8"
+      );
+    }
+  );
+
+
+// ===========================================================
+// PROCESSAMENTO CSV
+// ===========================================================
+
+function processarCSV(texto) {
+
+  const linhas =
+    String(texto || "")
+      .replace(/\r/g, "")
+      .split("\n")
+      .filter(
+        linha =>
+          linha.trim() !== ""
+      );
+
+
+  if (
+    linhas.length < 2
+  ) {
+
+    mostrarErro(
+      "O CSV está vazio ou não possui contatos."
+    );
+
+    zerarContadores();
+
+    return;
+  }
+
+
+  const separador =
+    detectarSeparador(
+      linhas[0]
+    );
+
+
+  const cabecalhos =
+    linhas[0]
+      .split(
+        separador
+      )
+      .map(
+        limparCampo
+      );
+
+
+  const colunaTelefone =
+    localizarColunaTelefone(
+      cabecalhos
+    );
+
+
+  const colunaNome =
+    localizarColunaNome(
+      cabecalhos
+    );
+
+
+  if (
+    colunaTelefone === -1
+  ) {
+
+    mostrarErro(
+      "Não encontrei uma coluna TELEFONE, CELULAR ou WHATSAPP."
+    );
+
+    zerarContadores();
+
+    return;
+  }
+
+
+  contatosProcessados =
+    [];
+
+
+  const vistos =
+    new Set();
+
+
+  let validos = 0;
+  let duplicados = 0;
+  let invalidos = 0;
+
+
+  for (
+    let i = 1;
+    i < linhas.length;
+    i++
+  ) {
+
+    const campos =
+      linhas[i]
+        .split(
+          separador
+        )
+        .map(
+          limparCampo
+        );
+
+
+    const telefoneOriginal =
+      campos[
+        colunaTelefone
+      ] || "";
+
+
+    const telefone =
+      normalizarTelefone(
+        telefoneOriginal
+      );
+
+
+    const nome =
+      colunaNome >= 0
+        ? campos[
+            colunaNome
+          ] || ""
+        : "";
+
+
+    let status;
+
+
+    if (
+      !telefoneValido(
+        telefone
+      )
+    ) {
+
+      status =
+        "Inválido";
+
+      invalidos++;
+
+    } else if (
+      vistos.has(
+        telefone
+      )
+    ) {
+
+      status =
+        "Duplicado";
+
+      duplicados++;
+
+    } else {
+
+      status =
+        "Válido";
+
+      validos++;
+
+      vistos.add(
+        telefone
+      );
+    }
+
+
+    contatosProcessados
+      .push({
+        nome,
+        telefoneOriginal,
+        telefone,
+        status
+      });
+  }
+
+
+  document
+    .getElementById(
+      "totalContatos"
+    )
+    .textContent =
+      contatosProcessados.length;
+
+
+  document
+    .getElementById(
+      "validos"
+    )
+    .textContent =
+      validos;
+
+
+  document
+    .getElementById(
+      "duplicados"
+    )
+    .textContent =
+      duplicados;
+
+
+  document
+    .getElementById(
+      "invalidos"
+    )
+    .textContent =
+      invalidos;
+
+
+  mostrarPreview();
+
+
+  mostrarSucesso(
+    "Lista carregada. Nenhuma mensagem foi enviada ainda."
+  );
+}
+
+
+// ===========================================================
+// PRÉVIA
+// ===========================================================
+
+function mostrarPreview() {
+
+  const tabela =
+    document.getElementById(
+      "previewTabela"
+    );
+
+
+  tabela.innerHTML =
+    "";
+
+
+  contatosProcessados
+    .slice(
+      0,
+      20
+    )
+    .forEach(
+      contato => {
+
+        const linha =
+          document.createElement(
+            "tr"
+          );
+
+
+        const classe =
+          contato.status ===
+          "Válido"
+            ? "valido"
+            : "invalido";
+
+
+        linha.innerHTML =
+          `
+          <td>
+            ${escaparHTML(
+              contato.nome
+            )}
+          </td>
+
+          <td>
+            ${escaparHTML(
+              contato.telefoneOriginal
+            )}
+          </td>
+
+          <td>
+            ${escaparHTML(
+              contato.telefone
+            )}
+          </td>
+
+          <td class="${classe}">
+            ${escaparHTML(
+              contato.status
+            )}
+          </td>
+          `;
+
+
+        tabela.appendChild(
+          linha
+        );
+      }
+    );
+
+
+  document
+    .getElementById(
+      "previewCard"
+    )
+    .style.display =
+      "block";
+}
+
+
+// ===========================================================
+// ENVIAR CAMPANHA
+// ===========================================================
+
+let campanhaPendente = null;
+
 
 function prepararCampanha() {
 
@@ -1592,7 +1761,7 @@ function prepararCampanha() {
   }
 
 
-  campanhaAguardandoConfirmacao = {
+  campanhaPendente = {
     nome,
     template,
     contatos:
@@ -1626,7 +1795,7 @@ function prepararCampanha() {
 
   document
     .getElementById(
-      "modalConfirmacao"
+      "modalConfirmacaoCampanha"
     )
     .classList
     .add(
@@ -1635,24 +1804,20 @@ function prepararCampanha() {
 
 
   mostrarAviso(
-    "Campanha preparada. Confira os dados e confirme o envio."
+    `Campanha "${nome}" preparada com ${contatosValidos.length} contato(s). Nenhuma mensagem foi enviada ainda.`
   );
 }
 
 
-// ===========================================================
-// CANCELAR ENVIO
-// ===========================================================
-
 function cancelarEnvioCampanha() {
 
-  campanhaAguardandoConfirmacao =
+  campanhaPendente =
     null;
 
 
   document
     .getElementById(
-      "modalConfirmacao"
+      "modalConfirmacaoCampanha"
     )
     .classList
     .remove(
@@ -1666,73 +1831,26 @@ function cancelarEnvioCampanha() {
 }
 
 
-// ===========================================================
-// CONFIRMAR E ENVIAR CAMPANHA
-// ===========================================================
-
 async function confirmarEnvioCampanha() {
 
   if (
-    !campanhaAguardandoConfirmacao
+    !campanhaPendente
   ) {
 
     mostrarErro(
-      "Nenhuma campanha está aguardando confirmação."
+      "Não há campanha preparada para envio."
     );
-
-    document
-      .getElementById(
-        "modalConfirmacao"
-      )
-      .classList
-      .remove(
-        "ativo"
-      );
 
     return;
   }
 
 
-  const nome =
-    campanhaAguardandoConfirmacao
-      .nome;
-
-
-  const template =
-    campanhaAguardandoConfirmacao
-      .template;
-
-
-  const contatosValidos =
-    campanhaAguardandoConfirmacao
-      .contatos;
-
-
-  if (
-    !Array.isArray(
-      contatosValidos
-    ) ||
-    contatosValidos.length === 0
-  ) {
-
-    mostrarErro(
-      "Nenhum contato válido disponível para envio."
-    );
-
-    campanhaAguardandoConfirmacao =
-      null;
-
-    document
-      .getElementById(
-        "modalConfirmacao"
-      )
-      .classList
-      .remove(
-        "ativo"
-      );
-
-    return;
-  }
+  const {
+    nome,
+    template,
+    contatos
+  } =
+    campanhaPendente;
 
 
   const botaoPreparar =
@@ -1792,27 +1910,14 @@ async function confirmarEnvioCampanha() {
 
               template,
 
-              contatos:
-                contatosValidos
+              contatos
             })
         }
       );
 
 
-    let dados = {};
-
-
-    try {
-
-      dados =
-        await resposta.json();
-
-    } catch {
-
-      throw new Error(
-        "O servidor retornou uma resposta inválida."
-      );
-    }
+    const dados =
+      await resposta.json();
 
 
     if (
@@ -1837,13 +1942,13 @@ async function confirmarEnvioCampanha() {
     );
 
 
-    campanhaAguardandoConfirmacao =
+    campanhaPendente =
       null;
 
 
     document
       .getElementById(
-        "modalConfirmacao"
+        "modalConfirmacaoCampanha"
       )
       .classList
       .remove(
@@ -1887,29 +1992,6 @@ async function confirmarEnvioCampanha() {
 
 
 // ===========================================================
-// FECHAR MODAL AO CLICAR FORA
-// ===========================================================
-
-document
-  .getElementById(
-    "modalConfirmacao"
-  )
-  .addEventListener(
-    "click",
-    function(event) {
-
-      if (
-        event.target ===
-        this
-      ) {
-
-        cancelarEnvioCampanha();
-      }
-    }
-  );
-
-
-// ===========================================================
 // STATUS
 // ===========================================================
 
@@ -1918,7 +2000,7 @@ async function atualizarStatusCampanha(
 ) {
 
   if (!nome) {
-    return;
+        return;
   }
 
 
@@ -2023,7 +2105,6 @@ async function atualizarStatusCampanha(
         dados.atualizadoEm
           ? `Última atualização: ${formatarData(dados.atualizadoEm)}`
           : "";
-
 
   } catch (erro) {
 
@@ -2249,7 +2330,9 @@ function abrirCampanha(
       "smooth"
   });
 }
-  // ===========================================================
+
+
+// ===========================================================
 // UTILIDADES
 // ===========================================================
 
@@ -2367,7 +2450,6 @@ function formatarData(
       data.getTime()
     )
   ) {
-
     return "-";
   }
 
@@ -2400,7 +2482,6 @@ function carregarContatosDaBase() {
   if (
     origem !== "base"
   ) {
-
     return;
   }
 
@@ -2519,7 +2600,6 @@ function carregarContatosDaBase() {
 
 
           contatosProcessados.push({
-
             nome:
               contato.nome ||
               "",
@@ -2535,7 +2615,6 @@ function carregarContatosDaBase() {
 
             consentimento:
               contato.consentimento === true
-
           });
         }
       );
@@ -2645,7 +2724,6 @@ function liberarPainel() {
   if (
     intervaloStatus
   ) {
-
     clearInterval(
       intervaloStatus
     );
@@ -2673,7 +2751,6 @@ function liberarPainel() {
   if (
     intervaloHistorico
   ) {
-
     clearInterval(
       intervaloHistorico
     );
