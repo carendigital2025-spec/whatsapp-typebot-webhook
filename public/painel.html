@@ -448,16 +448,16 @@ th {
   </a>
 
   <a
-  href="/base.html"
-  class="link-conversas"
-  style="
-    margin-left:8px;
-    background:#d7aa4b;
-    color:#071426;
-  "
->
-  Minha Base
-</a>
+    href="/base.html"
+    class="link-conversas"
+    style="
+      margin-left:8px;
+      background:#d7aa4b;
+      color:#071426;
+    "
+  >
+    Minha Base
+  </a>
 
 </div>
 
@@ -887,9 +887,7 @@ let campanhaSelecionada =
 let intervaloStatus = null;
 
 let intervaloHistorico = null;
-
-
-// ===========================================================
+  // ===========================================================
 // TEMPLATES
 // ===========================================================
 
@@ -1708,9 +1706,7 @@ async function prepararCampanha() {
       false;
   }
 }
-
-
-// ===========================================================
+  // ===========================================================
 // STATUS
 // ===========================================================
 
@@ -2181,6 +2177,225 @@ function formatarData(
 
 
 // ===========================================================
+// CONTATOS VINDOS DA MINHA BASE
+// ===========================================================
+
+function carregarContatosDaBase() {
+
+  const parametros =
+    new URLSearchParams(
+      window.location.search
+    );
+
+
+  const origem =
+    parametros.get(
+      "origem"
+    );
+
+
+  if (
+    origem !== "base"
+  ) {
+    return;
+  }
+
+
+  const dadosSalvos =
+    localStorage.getItem(
+      "adcredContatosDaBase"
+    );
+
+
+  if (
+    !dadosSalvos
+  ) {
+
+    mostrarErro(
+      "Nenhum contato selecionado na Minha Base."
+    );
+
+    return;
+  }
+
+
+  try {
+
+    const contatos =
+      JSON.parse(
+        dadosSalvos
+      );
+
+
+    if (
+      !Array.isArray(
+        contatos
+      ) ||
+      contatos.length === 0
+    ) {
+
+      mostrarErro(
+        "Nenhum contato válido foi recebido da Minha Base."
+      );
+
+      return;
+    }
+
+
+    contatosProcessados =
+      [];
+
+
+    const vistos =
+      new Set();
+
+
+    let validos = 0;
+    let duplicados = 0;
+    let invalidos = 0;
+
+
+    contatos
+      .slice(
+        0,
+        100
+      )
+      .forEach(
+        contato => {
+
+          const telefoneOriginal =
+            contato.telefoneOriginal ||
+            contato.telefone ||
+            "";
+
+
+          const telefone =
+            normalizarTelefone(
+              contato.telefone ||
+              telefoneOriginal
+            );
+
+
+          let status;
+
+
+          if (
+            !telefoneValido(
+              telefone
+            )
+          ) {
+
+            status =
+              "Inválido";
+
+            invalidos++;
+
+          } else if (
+            vistos.has(
+              telefone
+            )
+          ) {
+
+            status =
+              "Duplicado";
+
+            duplicados++;
+
+          } else {
+
+            status =
+              "Válido";
+
+            validos++;
+
+            vistos.add(
+              telefone
+            );
+          }
+
+
+          contatosProcessados.push({
+            nome:
+              contato.nome ||
+              "",
+
+            telefoneOriginal,
+
+            telefone,
+
+            status,
+
+            origem:
+              "minha_base",
+
+            consentimento:
+              contato.consentimento === true
+          });
+        }
+      );
+
+
+    document
+      .getElementById(
+        "totalContatos"
+      )
+      .textContent =
+        contatosProcessados.length;
+
+
+    document
+      .getElementById(
+        "validos"
+      )
+      .textContent =
+        validos;
+
+
+    document
+      .getElementById(
+        "duplicados"
+      )
+      .textContent =
+        duplicados;
+
+
+    document
+      .getElementById(
+        "invalidos"
+      )
+      .textContent =
+        invalidos;
+
+
+    mostrarPreview();
+
+
+    mostrarSucesso(
+      `${validos} contato(s) da Minha Base carregado(s). Nenhuma mensagem foi enviada.`
+    );
+
+
+    window.history.replaceState(
+      {},
+      document.title,
+      "/painel.html"
+    );
+
+
+  } catch (erro) {
+
+    console.error(
+      "Erro ao carregar contatos da Minha Base:",
+      erro
+    );
+
+
+    mostrarErro(
+      "Não foi possível carregar os contatos selecionados na Minha Base."
+    );
+  }
+}
+  // ===========================================================
 // LOGIN
 // ===========================================================
 
@@ -2205,6 +2420,8 @@ function liberarPainel() {
   carregarTemplates();
 
   carregarHistorico();
+
+  carregarContatosDaBase();
 
 
   if (
