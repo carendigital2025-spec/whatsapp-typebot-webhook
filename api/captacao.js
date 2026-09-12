@@ -1,556 +1,591 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-  <meta charset="UTF-8" />
+// ===========================================================
+// ADCRED - CAPTAÇÃO DE LEADS
+// ===========================================================
 
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
-  />
 
-  <title>Consulta FGTS | ADCred Solução Financeira</title>
+// ===========================================================
+// CONFIGURAÇÃO DO REDIS
+// ===========================================================
 
-  <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+function getRedisConfig() {
+  const url =
+    process.env.STORAGE_KV_REST_API_URL ||
+    process.env.KV_REST_API_URL ||
+    process.env.UPSTASH_REDIS_REST_URL;
 
-    body {
-      min-height: 100vh;
-      font-family: Arial, Helvetica, sans-serif;
-      background:
-        linear-gradient(
-          135deg,
-          #071426 0%,
-          #0d223c 55%,
-          #102b4a 100%
-        );
-      color: #ffffff;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 24px;
-    }
+  const token =
+    process.env.STORAGE_KV_REST_API_TOKEN ||
+    process.env.KV_REST_API_TOKEN ||
+    process.env.UPSTASH_REDIS_REST_TOKEN;
 
-    .pagina {
-      width: 100%;
-      max-width: 520px;
-    }
+  if (!url || !token) {
+    throw new Error("Configuração do Redis não encontrada.");
+  }
 
-    .marca {
-      text-align: center;
-      margin-bottom: 22px;
-    }
+  return {
+    url: url.replace(/\/$/, ""),
+    token
+  };
+}
 
-    .logo {
-      width: 68px;
-      height: 68px;
-      margin: 0 auto 12px;
-      border-radius: 18px;
-      background: #d7aa4b;
-      color: #071426;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 27px;
-      font-weight: 800;
-      letter-spacing: -1px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
-    }
 
-    .marca h1 {
-      font-size: 24px;
-      font-weight: 700;
-    }
+// ===========================================================
+// EXECUTAR COMANDO NO REDIS
+// ===========================================================
 
-    .marca p {
-      color: #b9c6d5;
-      font-size: 14px;
-      margin-top: 5px;
-    }
+async function redisCommand(command) {
+  const { url, token } = getRedisConfig();
 
-    .cnpj-topo {
-      color: #d9e1ea;
-      font-size: 12px;
-      margin-top: 7px;
-    }
+  const response = await fetch(url, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(command)
+  });
 
-    .card {
-      background: #ffffff;
-      color: #142033;
-      border-radius: 22px;
-      padding: 32px;
-      box-shadow: 0 22px 55px rgba(0, 0, 0, 0.28);
-    }
+  if (!response.ok) {
+    const texto = await response.text();
 
-    .card h2 {
-      font-size: 25px;
-      line-height: 1.25;
-      text-align: center;
-      margin-bottom: 10px;
-      color: #10233e;
-    }
+    throw new Error(
+      `Erro Redis: ${response.status} ${texto}`
+    );
+  }
 
-    .subtitulo {
-      text-align: center;
-      color: #68758a;
-      font-size: 15px;
-      line-height: 1.5;
-      margin-bottom: 28px;
-    }
+  const data = await response.json();
 
-    .grupo {
-      margin-bottom: 19px;
-    }
+  return data?.result;
+}
 
-    .grupo label {
-      display: block;
-      margin-bottom: 7px;
-      font-size: 14px;
-      font-weight: 700;
-      color: #26364c;
-    }
 
-    .grupo input[type="text"],
-    .grupo input[type="tel"] {
-      width: 100%;
-      height: 50px;
-      padding: 0 15px;
-      border: 1px solid #d4dbe4;
-      border-radius: 11px;
-      font-size: 16px;
-      color: #18263a;
-      outline: none;
-      transition: 0.2s;
-      background: #ffffff;
-    }
+// ===========================================================
+// NORMALIZAR TELEFONE
+// Aceita números brasileiros de qualquer DDD.
+// ===========================================================
 
-    .grupo input:focus {
-      border-color: #d7aa4b;
-      box-shadow: 0 0 0 3px rgba(215, 170, 75, 0.16);
-    }
+function normalizarTelefone(valor) {
+  let telefone = String(valor || "")
+    .replace(/\D/g, "");
 
-    .ajuda-telefone {
-      margin-top: 6px;
-      font-size: 11.5px;
-      color: #8995a5;
-    }
+  // Número já contendo o código do Brasil 55.
+  if (
+    telefone.startsWith("55") &&
+    (telefone.length === 12 ||
+      telefone.length === 13)
+  ) {
+    return telefone;
+  }
 
-    .consentimento {
-      display: flex;
-      align-items: flex-start;
-      gap: 11px;
-      margin-top: 6px;
-      padding: 15px;
-      background: #f6f8fb;
-      border: 1px solid #e2e7ee;
-      border-radius: 12px;
-    }
+  // Número brasileiro com DDD.
+  if (
+    telefone.length === 10 ||
+    telefone.length === 11
+  ) {
+    return "55" + telefone;
+  }
 
-    .consentimento input {
-      width: 19px;
-      height: 19px;
-      margin-top: 2px;
-      flex-shrink: 0;
-      accent-color: #102b4a;
-      cursor: pointer;
-    }
+  return "";
+}
 
-    .consentimento label {
-      font-size: 12.5px;
-      line-height: 1.55;
-      color: #536176;
-      cursor: pointer;
-    }
 
-    .botao {
-      width: 100%;
-      border: 0;
-      border-radius: 12px;
-      margin-top: 22px;
-      min-height: 54px;
-      padding: 13px 18px;
-      background: #d7aa4b;
-      color: #071426;
-      font-size: 15px;
-      font-weight: 800;
-      cursor: pointer;
-      transition: 0.2s;
-    }
+// ===========================================================
+// LIMPAR TEXTO
+// ===========================================================
 
-    .botao:hover {
-      transform: translateY(-1px);
-      filter: brightness(1.04);
-    }
+function limparTexto(valor, limite = 200) {
+  return String(valor || "")
+    .trim()
+    .replace(/\s+/g, " ")
+    .substring(0, limite);
+}
 
-    .botao:disabled {
-      cursor: not-allowed;
-      opacity: 0.65;
-      transform: none;
-    }
 
-    .privacidade {
-      text-align: center;
-      font-size: 11.5px;
-      line-height: 1.5;
-      color: #8a96a7;
-      margin-top: 16px;
-    }
+// ===========================================================
+// RESPOSTA JSON
+// ===========================================================
 
-    .mensagem {
-      display: none;
-      margin-top: 18px;
-      padding: 13px;
-      border-radius: 10px;
-      font-size: 14px;
-      line-height: 1.45;
-      text-align: center;
-    }
+function responder(res, status, dados) {
+  return res
+    .status(status)
+    .json(dados);
+}
 
-    .mensagem.erro {
-      display: block;
-      background: #fff1f1;
-      color: #a52222;
-      border: 1px solid #ffd1d1;
-    }
 
-    .mensagem.sucesso {
-      display: block;
-      background: #effaf3;
-      color: #176936;
-      border: 1px solid #cbeed7;
-    }
+// ===========================================================
+// HANDLER PRINCIPAL
+// ===========================================================
 
-    .rodape {
-      text-align: center;
-      color: #91a1b5;
-      font-size: 11px;
-      line-height: 1.6;
-      margin-top: 20px;
-    }
+export default async function handler(req, res) {
 
-    @media (max-width: 560px) {
-      body {
-        padding: 16px;
-        align-items: flex-start;
+  // ---------------------------------------------------------
+  // SOMENTE POST
+  // ---------------------------------------------------------
+
+  if (req.method !== "POST") {
+    res.setHeader("Allow", ["POST"]);
+
+    return responder(
+      res,
+      405,
+      {
+        ok: false,
+        erro: "Método não permitido."
       }
+    );
+  }
 
-      .pagina {
-        margin-top: 18px;
-      }
 
-      .card {
-        padding: 25px 20px;
-        border-radius: 18px;
-      }
-
-      .card h2 {
-        font-size: 22px;
-      }
-
-      .marca h1 {
-        font-size: 21px;
-      }
-    }
-  </style>
-</head>
-
-<body>
-  <main class="pagina">
-
-    <header class="marca">
-      <div class="logo">AD</div>
-
-      <h1>ADCred Solução Financeira</h1>
-
-      <p>Atendimento digital</p>
-
-      <div class="cnpj-topo">
-        CNPJ: 68.860.680/0001-57
-      </div>
-    </header>
-
-    <section class="card">
-
-      <h2>
-        Consulte sua possibilidade de antecipação do FGTS
-      </h2>
-
-      <p class="subtitulo">
-        Preencha seus dados para iniciar sua consulta.
-        A simulação é gratuita.
-      </p>
-
-      <form id="formCaptacao">
-
-        <div class="grupo">
-          <label for="nome">Nome</label>
-
-          <input
-            id="nome"
-            name="nome"
-            type="text"
-            placeholder="Digite seu nome"
-            autocomplete="name"
-            maxlength="100"
-            required
-          />
-        </div>
-
-        <div class="grupo">
-          <label for="telefone">WhatsApp</label>
-
-          <input
-            id="telefone"
-            name="telefone"
-            type="tel"
-            placeholder="(DDD) 99999-9999"
-            autocomplete="tel"
-            inputmode="numeric"
-            maxlength="16"
-            required
-          />
-
-          <div class="ajuda-telefone">
-            Informe seu número com DDD. Aceitamos números de todo o Brasil.
-          </div>
-        </div>
-
-        <div class="consentimento">
-
-          <input
-            id="consentimento"
-            name="consentimento"
-            type="checkbox"
-            required
-          />
-
-          <label for="consentimento">
-            Autorizo a ADCred Solução Financeira,
-            CNPJ 68.860.680/0001-57,
-            a entrar em contato comigo pelo WhatsApp sobre esta
-            solicitação e comunicações relacionadas aos seus produtos
-            e serviços. Estou ciente de que posso solicitar o
-            descadastro a qualquer momento.
-          </label>
-
-        </div>
-
-        <button
-          id="botaoEnviar"
-          class="botao"
-          type="submit"
-        >
-          QUERO FAZER MINHA CONSULTA
-        </button>
-
-        <div
-          id="mensagem"
-          class="mensagem"
-          aria-live="polite"
-        ></div>
-
-      </form>
-
-      <p class="privacidade">
-        Seus dados serão utilizados para atender sua solicitação
-        e registrar sua autorização de contato.
-      </p>
-
-    </section>
-
-    <footer class="rodape">
-      ADCred Solução Financeira
-      <br />
-      CNPJ: 68.860.680/0001-57
-      <br />
-      Atendimento digital e seguro.
-    </footer>
-
-  </main>
-
-  <script>
-    const form = document.getElementById("formCaptacao");
-    const nomeInput = document.getElementById("nome");
-    const telefoneInput = document.getElementById("telefone");
-    const consentimentoInput =
-      document.getElementById("consentimento");
-    const botaoEnviar =
-      document.getElementById("botaoEnviar");
-    const mensagem =
-      document.getElementById("mensagem");
+  try {
 
     // -------------------------------------------------------
-    // MÁSCARA DO TELEFONE
-    // ACEITA QUALQUER DDD BRASILEIRO
+    // RECEBER DADOS
     // -------------------------------------------------------
 
-    telefoneInput.addEventListener("input", function () {
-      let valor = telefoneInput.value.replace(/\D/g, "");
+    const {
+      nome,
+      telefone,
+      consentimento,
+      origem,
+      versaoConsentimento
+    } = req.body || {};
 
-      valor = valor.substring(0, 11);
-
-      if (valor.length <= 2) {
-        telefoneInput.value = valor;
-        return;
-      }
-
-      if (valor.length <= 6) {
-        telefoneInput.value =
-          "(" +
-          valor.substring(0, 2) +
-          ") " +
-          valor.substring(2);
-
-        return;
-      }
-
-      if (valor.length <= 10) {
-        telefoneInput.value =
-          "(" +
-          valor.substring(0, 2) +
-          ") " +
-          valor.substring(2, 6) +
-          "-" +
-          valor.substring(6);
-
-        return;
-      }
-
-      telefoneInput.value =
-        "(" +
-        valor.substring(0, 2) +
-        ") " +
-        valor.substring(2, 7) +
-        "-" +
-        valor.substring(7);
-    });
 
     // -------------------------------------------------------
-    // MENSAGENS
+    // VALIDAR NOME
     // -------------------------------------------------------
 
-    function mostrarMensagem(texto, tipo) {
-      mensagem.textContent = texto;
-      mensagem.className = "mensagem " + tipo;
+    const nomeLimpo =
+      limparTexto(nome, 100);
+
+    if (nomeLimpo.length < 2) {
+      return responder(
+        res,
+        400,
+        {
+          ok: false,
+          erro: "Informe um nome válido."
+        }
+      );
     }
 
-    function limparMensagem() {
-      mensagem.textContent = "";
-      mensagem.className = "mensagem";
+
+    // -------------------------------------------------------
+    // VALIDAR TELEFONE
+    // -------------------------------------------------------
+
+    const telefoneNormalizado =
+      normalizarTelefone(telefone);
+
+    if (!telefoneNormalizado) {
+      return responder(
+        res,
+        400,
+        {
+          ok: false,
+          erro:
+            "Informe um número de WhatsApp válido com DDD."
+        }
+      );
     }
 
+
     // -------------------------------------------------------
-    // ENVIO
+    // VALIDAR CONSENTIMENTO
     // -------------------------------------------------------
 
-    form.addEventListener("submit", async function (event) {
-      event.preventDefault();
+    if (consentimento !== true) {
+      return responder(
+        res,
+        400,
+        {
+          ok: false,
+          erro:
+            "É necessário autorizar o contato para continuar."
+        }
+      );
+    }
 
-      limparMensagem();
 
-      const nome = nomeInput.value.trim();
+    // -------------------------------------------------------
+    // DADOS DO CADASTRO
+    // -------------------------------------------------------
 
-      const telefone =
-        telefoneInput.value.replace(/\D/g, "");
+    const origemLimpa =
+      limparTexto(
+        origem || "pagina_captacao",
+        100
+      );
 
-      if (nome.length < 2) {
-        mostrarMensagem(
-          "Digite seu nome para continuar.",
-          "erro"
-        );
+    const versaoLimpa =
+      limparTexto(
+        versaoConsentimento || "v1",
+        50
+      );
 
-        return;
-      }
+    const agora =
+      new Date().toISOString();
 
-      if (
-        telefone.length !== 10 &&
-        telefone.length !== 11
-      ) {
-        mostrarMensagem(
-          "Digite um número de WhatsApp válido com DDD.",
-          "erro"
-        );
 
-        return;
-      }
+    // -------------------------------------------------------
+    // CHAVES DO REDIS
+    // -------------------------------------------------------
 
-      if (!consentimentoInput.checked) {
-        mostrarMensagem(
-          "Para solicitar o contato, marque a autorização.",
-          "erro"
-        );
+    const chaveLead =
+      `lead:${telefoneNormalizado}`;
 
-        return;
-      }
+    const chaveCampanhaTelefone =
+      `campanha:telefone:${telefoneNormalizado}`;
 
-      botaoEnviar.disabled = true;
-      botaoEnviar.textContent = "ENVIANDO...";
 
+    // -------------------------------------------------------
+    // VERIFICAR DESCADASTRO JÁ REGISTRADO
+    // -------------------------------------------------------
+
+    const campanhaTelefoneRaw =
+      await redisCommand([
+        "GET",
+        chaveCampanhaTelefone
+      ]);
+
+    if (campanhaTelefoneRaw) {
       try {
-        const resposta = await fetch("/api/captacao", {
-          method: "POST",
+        const campanhaTelefone =
+          JSON.parse(campanhaTelefoneRaw);
 
-          headers: {
-            "Content-Type": "application/json"
-          },
-
-          body: JSON.stringify({
-            nome,
-            telefone,
-            consentimento: true,
-            origem: "pagina_captacao",
-            versaoConsentimento: "v1"
-          })
-        });
-
-        const tipoConteudo =
-          resposta.headers.get("content-type") || "";
-
-        if (!tipoConteudo.includes("application/json")) {
-          throw new Error(
-            "O servidor não respondeu corretamente. Tente novamente em instantes."
+        if (
+          campanhaTelefone?.descadastrado === true
+        ) {
+          return responder(
+            res,
+            409,
+            {
+              ok: false,
+              descadastrado: true,
+              erro:
+                "Este número possui um pedido de descadastro registrado. Entre em contato com o atendimento caso queira reativar seu cadastro."
+            }
           );
         }
-
-        const dados = await resposta.json();
-
-        if (!resposta.ok || !dados.ok) {
-          throw new Error(
-            dados.erro ||
-            "Não foi possível realizar o cadastro."
-          );
-        }
-
-        mostrarMensagem(
-          "Cadastro realizado! Recebemos sua solicitação.",
-          "sucesso"
-        );
-
-        form.reset();
 
       } catch (erro) {
         console.error(
-          "Erro ao realizar cadastro:",
+          "Erro ao interpretar registro da campanha:",
           erro
         );
+      }
+    }
 
-        mostrarMensagem(
-          erro.message ||
-          "Não foi possível enviar seus dados. Tente novamente.",
-          "erro"
+
+    // -------------------------------------------------------
+    // VERIFICAR SE O LEAD JÁ EXISTE
+    // -------------------------------------------------------
+
+    const leadExistenteRaw =
+      await redisCommand([
+        "GET",
+        chaveLead
+      ]);
+
+    if (leadExistenteRaw) {
+      try {
+        const leadExistente =
+          JSON.parse(leadExistenteRaw);
+
+        // Não reativa automaticamente um lead
+        // marcado como descadastrado.
+        if (
+          leadExistente?.status === "descadastrado"
+        ) {
+          return responder(
+            res,
+            409,
+            {
+              ok: false,
+              descadastrado: true,
+              erro:
+                "Este número possui um pedido de descadastro registrado. Entre em contato com o atendimento caso queira reativar seu cadastro."
+            }
+          );
+        }
+
+
+        // ---------------------------------------------------
+        // ATUALIZAR LEAD EXISTENTE
+        // ---------------------------------------------------
+
+        const atualizado = {
+          ...leadExistente,
+
+          nome:
+            nomeLimpo,
+
+          telefone:
+            telefoneNormalizado,
+
+          origem:
+            origemLimpa,
+
+          consentimento:
+            true,
+
+          versaoConsentimento:
+            versaoLimpa,
+
+          ultimoConsentimentoEm:
+            agora,
+
+          atualizadoEm:
+            agora,
+
+          status:
+            "ativo"
+        };
+
+
+        await redisCommand([
+          "SET",
+          chaveLead,
+          JSON.stringify(atualizado)
+        ]);
+
+
+        // Índice geral.
+        await redisCommand([
+          "ZADD",
+          "leads:todos",
+          Date.now(),
+          telefoneNormalizado
+        ]);
+
+
+        // Índice de ativos.
+        await redisCommand([
+          "ZADD",
+          "leads:ativos",
+          Date.now(),
+          telefoneNormalizado
+        ]);
+
+
+        // ---------------------------------------------------
+        // HISTÓRICO DO NOVO CONSENTIMENTO
+        // ---------------------------------------------------
+
+        const registroConsentimento = {
+          telefone:
+            telefoneNormalizado,
+
+          nome:
+            nomeLimpo,
+
+          consentimento:
+            true,
+
+          origem:
+            origemLimpa,
+
+          versaoConsentimento:
+            versaoLimpa,
+
+          registradoEm:
+            agora
+        };
+
+
+        await redisCommand([
+          "LPUSH",
+          `lead:consentimentos:${telefoneNormalizado}`,
+          JSON.stringify(registroConsentimento)
+        ]);
+
+
+        await redisCommand([
+          "LTRIM",
+          `lead:consentimentos:${telefoneNormalizado}`,
+          0,
+          49
+        ]);
+
+
+        console.log(
+          "Lead existente atualizado:",
+          telefoneNormalizado
         );
 
-      } finally {
-        botaoEnviar.disabled = false;
 
-        botaoEnviar.textContent =
-          "QUERO FAZER MINHA CONSULTA";
+        return responder(
+          res,
+          200,
+          {
+            ok: true,
+            novo: false,
+            mensagem:
+              "Cadastro atualizado com sucesso."
+          }
+        );
+
+      } catch (erro) {
+        console.error(
+          "Erro ao interpretar lead existente:",
+          erro
+        );
       }
-    });
-  </script>
+    }
 
-</body>
-</html>
+
+    // -------------------------------------------------------
+    // CRIAR NOVO LEAD
+    // -------------------------------------------------------
+
+    const novoLead = {
+      nome:
+        nomeLimpo,
+
+      telefone:
+        telefoneNormalizado,
+
+      status:
+        "ativo",
+
+      origem:
+        origemLimpa,
+
+      consentimento:
+        true,
+
+      versaoConsentimento:
+        versaoLimpa,
+
+      consentimentoEm:
+        agora,
+
+      ultimoConsentimentoEm:
+        agora,
+
+      criadoEm:
+        agora,
+
+      atualizadoEm:
+        agora
+    };
+
+
+    // -------------------------------------------------------
+    // SALVAR LEAD
+    // -------------------------------------------------------
+
+    await redisCommand([
+      "SET",
+      chaveLead,
+      JSON.stringify(novoLead)
+    ]);
+
+
+    // -------------------------------------------------------
+    // ÍNDICE GERAL
+    // -------------------------------------------------------
+
+    await redisCommand([
+      "ZADD",
+      "leads:todos",
+      Date.now(),
+      telefoneNormalizado
+    ]);
+
+
+    // -------------------------------------------------------
+    // ÍNDICE DE ATIVOS
+    // -------------------------------------------------------
+
+    await redisCommand([
+      "ZADD",
+      "leads:ativos",
+      Date.now(),
+      telefoneNormalizado
+    ]);
+
+
+    // -------------------------------------------------------
+    // HISTÓRICO DO CONSENTIMENTO
+    // -------------------------------------------------------
+
+    const registroConsentimento = {
+      telefone:
+        telefoneNormalizado,
+
+      nome:
+        nomeLimpo,
+
+      consentimento:
+        true,
+
+      origem:
+        origemLimpa,
+
+      versaoConsentimento:
+        versaoLimpa,
+
+      registradoEm:
+        agora
+    };
+
+
+    await redisCommand([
+      "LPUSH",
+      `lead:consentimentos:${telefoneNormalizado}`,
+      JSON.stringify(registroConsentimento)
+    ]);
+
+
+    // Mantém os 50 registros de consentimento
+    // mais recentes daquele telefone.
+    await redisCommand([
+      "LTRIM",
+      `lead:consentimentos:${telefoneNormalizado}`,
+      0,
+      49
+    ]);
+
+
+    // -------------------------------------------------------
+    // SUCESSO
+    // -------------------------------------------------------
+
+    console.log(
+      "Novo lead captado:",
+      telefoneNormalizado
+    );
+
+
+    return responder(
+      res,
+      201,
+      {
+        ok: true,
+        novo: true,
+        mensagem:
+          "Cadastro realizado com sucesso."
+      }
+    );
+
+
+  } catch (erro) {
+
+    console.error(
+      "Erro no endpoint de captação:",
+      erro
+    );
+
+
+    return responder(
+      res,
+      500,
+      {
+        ok: false,
+        erro:
+          "Não foi possível realizar o cadastro agora. Tente novamente."
+      }
+    );
+  }
+}
