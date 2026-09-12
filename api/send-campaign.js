@@ -1,7 +1,19 @@
 import crypto from "crypto";
 
-const MAX_CONTATOS_POR_CAMPANHA = 100;
+// ===========================================================
+// CONFIGURAÇÃO DE LOTES
+// ===========================================================
+
+// Cada chamada da API processa no máximo 25 contatos.
+// Campanhas maiores serão divididas automaticamente pelo painel.
+const MAX_CONTATOS_POR_LOTE = 25;
+
+// Limite total da campanha.
+const MAX_CONTATOS_POR_CAMPANHA = 500;
+
+// Intervalo pequeno entre mensagens dentro do lote.
 const INTERVALO_ENTRE_ENVIOS_MS = 250;
+
 
 // ===========================================================
 // REDIS
@@ -24,6 +36,7 @@ function getRedisConfig() {
   };
 }
 
+
 async function redisCommand(command) {
   const { url, token } =
     getRedisConfig();
@@ -35,20 +48,23 @@ async function redisCommand(command) {
   }
 
   const resposta =
-    await fetch(url, {
-      method: "POST",
+    await fetch(
+      url,
+      {
+        method: "POST",
 
-      headers: {
-        Authorization:
-          `Bearer ${token}`,
+        headers: {
+          Authorization:
+            `Bearer ${token}`,
 
-        "Content-Type":
-          "application/json"
-      },
+          "Content-Type":
+            "application/json"
+        },
 
-      body:
-        JSON.stringify(command)
-    });
+        body:
+          JSON.stringify(command)
+      }
+    );
 
   const dados =
     await resposta.json();
@@ -82,6 +98,40 @@ function normalizarTelefone(valor) {
 }
 
 
+function numeroInteiroSeguro(
+  valor,
+  padrao
+) {
+  const numero =
+    Number(valor);
+
+  if (
+    !Number.isInteger(numero) ||
+    numero < 1
+  ) {
+    return padrao;
+  }
+
+  return numero;
+}
+
+
+function parseJsonSeguro(
+  valor,
+  padrao = null
+) {
+  if (!valor) {
+    return padrao;
+  }
+
+  try {
+    return JSON.parse(valor);
+  } catch {
+    return padrao;
+  }
+}
+
+
 // ===========================================================
 // AUTENTICAÇÃO DO PAINEL
 // ===========================================================
@@ -93,13 +143,15 @@ function autenticarPainel(req) {
   const cookieSessao =
     cookies
       .split(";")
-      .map(cookie =>
-        cookie.trim()
+      .map(
+        cookie =>
+          cookie.trim()
       )
-      .find(cookie =>
-        cookie.startsWith(
-          "panel_session="
-        )
+      .find(
+        cookie =>
+          cookie.startsWith(
+            "panel_session="
+          )
       );
 
   if (
@@ -126,10 +178,14 @@ function autenticarPainel(req) {
       .digest("hex");
 
   const bufferRecebido =
-    Buffer.from(tokenRecebido);
+    Buffer.from(
+      tokenRecebido
+    );
 
   const bufferEsperado =
-    Buffer.from(tokenEsperado);
+    Buffer.from(
+      tokenEsperado
+    );
 
   if (
     bufferRecebido.length !==
@@ -142,6 +198,249 @@ function autenticarPainel(req) {
     bufferRecebido,
     bufferEsperado
   );
+}
+
+
+// ===========================================================
+// STATUS DA CAMPANHA
+// ===========================================================
+
+async function lerStatusCampanha(
+  chaveStatus
+) {
+  const registro =
+    await redisCommand([
+      "GET",
+      chaveStatus
+    ]);
+
+  return parseJsonSeguro(
+    registro,
+    null
+  );
+}
+
+
+async function salvarStatusCampanha(
+  chaveStatus,
+  status
+) {
+  await redisCommand([
+    "SET",
+    chaveStatus,
+    JSON.stringify(status)
+  ]);
+}
+
+
+async function atualizarContadoresCampanha(
+  chaveStatus,
+  {
+    enviadosSomar = 0,
+    falhasSomar = 0,
+    ignoradosSomar = 0,
+    loteNumero = null,
+    totalLotes = null,
+    finalizado = false
+  } = {}
+) {
+  const statusAtual =
+    await lerStatusCampanha(
+      chaveStatus
+    );
+
+  if (!statusAtual) {
+    throw new Error(
+      "Status da campanha não encontrado."
+    );
+  }
+
+  statusAtual.enviados =
+    Number(
+      statusAtual.enviados || 0
+    ) +
+    enviadosSomar;
+
+  statusAtual.falhas =
+    Number(
+      statusAtual.falhas || 0
+    ) +
+    falhasSomar;
+
+  statusAtual.ignorados =
+    Number(
+      statusAtual.ignorados || 0
+    ) +
+    ignoradosSomar;
+
+  if (
+    loteNumero !== null
+  ) {
+    statusAtual.loteAtual =
+      loteNumero;
+  }
+
+  if (
+    totalLotes !== null
+  ) {
+    statusAtual.totalLotes =
+      totalLotes;
+  }
+
+  statusAtual.atualizadoEm =
+    new Date()
+      .toISOString();
+
+  if (finalizado) {
+    statusAtual.finalizadoEm =
+      statusAtual.atualizadoEm;
+
+    statusAtual.processando =
+      false;
+  }
+
+  await salvarStatusCampanha(
+    chaveStatus,
+    statusAtual
+  );
+
+  return statusAtual;
+}
+
+
+// ===========================================================
+// VALIDAÇÃO DA MINHA BASE
+// ===========================================================
+
+async function validarContatoMinhaBase(
+  contato,
+  telefone
+) {
+  if (
+    contato.origem !==
+    "minha_base"
+  ) {
+    return {
+      ok: true
+    };
+  }
+
+  let registroLead;
+
+  try {
+    registroLead =
+      await redisCommand([
+        "GET",
+        `lead:${telefone}`
+      ]);
+
+  } catch {
+    return {
+      ok: false,
+
+      motivo:
+        "Não foi possível validar o contato da Minha Base."
+    };
+  }
+
+  if (!registroLead) {
+    return {
+      ok: false,
+
+      motivo:
+        "Contato da Minha Base não encontrado no cadastro de leads."
+    };
+  }
+
+  const dadosLead =
+    parseJsonSeguro(
+      registroLead,
+      null
+    );
+
+  if (!dadosLead) {
+    return {
+      ok: false,
+
+      motivo:
+        "Cadastro do lead inválido."
+    };
+  }
+
+  const statusLead =
+    String(
+      dadosLead.status || ""
+    )
+      .trim()
+      .toLowerCase();
+
+  if (
+    statusLead !== "ativo"
+  ) {
+    return {
+      ok: false,
+
+      motivo:
+        "Contato da Minha Base não está ativo."
+    };
+  }
+
+  if (
+    dadosLead.consentimento !==
+    true
+  ) {
+    return {
+      ok: false,
+
+      motivo:
+        "Contato da Minha Base sem consentimento válido."
+    };
+  }
+
+  return {
+    ok: true
+  };
+}
+
+
+// ===========================================================
+// VERIFICA DESCADASTRO
+// ===========================================================
+
+async function contatoDescadastrado(
+  telefone
+) {
+  try {
+    const registroTelefone =
+      await redisCommand([
+        "GET",
+        `campanha:telefone:${telefone}`
+      ]);
+
+    if (!registroTelefone) {
+      return false;
+    }
+
+    const dadosTelefone =
+      parseJsonSeguro(
+        registroTelefone,
+        null
+      );
+
+    return (
+      dadosTelefone
+        ?.descadastrado ===
+      true
+    );
+
+  } catch (erro) {
+    console.error(
+      "Erro ao consultar descadastro:",
+      erro
+    );
+
+    return false;
+  }
 }
 
 
@@ -163,6 +462,7 @@ export default async function handler(
       .status(401)
       .json({
         ok: false,
+
         erro:
           "Não autorizado. Faça login no painel."
       });
@@ -173,11 +473,15 @@ export default async function handler(
   // MÉTODO
   // ---------------------------------------------------------
 
-  if (req.method !== "POST") {
+  if (
+    req.method !==
+    "POST"
+  ) {
     return res
       .status(405)
       .json({
         ok: false,
+
         erro:
           "Método não permitido."
       });
@@ -192,12 +496,14 @@ export default async function handler(
 
     const nomeCampanha =
       String(
-        req.body?.campanha || ""
+        req.body?.campanha ||
+        ""
       ).trim();
 
     const nomeTemplate =
       String(
-        req.body?.template || ""
+        req.body?.template ||
+        ""
       ).trim();
 
     const contatosRecebidos =
@@ -206,6 +512,36 @@ export default async function handler(
       )
         ? req.body.contatos
         : [];
+
+    const loteNumero =
+      numeroInteiroSeguro(
+        req.body?.loteNumero,
+        1
+      );
+
+    const totalLotes =
+      numeroInteiroSeguro(
+        req.body?.totalLotes,
+        1
+      );
+
+    const totalCampanha =
+      numeroInteiroSeguro(
+        req.body?.totalCampanha,
+        contatosRecebidos.length
+      );
+
+    const continuacao =
+      req.body
+        ?.continuacao ===
+      true;
+
+    const ultimoLote =
+      req.body
+        ?.ultimoLote ===
+      true ||
+      loteNumero ===
+      totalLotes;
 
 
     // -------------------------------------------------------
@@ -217,6 +553,7 @@ export default async function handler(
         .status(400)
         .json({
           ok: false,
+
           erro:
             "Informe o nome da campanha."
         });
@@ -228,6 +565,7 @@ export default async function handler(
         .status(400)
         .json({
           ok: false,
+
           erro:
             "Selecione um template."
         });
@@ -242,6 +580,7 @@ export default async function handler(
         .status(400)
         .json({
           ok: false,
+
           erro:
             "Template não autorizado para este envio."
         });
@@ -249,12 +588,14 @@ export default async function handler(
 
 
     if (
-      contatosRecebidos.length === 0
+      contatosRecebidos.length ===
+      0
     ) {
       return res
         .status(400)
         .json({
           ok: false,
+
           erro:
             "Nenhum contato recebido."
         });
@@ -263,12 +604,28 @@ export default async function handler(
 
     if (
       contatosRecebidos.length >
+      MAX_CONTATOS_POR_LOTE
+    ) {
+      return res
+        .status(400)
+        .json({
+          ok: false,
+
+          erro:
+            `Cada lote pode conter no máximo ${MAX_CONTATOS_POR_LOTE} contatos.`
+        });
+    }
+
+
+    if (
+      totalCampanha >
       MAX_CONTATOS_POR_CAMPANHA
     ) {
       return res
         .status(400)
         .json({
           ok: false,
+
           erro:
             `O limite atual é de ${MAX_CONTATOS_POR_CAMPANHA} contatos por campanha.`
         });
@@ -276,13 +633,31 @@ export default async function handler(
 
 
     if (
-      !process.env.WHATSAPP_TOKEN ||
-      !process.env.PHONE_NUMBER_ID
+      loteNumero >
+      totalLotes
+    ) {
+      return res
+        .status(400)
+        .json({
+          ok: false,
+
+          erro:
+            "Número do lote inválido."
+        });
+    }
+
+
+    if (
+      !process.env
+        .WHATSAPP_TOKEN ||
+      !process.env
+        .PHONE_NUMBER_ID
     ) {
       return res
         .status(500)
         .json({
           ok: false,
+
           erro:
             "Configuração do WhatsApp incompleta."
         });
@@ -290,50 +665,123 @@ export default async function handler(
 
 
     // -------------------------------------------------------
-    // EVITA NOME DE CAMPANHA REPETIDO
+    // STATUS / CONTINUIDADE
     // -------------------------------------------------------
 
     const chaveStatus =
       `campanha:status:${nomeCampanha}`;
 
     const campanhaExistente =
-      await redisCommand([
-        "GET",
+      await lerStatusCampanha(
         chaveStatus
-      ]);
+      );
 
-    if (campanhaExistente) {
+
+    // Primeiro lote:
+    // não pode existir campanha com o mesmo nome.
+
+    if (
+      !continuacao &&
+      campanhaExistente
+    ) {
       return res
         .status(409)
         .json({
           ok: false,
+
           erro:
             "Já existe uma campanha com esse nome. Use outro nome."
         });
     }
 
 
+    // Lotes seguintes:
+    // campanha precisa existir.
+
+    if (
+      continuacao &&
+      !campanhaExistente
+    ) {
+      return res
+        .status(409)
+        .json({
+          ok: false,
+
+          erro:
+            "A campanha não foi iniciada. Envie primeiro o lote 1."
+        });
+    }
+
+
+    // Template precisa ser o mesmo em todos os lotes.
+
+    if (
+      continuacao &&
+      campanhaExistente
+        ?.template &&
+      campanhaExistente
+        .template !==
+      nomeTemplate
+    ) {
+      return res
+        .status(409)
+        .json({
+          ok: false,
+
+          erro:
+            "O template não corresponde ao template usado no início da campanha."
+        });
+    }
+
+
+    // Total precisa ser igual ao registrado no primeiro lote.
+
+    if (
+      continuacao &&
+      Number(
+        campanhaExistente
+          ?.total || 0
+      ) !==
+      totalCampanha
+    ) {
+      return res
+        .status(409)
+        .json({
+          ok: false,
+
+          erro:
+            "O total de contatos não corresponde ao total registrado no início da campanha."
+        });
+    }
+
+
     // -------------------------------------------------------
-    // REMOVE DUPLICADOS
+    // REMOVE DUPLICADOS DENTRO DO LOTE
     // -------------------------------------------------------
 
     const telefonesVistos =
       new Set();
 
-    const contatos = [];
+    const contatos =
+      [];
+
 
     for (
       const contato of
       contatosRecebidos
     ) {
+
       const telefone =
         normalizarTelefone(
-          contato?.telefone
+          contato
+            ?.telefone
         );
+
 
       if (!telefone) {
         continue;
       }
+
 
       if (
         telefonesVistos.has(
@@ -343,36 +791,44 @@ export default async function handler(
         continue;
       }
 
+
       telefonesVistos.add(
         telefone
       );
 
+
       contatos.push({
         nome:
           String(
-            contato?.nome || ""
+            contato
+              ?.nome || ""
           ).trim(),
 
         telefone,
 
         origem:
           String(
-            contato?.origem || ""
+            contato
+              ?.origem || ""
           ).trim(),
 
         consentimento:
-          contato?.consentimento === true
+          contato
+            ?.consentimento ===
+          true
       });
     }
 
 
     if (
-      contatos.length === 0
+      contatos.length ===
+      0
     ) {
       return res
         .status(400)
         .json({
           ok: false,
+
           erro:
             "Nenhum telefone válido para envio."
         });
@@ -380,60 +836,84 @@ export default async function handler(
 
 
     // -------------------------------------------------------
-    // STATUS INICIAL
+    // CRIA STATUS NO PRIMEIRO LOTE
     // -------------------------------------------------------
 
-    const criadoEm =
-      new Date().toISOString();
+    if (!continuacao) {
 
-    const statusInicial = {
-      campanha:
-        nomeCampanha,
+      const criadoEm =
+        new Date()
+          .toISOString();
 
-      template:
-        nomeTemplate,
+      const statusInicial = {
+        campanha:
+          nomeCampanha,
 
-      total:
-        contatos.length,
+        template:
+          nomeTemplate,
 
-      enviados: 0,
+        total:
+          totalCampanha,
 
-      entregues: 0,
+        enviados:
+          0,
 
-      respondidos: 0,
+        entregues:
+          0,
 
-      descadastrados: 0,
+        respondidos:
+          0,
 
-      falhas: 0,
+        descadastrados:
+          0,
 
-      ignorados: 0,
+        falhas:
+          0,
 
-      criadoEm,
+        ignorados:
+          0,
 
-      atualizadoEm:
-        criadoEm
-    };
+        loteAtual:
+          0,
+
+        totalLotes,
+
+        processando:
+          true,
+
+        criadoEm,
+
+        atualizadoEm:
+          criadoEm
+      };
 
 
-    await redisCommand([
-      "SET",
-      chaveStatus,
-      JSON.stringify(
+      await salvarStatusCampanha(
+        chaveStatus,
         statusInicial
-      )
-    ]);
+      );
+    }
 
 
     // -------------------------------------------------------
-    // ENVIO
+    // ENVIO DO LOTE
     // -------------------------------------------------------
 
-    let enviados = 0;
-    let falhas = 0;
-    let ignorados = 0;
+    let enviadosLote =
+      0;
 
-    const erros = [];
-    const ignoradosDetalhes = [];
+    let falhasLote =
+      0;
+
+    let ignoradosLote =
+      0;
+
+
+    const erros =
+      [];
+
+    const ignoradosDetalhes =
+      [];
 
 
     const versaoGraph =
@@ -448,7 +928,8 @@ export default async function handler(
 
     for (
       let indice = 0;
-      indice < contatos.length;
+      indice <
+      contatos.length;
       indice++
     ) {
 
@@ -460,173 +941,62 @@ export default async function handler(
 
 
       // -----------------------------------------------------
-      // VALIDA CONTATOS VINDOS DA MINHA BASE
+      // VALIDA MINHA BASE
       // -----------------------------------------------------
 
+      const validacaoMinhaBase =
+        await validarContatoMinhaBase(
+          contato,
+          telefone
+        );
+
+
       if (
-        contato.origem ===
-        "minha_base"
+        !validacaoMinhaBase.ok
       ) {
 
-        try {
-
-          const registroLead =
-            await redisCommand([
-              "GET",
-              `lead:${telefone}`
-            ]);
+        ignoradosLote++;
 
 
-          if (!registroLead) {
+        ignoradosDetalhes
+          .push({
+            telefone,
 
-            ignorados++;
-
-            ignoradosDetalhes
-              .push({
-                telefone,
-                motivo:
-                  "Contato da Minha Base não encontrado no cadastro de leads."
-              });
-
-            continue;
-          }
+            motivo:
+              validacaoMinhaBase
+                .motivo
+          });
 
 
-          let dadosLead;
-
-          try {
-
-            dadosLead =
-              JSON.parse(
-                registroLead
-              );
-
-          } catch {
-
-            ignorados++;
-
-            ignoradosDetalhes
-              .push({
-                telefone,
-                motivo:
-                  "Cadastro do lead inválido."
-              });
-
-            continue;
-          }
-
-
-          const statusLead =
-            String(
-              dadosLead?.status ||
-              ""
-            )
-              .trim()
-              .toLowerCase();
-
-
-          if (
-            statusLead !==
-            "ativo"
-          ) {
-
-            ignorados++;
-
-            ignoradosDetalhes
-              .push({
-                telefone,
-                motivo:
-                  "Contato da Minha Base não está ativo."
-              });
-
-            continue;
-          }
-
-
-          if (
-            dadosLead?.consentimento !==
-            true
-          ) {
-
-            ignorados++;
-
-            ignoradosDetalhes
-              .push({
-                telefone,
-                motivo:
-                  "Contato da Minha Base sem consentimento válido."
-              });
-
-            continue;
-          }
-
-        } catch (erro) {
-
-          console.error(
-            "Erro ao validar lead da Minha Base:",
-            erro
-          );
-
-          ignorados++;
-
-          ignoradosDetalhes
-            .push({
-              telefone,
-              motivo:
-                "Não foi possível validar o contato da Minha Base."
-            });
-
-          continue;
-        }
+        continue;
       }
 
 
       // -----------------------------------------------------
-      // VERIFICA DESCADASTRO ANTERIOR
+      // VERIFICA DESCADASTRO
       // -----------------------------------------------------
 
-      try {
-        const registroTelefone =
-          await redisCommand([
-            "GET",
-            `campanha:telefone:${telefone}`
-          ]);
-
-        if (registroTelefone) {
-          try {
-            const dadosTelefone =
-              JSON.parse(
-                registroTelefone
-              );
-
-            if (
-              dadosTelefone
-                ?.descadastrado ===
-              true
-            ) {
-              ignorados++;
-
-              ignoradosDetalhes
-                .push({
-                  telefone,
-                  motivo:
-                    "Contato descadastrado."
-                });
-
-              continue;
-            }
-
-          } catch {
-            // registro antigo inválido:
-            // segue envio normalmente
-          }
-        }
-
-      } catch (erro) {
-        console.error(
-          "Erro ao consultar descadastro:",
-          erro
+      const descadastrado =
+        await contatoDescadastrado(
+          telefone
         );
+
+
+      if (descadastrado) {
+
+        ignoradosLote++;
+
+
+        ignoradosDetalhes
+          .push({
+            telefone,
+
+            motivo:
+              "Contato descadastrado."
+          });
+
+
+        continue;
       }
 
 
@@ -635,11 +1005,13 @@ export default async function handler(
       // -----------------------------------------------------
 
       try {
+
         const respostaMeta =
           await fetch(
             urlWhatsApp,
             {
-              method: "POST",
+              method:
+                "POST",
 
               headers: {
                 Authorization:
@@ -678,11 +1050,16 @@ export default async function handler(
 
 
         const dadosMeta =
-          await respostaMeta.json();
+          await respostaMeta
+            .json();
 
 
-        if (!respostaMeta.ok) {
-          falhas++;
+        if (
+          !respostaMeta.ok
+        ) {
+
+          falhasLote++;
+
 
           erros.push({
             telefone,
@@ -694,18 +1071,22 @@ export default async function handler(
               "Falha no envio."
           });
 
+
           continue;
         }
 
 
         const messageId =
           dadosMeta
-            ?.messages?.[0]
+            ?.messages
+            ?.[0]
             ?.id;
 
 
         if (!messageId) {
-          falhas++;
+
+          falhasLote++;
+
 
           erros.push({
             telefone,
@@ -714,11 +1095,12 @@ export default async function handler(
               "A Meta não retornou o ID da mensagem."
           });
 
+
           continue;
         }
 
 
-        enviados++;
+        enviadosLote++;
 
 
         // ---------------------------------------------------
@@ -727,7 +1109,9 @@ export default async function handler(
 
         await redisCommand([
           "SET",
+
           `campanha:mensagem:${messageId}`,
+
           JSON.stringify({
             campanha:
               nomeCampanha,
@@ -739,6 +1123,9 @@ export default async function handler(
 
             status:
               "sent",
+
+            lote:
+              loteNumero,
 
             criadoEm:
               new Date()
@@ -753,7 +1140,9 @@ export default async function handler(
 
         await redisCommand([
           "SET",
+
           `campanha:telefone:${telefone}`,
+
           JSON.stringify({
             campanha:
               nomeCampanha,
@@ -774,6 +1163,9 @@ export default async function handler(
             descadastrado:
               false,
 
+            lote:
+              loteNumero,
+
             criadoEm:
               new Date()
                 .toISOString()
@@ -781,72 +1173,33 @@ export default async function handler(
         ]);
 
 
-        // ---------------------------------------------------
-        // ATUALIZA ENVIADOS SEM APAGAR ENTREGA/RESPOSTA
-        // ---------------------------------------------------
+      } catch (
+        erroEnvio
+      ) {
 
-        const registroAtual =
-          await redisCommand([
-            "GET",
-            chaveStatus
-          ]);
+        falhasLote++;
 
-        if (registroAtual) {
-          try {
-            const statusAtual =
-              JSON.parse(
-                registroAtual
-              );
-
-            statusAtual.enviados =
-              enviados;
-
-            statusAtual.falhas =
-              falhas;
-
-            statusAtual.ignorados =
-              ignorados;
-
-            statusAtual.atualizadoEm =
-              new Date()
-                .toISOString();
-
-            await redisCommand([
-              "SET",
-              chaveStatus,
-              JSON.stringify(
-                statusAtual
-              )
-            ]);
-
-          } catch {
-            // segue campanha
-          }
-        }
-
-
-      } catch (erroEnvio) {
-
-        falhas++;
 
         erros.push({
           telefone,
 
           erro:
-            erroEnvio?.message ||
+            erroEnvio
+              ?.message ||
             "Erro inesperado no envio."
         });
       }
 
 
       // -----------------------------------------------------
-      // PEQUENO INTERVALO ENTRE ENVIOS
+      // INTERVALO ENTRE ENVIOS
       // -----------------------------------------------------
 
       if (
         indice <
         contatos.length - 1
       ) {
+
         await aguardar(
           INTERVALO_ENTRE_ENVIOS_MS
         );
@@ -855,103 +1208,41 @@ export default async function handler(
 
 
     // -------------------------------------------------------
-    // STATUS FINAL
+    // ATUALIZA STATUS AGREGADO
     // -------------------------------------------------------
 
-    const registroFinal =
-      await redisCommand([
-        "GET",
-        chaveStatus
-      ]);
+    const statusAtualizado =
+      await atualizarContadoresCampanha(
+        chaveStatus,
+        {
+          enviadosSomar:
+            enviadosLote,
 
-    let statusFinal =
-      statusInicial;
+          falhasSomar:
+            falhasLote,
 
-    if (registroFinal) {
-      try {
-        statusFinal =
-          JSON.parse(
-            registroFinal
-          );
-      } catch {
-        statusFinal =
-          statusInicial;
-      }
-    }
+          ignoradosSomar:
+            ignoradosLote,
 
+          loteNumero,
 
-    statusFinal.total =
-      contatos.length;
+          totalLotes,
 
-    statusFinal.enviados =
-      enviados;
-
-    statusFinal.falhas =
-      falhas;
-
-    statusFinal.ignorados =
-      ignorados;
-
-    statusFinal.finalizadoEm =
-      new Date()
-        .toISOString();
-
-    statusFinal.atualizadoEm =
-      statusFinal.finalizadoEm;
-
-
-    await redisCommand([
-      "SET",
-      chaveStatus,
-      JSON.stringify(
-        statusFinal
-      )
-    ]);
+          finalizado:
+            ultimoLote
+        }
+      );
 
 
     // -------------------------------------------------------
-    // SE NADA FOI ENVIADO
-    // -------------------------------------------------------
-
-    if (
-      enviados === 0 &&
-      falhas > 0
-    ) {
-      return res
-        .status(400)
-        .json({
-          ok: false,
-
-          erro:
-            "Nenhuma mensagem foi enviada.",
-
-          campanha:
-            nomeCampanha,
-
-          total:
-            contatos.length,
-
-          enviados,
-
-          falhas,
-
-          ignorados,
-
-          erros,
-
-          ignoradosDetalhes
-        });
-    }
-
-
-    // -------------------------------------------------------
-    // SUCESSO
+    // RESPOSTA
     // -------------------------------------------------------
 
     return res
       .status(200)
       .json({
-        ok: true,
+        ok:
+          true,
 
         campanha:
           nomeCampanha,
@@ -959,18 +1250,47 @@ export default async function handler(
         template:
           nomeTemplate,
 
-        quantidade:
+        loteNumero,
+
+        totalLotes,
+
+        ultimoLote,
+
+        quantidadeLote:
           contatos.length,
 
-        enviados,
+        totalCampanha,
 
-        falhas,
+        enviadosLote,
 
-        ignorados,
+        falhasLote,
+
+        ignoradosLote,
+
+        enviados:
+          Number(
+            statusAtualizado
+              .enviados || 0
+          ),
+
+        falhas:
+          Number(
+            statusAtualizado
+              .falhas || 0
+          ),
+
+        ignorados:
+          Number(
+            statusAtualizado
+              .ignorados || 0
+          ),
 
         erros,
 
-        ignoradosDetalhes
+        ignoradosDetalhes,
+
+        finalizado:
+          ultimoLote
       });
 
 
@@ -981,13 +1301,16 @@ export default async function handler(
       erro
     );
 
+
     return res
       .status(500)
       .json({
-        ok: false,
+        ok:
+          false,
 
         erro:
-          erro?.message ||
+          erro
+            ?.message ||
           "Erro interno ao enviar campanha."
       });
   }
