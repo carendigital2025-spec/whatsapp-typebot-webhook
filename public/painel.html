@@ -998,7 +998,7 @@ th {
 
       <button
         id="botaoCancelarEnvio"
-                type="button"
+        type="button"
         class="botao-cancelar"
         onclick="cancelarEnvioCampanha()"
       >
@@ -1035,6 +1035,9 @@ let campanhaSelecionada =
 let intervaloStatus = null;
 
 let intervaloHistorico = null;
+
+const TAMANHO_LOTE_CAMPANHA = 25;
+const MAX_CONTATOS_POR_CAMPANHA = 500;
 
 
 // ===========================================================
@@ -1743,6 +1746,19 @@ function prepararCampanha() {
   }
 
 
+  if (
+    contatosValidos.length >
+    MAX_CONTATOS_POR_CAMPANHA
+  ) {
+
+    mostrarErro(
+      `O limite atual é de ${MAX_CONTATOS_POR_CAMPANHA} contatos válidos por campanha.`
+    );
+
+    return;
+  }
+
+
   const template =
     document
       .getElementById(
@@ -1881,56 +1897,21 @@ async function confirmarEnvioCampanha() {
     true;
 
 
-  mostrarAviso(
-    `Enviando campanha "${nome}"...`
-  );
+  const totalCampanha =
+    contatos.length;
+
+  const totalLotes =
+    Math.ceil(
+      totalCampanha /
+      TAMANHO_LOTE_CAMPANHA
+    );
+
+
+  let ultimoResultado =
+    null;
 
 
   try {
-
-    const resposta =
-      await fetch(
-        "/api/send-campaign",
-        {
-          method:
-            "POST",
-
-          credentials:
-            "same-origin",
-
-          headers: {
-            "Content-Type":
-              "application/json"
-          },
-
-          body:
-            JSON.stringify({
-              campanha:
-                nome,
-
-              template,
-
-              contatos
-            })
-        }
-      );
-
-
-    const dados =
-      await resposta.json();
-
-
-    if (
-      !resposta.ok ||
-      !dados.ok
-    ) {
-
-      throw new Error(
-        dados.erro ||
-        "Erro ao enviar campanha."
-      );
-    }
-
 
     campanhaSelecionada =
       nome;
@@ -1940,6 +1921,118 @@ async function confirmarEnvioCampanha() {
       "adcredUltimaCampanha",
       nome
     );
+
+
+    for (
+      let indiceLote = 0;
+      indiceLote <
+      totalLotes;
+      indiceLote++
+    ) {
+
+      const loteNumero =
+        indiceLote + 1;
+
+
+      const inicio =
+        indiceLote *
+        TAMANHO_LOTE_CAMPANHA;
+
+
+      const fim =
+        inicio +
+        TAMANHO_LOTE_CAMPANHA;
+
+
+      const contatosDoLote =
+        contatos.slice(
+          inicio,
+          fim
+        );
+
+
+      mostrarAviso(
+        `Enviando campanha "${nome}" — lote ${loteNumero} de ${totalLotes}...`
+      );
+
+
+      const resposta =
+        await fetch(
+          "/api/send-campaign",
+          {
+            method:
+              "POST",
+
+            credentials:
+              "same-origin",
+
+            headers: {
+              "Content-Type":
+                "application/json"
+            },
+
+            body:
+              JSON.stringify({
+                campanha:
+                  nome,
+
+                template,
+
+                contatos:
+                  contatosDoLote,
+
+                loteNumero,
+
+                totalLotes,
+
+                totalCampanha,
+
+                continuacao:
+                  loteNumero > 1,
+
+                ultimoLote:
+                  loteNumero ===
+                  totalLotes
+              })
+          }
+        );
+
+
+      let dados;
+
+      try {
+
+        dados =
+          await resposta.json();
+
+      } catch {
+
+        throw new Error(
+          `O servidor retornou uma resposta inválida no lote ${loteNumero}.`
+        );
+      }
+
+
+      if (
+        !resposta.ok ||
+        !dados.ok
+      ) {
+
+        throw new Error(
+          dados.erro ||
+          `Erro ao enviar o lote ${loteNumero}.`
+        );
+      }
+
+
+      ultimoResultado =
+        dados;
+
+
+      await atualizarStatusCampanha(
+        nome
+      );
+    }
 
 
     campanhaPendente =
@@ -1956,8 +2049,21 @@ async function confirmarEnvioCampanha() {
       );
 
 
+    const enviados =
+      ultimoResultado
+        ?.enviados || 0;
+
+    const falhas =
+      ultimoResultado
+        ?.falhas || 0;
+
+    const ignorados =
+      ultimoResultado
+        ?.ignorados || 0;
+
+
     mostrarSucesso(
-      `Campanha "${nome}" concluída. Enviados: ${dados.enviados || 0}. Falhas: ${dados.falhas || 0}. Ignorados: ${dados.ignorados || 0}.`
+      `Campanha "${nome}" concluída em ${totalLotes} lote(s). Enviados: ${enviados}. Falhas: ${falhas}. Ignorados: ${ignorados}.`
     );
 
 
@@ -1975,6 +2081,14 @@ async function confirmarEnvioCampanha() {
       erro.message ||
       "Erro ao enviar campanha."
     );
+
+
+    await atualizarStatusCampanha(
+      nome
+    );
+
+
+    await carregarHistorico();
 
 
   } finally {
@@ -2000,7 +2114,7 @@ async function atualizarStatusCampanha(
 ) {
 
   if (!nome) {
-        return;
+    return;
   }
 
 
@@ -2543,7 +2657,7 @@ function carregarContatosDaBase() {
     contatos
       .slice(
         0,
-        100
+        MAX_CONTATOS_POR_CAMPANHA
       )
       .forEach(
         contato => {
