@@ -1,2443 +1,1679 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-
 <head>
-
-<meta charset="UTF-8">
-
-<meta
-  name="viewport"
-  content="width=device-width, initial-scale=1.0"
->
-
-<title>
-  ADCred - Painel de Campanhas
-</title>
-
-
-<style>
-
-* {
-  box-sizing: border-box;
-}
-
-
-body {
-  font-family: Arial, sans-serif;
-  background: #f4f6f8;
-  margin: 0;
-  color: #111827;
-}
-
-
-.topo {
-  background: #111827;
-  color: white;
-  padding: 22px;
-  text-align: center;
-}
-
-
-.topo h1 {
-  margin: 0;
-}
-
-
-.topo p {
-  margin-bottom: 10px;
-}
-
-
-.link-conversas {
-  display: inline-block;
-  margin-top: 8px;
-  padding: 10px 18px;
-  background: white;
-  color: #111827;
-  text-decoration: none;
-  border-radius: 8px;
-  font-weight: bold;
-}
-
-
-.container {
-  max-width: 1150px;
-  margin: 30px auto;
-  padding: 20px;
-}
-
-
-.card {
-  background: white;
-  border-radius: 12px;
-  padding: 25px;
-  margin-bottom: 20px;
-
-  box-shadow:
-    0 2px 8px
-    rgba(0, 0, 0, 0.08);
-}
-
-
-h2 {
-  margin-top: 0;
-}
-
-
-label {
-  display: block;
-  margin-top: 10px;
-  font-weight: bold;
-}
-
-
-input,
-select {
-  width: 100%;
-  padding: 12px;
-
-  margin-top: 8px;
-  margin-bottom: 18px;
-
-  border:
-    1px solid #d1d5db;
-
-  border-radius: 7px;
-}
-
-
-button {
-  background: #111827;
-  color: white;
-
-  border: none;
-
-  padding: 13px 20px;
-
-  border-radius: 8px;
-
-  cursor: pointer;
-
-  font-size: 15px;
-  font-weight: bold;
-}
-
-
-button:hover {
-  opacity: 0.9;
-}
-
-
-button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-
-.status {
-  display: grid;
-
-  grid-template-columns:
-    repeat(4, 1fr);
-
-  gap: 12px;
-}
-
-
-.status-detalhado {
-  display: grid;
-
-  grid-template-columns:
-    repeat(6, 1fr);
-
-  gap: 12px;
-}
-
-
-.numero {
-  background: #f4f6f8;
-
-  padding: 18px 10px;
-
-  border-radius: 8px;
-
-  text-align: center;
-}
-
-
-.numero strong {
-  display: block;
-
-  font-size: 25px;
-
-  margin-bottom: 5px;
-}
-
-
-.mensagem {
-  display: none;
-
-  padding: 15px;
-
-  margin-top: 15px;
-
-  border-radius: 8px;
-}
-
-
-.sucesso {
-  display: block;
-
-  background: #dcfce7;
-
-  color: #166534;
-}
-
-
-.erro {
-  display: block;
-
-  background: #fee2e2;
-
-  color: #991b1b;
-}
-
-
-.aviso {
-  display: block;
-
-  background: #fef3c7;
-
-  color: #92400e;
-}
-
-
-.tabela-container {
-  width: 100%;
-
-  overflow-x: auto;
-
-  margin-top: 18px;
-}
-
-
-table {
-  width: 100%;
-
-  border-collapse:
-    collapse;
-}
-
-
-th,
-td {
-  padding: 11px;
-
-  text-align: left;
-
-  border-bottom:
-    1px solid #e5e7eb;
-
-  white-space: nowrap;
-}
-
-
-th {
-  background: #f9fafb;
-}
-
-
-.valido {
-  color: green;
-
-  font-weight: bold;
-}
-
-
-.invalido {
-  color: #b91c1c;
-
-  font-weight: bold;
-}
-
-
-.selecionar-campanha {
-  background: #374151;
-
-  padding: 8px 12px;
-
-  font-size: 13px;
-}
-
-
-.subtitulo {
-  color: #6b7280;
-
-  margin-top: -7px;
-}
-
-
-.campanha-atual {
-  margin-bottom: 15px;
-
-  font-weight: bold;
-
-  color: #374151;
-}
-
-
-.sem-registros {
-  padding: 20px;
-
-  text-align: center;
-
-  color: #6b7280;
-}
-
-
-.acoes-historico {
-  display: flex;
-
-  justify-content:
-    space-between;
-
-  align-items: center;
-
-  gap: 15px;
-
-  margin-bottom: 15px;
-}
-
-
-.data-campanha {
-  font-size: 13px;
-
-  color: #6b7280;
-}
-
-
-@media (
-  max-width: 900px
-) {
-
-  .status-detalhado {
-    grid-template-columns:
-      repeat(3, 1fr);
-  }
-}
-
-
-@media (
-  max-width: 700px
-) {
-
-  .status,
-  .status-detalhado {
-    grid-template-columns:
-      repeat(2, 1fr);
-  }
-
-
-  .acoes-historico {
-    display: block;
-  }
-
-
-  .acoes-historico button {
-    margin-top: 10px;
-  }
-}
-
-</style>
-
+  <meta charset="UTF-8" />
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  />
+
+  <title>Minha Base | ADCred</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      background: #f3f6f9;
+      color: #162033;
+      min-height: 100vh;
+    }
+
+    .topo {
+      background: #071426;
+      color: #ffffff;
+      padding: 18px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .topo h1 {
+      font-size: 22px;
+    }
+
+    .topo p {
+      font-size: 13px;
+      color: #b9c6d5;
+      margin-top: 4px;
+    }
+
+    .topo a {
+      color: #071426;
+      background: #d7aa4b;
+      text-decoration: none;
+      font-weight: 700;
+      padding: 10px 16px;
+      border-radius: 9px;
+      font-size: 14px;
+    }
+
+    .conteudo {
+      width: 100%;
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 28px 20px 40px;
+    }
+
+    .cabecalho-secao {
+      margin-bottom: 22px;
+    }
+
+    .cabecalho-secao h2 {
+      font-size: 26px;
+      margin-bottom: 6px;
+    }
+
+    .cabecalho-secao p {
+      color: #6d788a;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .card {
+      background: #ffffff;
+      border-radius: 14px;
+      padding: 22px;
+      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.06);
+      border: 1px solid #e7ebf0;
+    }
+
+    .card span {
+      display: block;
+      color: #7a8697;
+      font-size: 13px;
+      margin-bottom: 8px;
+    }
+
+    .card strong {
+      font-size: 30px;
+      color: #10233e;
+    }
+
+    .card.selecionados {
+      border-color: #d7aa4b;
+      background: #fffdf7;
+    }
+
+    .acoes-campanha {
+      background: #ffffff;
+      border: 1px solid #e7ebf0;
+      border-radius: 14px;
+      padding: 18px;
+      margin-bottom: 18px;
+      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.05);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 15px;
+      flex-wrap: wrap;
+    }
+
+    .acoes-esquerda {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .botao-selecao {
+      min-height: 44px;
+      border: 1px solid #cfd7e1;
+      background: #ffffff;
+      color: #26364c;
+      border-radius: 9px;
+      padding: 0 15px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .botao-selecao:hover {
+      background: #f7f9fb;
+    }
+
+    .botao-campanha {
+      min-height: 46px;
+      border: 0;
+      border-radius: 10px;
+      padding: 0 20px;
+      background: #d7aa4b;
+      color: #071426;
+      font-size: 14px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .botao-campanha:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    .limite {
+      width: 100%;
+      margin-top: 3px;
+      font-size: 11.5px;
+      color: #8a95a5;
+    }
+
+    .filtros {
+      background: #ffffff;
+      padding: 18px;
+      border-radius: 14px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.05);
+      border: 1px solid #e7ebf0;
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .campo-pesquisa {
+      flex: 1;
+      min-width: 220px;
+    }
+
+    .campo-pesquisa input {
+      width: 100%;
+      height: 44px;
+      border: 1px solid #d6dde6;
+      border-radius: 9px;
+      padding: 0 14px;
+      font-size: 14px;
+      outline: none;
+    }
+
+    .campo-pesquisa input:focus {
+      border-color: #d7aa4b;
+      box-shadow: 0 0 0 3px rgba(215, 170, 75, 0.14);
+    }
+
+    select {
+      height: 44px;
+      border: 1px solid #d6dde6;
+      border-radius: 9px;
+      padding: 0 12px;
+      background: #ffffff;
+      color: #26364c;
+      font-size: 14px;
+      outline: none;
+    }
+
+    .botao-atualizar {
+      height: 44px;
+      border: 0;
+      border-radius: 9px;
+      padding: 0 17px;
+      background: #102b4a;
+      color: #ffffff;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .botao-atualizar:disabled {
+      opacity: 0.65;
+      cursor: wait;
+    }
+
+    .tabela-box {
+      background: #ffffff;
+      border-radius: 14px;
+      border: 1px solid #e7ebf0;
+      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.05);
+      overflow: hidden;
+    }
+
+    .tabela-scroll {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 1050px;
+    }
+
+    thead {
+      background: #f6f8fb;
+    }
+
+    th {
+      text-align: left;
+      padding: 14px 16px;
+      font-size: 12px;
+      color: #5f6b7c;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      border-bottom: 1px solid #e7ebf0;
+    }
+
+    td {
+      padding: 15px 16px;
+      font-size: 14px;
+      border-bottom: 1px solid #edf0f4;
+      vertical-align: middle;
+    }
+
+    tbody tr:hover {
+      background: #fafbfd;
+    }
+
+    tbody tr.selecionado {
+      background: #fffaf0;
+    }
+
+    .coluna-checkbox {
+      width: 55px;
+      text-align: center;
+    }
+
+    .checkbox-lead {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+      accent-color: #102b4a;
+    }
+
+    .checkbox-lead:disabled {
+      cursor: not-allowed;
+      opacity: 0.35;
+    }
+
+    .nome {
+      font-weight: 700;
+      color: #142033;
+    }
+
+    .telefone {
+      font-family: Consolas, monospace;
+      color: #3f4d5f;
+    }
+
+    .status {
+      display: inline-block;
+      padding: 6px 9px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .status.ativo {
+      background: #e8f8ee;
+      color: #1e6d3d;
+    }
+
+    .status.descadastrado {
+      background: #fdecec;
+      color: #9b2c2c;
+    }
+
+    .sim {
+      color: #1e6d3d;
+      font-weight: 700;
+    }
+
+    .nao {
+      color: #9b2c2c;
+      font-weight: 700;
+    }
+
+    .indisponivel {
+      color: #9b2c2c;
+      font-size: 11px;
+      display: block;
+      margin-top: 4px;
+    }
+
+    .rodape-tabela {
+      padding: 14px 16px;
+      color: #6c7788;
+      font-size: 13px;
+      background: #fbfcfd;
+    }
+
+    .mensagem {
+      padding: 28px;
+      text-align: center;
+      color: #6b7688;
+    }
+
+    .erro {
+      color: #a52222;
+    }
+
+    .aviso {
+      display: none;
+      margin-bottom: 18px;
+      padding: 13px 15px;
+      border-radius: 10px;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .aviso.sucesso {
+      display: block;
+      background: #effaf3;
+      color: #176936;
+      border: 1px solid #cbeed7;
+    }
+
+    .aviso.erro {
+      display: block;
+      background: #fff1f1;
+      color: #a52222;
+      border: 1px solid #ffd1d1;
+    }
+
+    @media (max-width: 950px) {
+      .cards {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 600px) {
+      .cards {
+        grid-template-columns: 1fr;
+      }
+
+      .topo {
+        align-items: flex-start;
+      }
+
+      .conteudo {
+        padding: 20px 12px 32px;
+      }
+
+      .acoes-campanha {
+        align-items: stretch;
+      }
+
+      .acoes-esquerda,
+      .botao-campanha {
+        width: 100%;
+      }
+
+      .botao-selecao {
+        flex: 1;
+      }
+    }
+  </style>
 </head>
-
 
 <body>
 
+  <header class="topo">
 
-<!-- ===================================================== -->
-<!-- LOGIN -->
-<!-- ===================================================== -->
+    <div>
+      <h1>ADCred Solução Financeira</h1>
+      <p>Minha Base de Leads</p>
+    </div>
 
-<div
-  id="telaLogin"
-  style="
-    min-height:100vh;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    padding:20px;
-  "
->
+    <a href="/painel.html">
+      Voltar ao painel
+    </a>
 
-  <div
-    style="
-      width:100%;
-      max-width:380px;
-      background:white;
-      padding:30px;
-      border-radius:14px;
-      box-shadow:0 8px 30px rgba(0,0,0,0.08);
-    "
-  >
+  </header>
 
-    <h2>
-      ADCred
-    </h2>
+  <main class="conteudo">
 
-    <p>
-      Digite a senha para acessar o painel.
-    </p>
+    <section class="cabecalho-secao">
+
+      <h2>Minha Base</h2>
+
+      <p>
+        Contatos captados com registro de consentimento.
+        Selecione leads ativos para utilizá-los em uma campanha.
+      </p>
+
+    </section>
 
 
-    <input
-      id="senhaPainel"
-      type="password"
-      placeholder="Senha"
-    >
+    <section class="cards">
+
+      <div class="card">
+
+        <span>Total de leads</span>
+
+        <strong id="totalLeads">
+          0
+        </strong>
+
+      </div>
 
 
-    <button
-      onclick="entrarPainel()"
-      style="width:100%;"
-    >
-      Entrar
-    </button>
+      <div class="card">
+
+        <span>Ativos</span>
+
+        <strong id="totalAtivos">
+          0
+        </strong>
+
+      </div>
+
+
+      <div class="card">
+
+        <span>Descadastrados</span>
+
+        <strong id="totalDescadastrados">
+          0
+        </strong>
+
+      </div>
+
+
+      <div class="card selecionados">
+
+        <span>Selecionados</span>
+
+        <strong id="totalSelecionados">
+          0
+        </strong>
+
+      </div>
+
+    </section>
 
 
     <div
-      id="erroLogin"
-      style="
-        margin-top:12px;
-        color:#b00020;
-        display:none;
-      "
+      id="aviso"
+      class="aviso"
     ></div>
 
-  </div>
 
-</div>
+    <section class="acoes-campanha">
 
+      <div class="acoes-esquerda">
 
-<!-- ===================================================== -->
-<!-- PAINEL -->
-<!-- ===================================================== -->
+        <button
+          id="botaoSelecionarAtivos"
+          class="botao-selecao"
+          type="button"
+        >
+          Selecionar todos os ativos
+        </button>
 
-<div
-  id="conteudoPainel"
-  style="display:none;"
->
 
+        <button
+          id="botaoLimparSelecao"
+          class="botao-selecao"
+          type="button"
+        >
+          Limpar seleção
+        </button>
 
-<div class="topo">
-
-  <h1>
-    ADCred
-  </h1>
-
-  <p>
-    Painel de Campanhas
-  </p>
-
-  <a
-    href="/conversas.html"
-    class="link-conversas"
-  >
-    Conversas
-  </a>
-
-  <a
-  href="/base.html"
-  class="link-conversas"
-  style="
-    margin-left:8px;
-    background:#d7aa4b;
-    color:#071426;
-  "
->
-  Minha Base
-</a>
-
-</div>
-
-
-<div class="container">
-
-
-<!-- ===================================================== -->
-<!-- NOVA CAMPANHA -->
-<!-- ===================================================== -->
-
-<div class="card">
-
-  <h2>
-    Nova campanha
-  </h2>
-
-
-  <label>
-    Nome da campanha
-  </label>
-
-  <input
-    id="nomeCampanha"
-    type="text"
-    placeholder="Ex.: FGTS Setembro 01"
-  >
-
-
-  <label>
-    Importar lista de contatos CSV
-  </label>
-
-  <input
-    id="arquivoCSV"
-    type="file"
-    accept=".csv,text/csv"
-  >
-
-
-  <label>
-    Template do WhatsApp
-  </label>
-
-  <select id="template">
-
-    <option value="">
-      Selecione um template
-    </option>
-
-  </select>
-
-
-  <button
-    id="botaoCampanha"
-    type="button"
-    onclick="prepararCampanha()"
-  >
-    Preparar campanha
-  </button>
-
-
-  <div
-    id="mensagem"
-    class="mensagem"
-  ></div>
-
-</div>
-
-
-<!-- ===================================================== -->
-<!-- ANÁLISE DA LISTA -->
-<!-- ===================================================== -->
-
-<div class="card">
-
-  <h2>
-    Análise da lista
-  </h2>
-
-
-  <div class="status">
-
-    <div class="numero">
-
-      <strong id="totalContatos">
-        0
-      </strong>
-
-      Total
-
-    </div>
-
-
-    <div class="numero">
-
-      <strong id="validos">
-        0
-      </strong>
-
-      Válidos
-
-    </div>
-
-
-    <div class="numero">
-
-      <strong id="duplicados">
-        0
-      </strong>
-
-      Duplicados
-
-    </div>
-
-
-    <div class="numero">
-
-      <strong id="invalidos">
-        0
-      </strong>
-
-      Inválidos
-
-    </div>
-
-  </div>
-
-</div>
-
-
-<!-- ===================================================== -->
-<!-- PRÉVIA -->
-<!-- ===================================================== -->
-
-<div
-  id="previewCard"
-  class="card"
-  style="display:none;"
->
-
-  <h2>
-    Prévia dos contatos
-  </h2>
-
-  <p class="subtitulo">
-    Mostrando os primeiros 20 registros.
-  </p>
-
-
-  <div class="tabela-container">
-
-    <table>
-
-      <thead>
-
-        <tr>
-
-          <th>
-            Nome
-          </th>
-
-          <th>
-            Telefone original
-          </th>
-
-          <th>
-            Telefone tratado
-          </th>
-
-          <th>
-            Status
-          </th>
-
-        </tr>
-
-      </thead>
-
-
-      <tbody
-        id="previewTabela"
-      >
-      </tbody>
-
-    </table>
-
-  </div>
-
-</div>
-
-
-<!-- ===================================================== -->
-<!-- STATUS DA CAMPANHA -->
-<!-- ===================================================== -->
-
-<div class="card">
-
-  <h2>
-    Status da campanha
-  </h2>
-
-
-  <div
-    id="nomeCampanhaAtual"
-    class="campanha-atual"
-  >
-    Nenhuma campanha selecionada
-  </div>
-
-
-  <div class="status-detalhado">
-
-    <div class="numero">
-
-      <strong
-        id="campanhaEnviados"
-      >
-        0
-      </strong>
-
-      Enviados
-
-    </div>
-
-
-    <div class="numero">
-
-      <strong
-        id="campanhaEntregues"
-      >
-        0
-      </strong>
-
-      Entregues
-
-    </div>
-
-
-    <div class="numero">
-
-      <strong
-        id="campanhaRespondidos"
-      >
-        0
-      </strong>
-
-      Respondidos
-
-    </div>
-
-
-    <div class="numero">
-
-      <strong
-        id="campanhaDescadastrados"
-      >
-        0
-      </strong>
-
-      Descadastrados
-
-    </div>
-
-
-    <div class="numero">
-
-      <strong
-        id="campanhaFalhas"
-      >
-        0
-      </strong>
-
-      Falhas
-
-    </div>
-
-
-    <div class="numero">
-
-      <strong
-        id="campanhaIgnorados"
-      >
-        0
-      </strong>
-
-      Ignorados
-
-    </div>
-
-  </div>
-
-
-  <p
-    id="ultimaAtualizacao"
-    class="data-campanha"
-    style="margin-top:15px;"
-  >
-  </p>
-
-</div>
-
-
-<!-- ===================================================== -->
-<!-- HISTÓRICO -->
-<!-- ===================================================== -->
-
-<div class="card">
-
-  <div class="acoes-historico">
-
-    <div>
-
-      <h2
-        style="margin-bottom:5px;"
-      >
-        Histórico de campanhas
-      </h2>
-
-      <div class="subtitulo">
-        Consulte campanhas enviadas anteriormente.
       </div>
 
-    </div>
 
-
-    <button
-      type="button"
-      onclick="carregarHistorico()"
-    >
-      Atualizar histórico
-    </button>
-
-  </div>
-
-
-  <div class="tabela-container">
-
-    <table>
-
-      <thead>
-
-        <tr>
-
-          <th>
-            Campanha
-          </th>
-
-          <th>
-            Enviados
-          </th>
-
-          <th>
-            Entregues
-          </th>
-
-          <th>
-            Respondidos
-          </th>
-
-          <th>
-            Descadastrados
-          </th>
-
-          <th>
-            Falhas
-          </th>
-
-          <th>
-            Ignorados
-          </th>
-
-          <th>
-            Atualização
-          </th>
-
-          <th>
-            Abrir
-          </th>
-
-        </tr>
-
-      </thead>
-
-
-      <tbody
-        id="historicoTabela"
+      <button
+        id="botaoUsarCampanha"
+        class="botao-campanha"
+        type="button"
+        disabled
       >
-
-        <tr>
-
-          <td
-            colspan="9"
-            class="sem-registros"
-          >
-            Carregando histórico...
-          </td>
-
-        </tr>
-
-      </tbody>
-
-    </table>
-
-  </div>
-
-</div>
+        Usar selecionados em campanha
+      </button>
 
 
-</div>
+      <div class="limite">
+        Máximo de 100 contatos por campanha.
+        Leads descadastrados ou sem consentimento não podem ser selecionados.
+      </div>
 
-</div>
-
-
-<script>
-
-// ===========================================================
-// VARIÁVEIS
-// ===========================================================
-
-let contatosProcessados = [];
-
-let campanhaSelecionada =
-  localStorage.getItem(
-    "adcredUltimaCampanha"
-  ) || "";
-
-let intervaloStatus = null;
-
-let intervaloHistorico = null;
+    </section>
 
 
-// ===========================================================
-// TEMPLATES
-// ===========================================================
+    <section class="filtros">
 
-async function carregarTemplates() {
+      <div class="campo-pesquisa">
 
-  const campo =
-    document.getElementById(
-      "template"
-    );
+        <input
+          type="text"
+          id="pesquisa"
+          placeholder="Pesquisar por nome ou WhatsApp"
+        />
 
-
-  campo.disabled =
-    true;
+      </div>
 
 
-  campo.innerHTML =
-    `<option value="">
-       Carregando templates...
-     </option>`;
+      <select id="filtroStatus">
+
+        <option value="todos">
+          Todos os status
+        </option>
+
+        <option value="ativo">
+          Ativos
+        </option>
+
+        <option value="descadastrado">
+          Descadastrados
+        </option>
+
+      </select>
 
 
-  try {
+      <button
+        id="botaoAtualizar"
+        class="botao-atualizar"
+        type="button"
+      >
+        Atualizar
+      </button>
 
-    const resposta =
-      await fetch(
-        "/api/templates",
-        {
-          method: "GET",
-          credentials:
-            "same-origin"
-        }
+    </section>
+
+
+    <section class="tabela-box">
+
+      <div class="tabela-scroll">
+
+        <table>
+
+          <thead>
+
+            <tr>
+
+              <th class="coluna-checkbox">
+                Selecionar
+              </th>
+
+              <th>Nome</th>
+
+              <th>WhatsApp</th>
+
+              <th>Status</th>
+
+              <th>Consentimento</th>
+
+              <th>Origem</th>
+
+              <th>Data do cadastro</th>
+
+            </tr>
+
+          </thead>
+
+
+          <tbody id="corpoTabela">
+
+            <tr>
+
+              <td colspan="7">
+
+                <div class="mensagem">
+                  Carregando contatos...
+                </div>
+
+              </td>
+
+            </tr>
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+
+      <div
+        id="rodapeTabela"
+        class="rodape-tabela"
+      >
+        0 contatos exibidos
+      </div>
+
+    </section>
+
+  </main>
+
+
+  <script>
+
+    // =======================================================
+    // ELEMENTOS
+    // =======================================================
+
+    const totalLeads =
+      document.getElementById(
+        "totalLeads"
+      );
+
+    const totalAtivos =
+      document.getElementById(
+        "totalAtivos"
+      );
+
+    const totalDescadastrados =
+      document.getElementById(
+        "totalDescadastrados"
+      );
+
+    const totalSelecionados =
+      document.getElementById(
+        "totalSelecionados"
+      );
+
+    const pesquisa =
+      document.getElementById(
+        "pesquisa"
+      );
+
+    const filtroStatus =
+      document.getElementById(
+        "filtroStatus"
+      );
+
+    const botaoAtualizar =
+      document.getElementById(
+        "botaoAtualizar"
+      );
+
+    const botaoSelecionarAtivos =
+      document.getElementById(
+        "botaoSelecionarAtivos"
+      );
+
+    const botaoLimparSelecao =
+      document.getElementById(
+        "botaoLimparSelecao"
+      );
+
+    const botaoUsarCampanha =
+      document.getElementById(
+        "botaoUsarCampanha"
+      );
+
+    const corpoTabela =
+      document.getElementById(
+        "corpoTabela"
+      );
+
+    const rodapeTabela =
+      document.getElementById(
+        "rodapeTabela"
+      );
+
+    const aviso =
+      document.getElementById(
+        "aviso"
       );
 
 
-    const dados =
-      await resposta.json();
+    // =======================================================
+    // DADOS
+    // =======================================================
+
+    let leads = [];
+
+    const selecionados =
+      new Set();
+
+    const LIMITE_CAMPANHA = 100;
 
 
-    if (
-      !resposta.ok ||
-      !dados.ok
+    // =======================================================
+    // TELEFONE
+    // =======================================================
+
+    function formatarTelefone(
+      telefone
     ) {
-      throw new Error(
-        dados.erro ||
-        "Erro ao carregar templates."
+
+      if (!telefone) {
+        return "-";
+      }
+
+      let numero =
+        String(telefone)
+          .replace(/\D/g, "");
+
+      if (
+        numero.startsWith("55")
+      ) {
+        numero =
+          numero.substring(2);
+      }
+
+      if (
+        numero.length === 11
+      ) {
+
+        return (
+          "(" +
+          numero.substring(0, 2) +
+          ") " +
+          numero.substring(2, 7) +
+          "-" +
+          numero.substring(7)
+        );
+      }
+
+      if (
+        numero.length === 10
+      ) {
+
+        return (
+          "(" +
+          numero.substring(0, 2) +
+          ") " +
+          numero.substring(2, 6) +
+          "-" +
+          numero.substring(6)
+        );
+      }
+
+      return telefone;
+    }
+
+
+    // =======================================================
+    // DATA
+    // =======================================================
+
+    function formatarData(
+      data
+    ) {
+
+      if (!data) {
+        return "-";
+      }
+
+      const objetoData =
+        new Date(data);
+
+      if (
+        Number.isNaN(
+          objetoData.getTime()
+        )
+      ) {
+        return "-";
+      }
+
+      return objetoData
+        .toLocaleString(
+          "pt-BR",
+          {
+            dateStyle:
+              "short",
+
+            timeStyle:
+              "short"
+          }
+        );
+    }
+
+
+    // =======================================================
+    // SEGURANÇA HTML
+    // =======================================================
+
+    function escaparHtml(
+      texto
+    ) {
+
+      return String(
+        texto || ""
+      )
+        .replace(
+          /&/g,
+          "&amp;"
+        )
+        .replace(
+          /</g,
+          "&lt;"
+        )
+        .replace(
+          />/g,
+          "&gt;"
+        )
+        .replace(
+          /"/g,
+          "&quot;"
+        )
+        .replace(
+          /'/g,
+          "&#039;"
+        );
+    }
+
+
+    // =======================================================
+    // AVISOS
+    // =======================================================
+
+    function mostrarAviso(
+      texto,
+      tipo
+    ) {
+
+      aviso.textContent =
+        texto;
+
+      aviso.className =
+        "aviso " + tipo;
+    }
+
+
+    function limparAviso() {
+
+      aviso.textContent = "";
+
+      aviso.className =
+        "aviso";
+    }
+
+
+    // =======================================================
+    // LEAD ELEGÍVEL
+    // =======================================================
+
+    function leadElegivel(
+      lead
+    ) {
+
+      return (
+        lead &&
+        lead.status === "ativo" &&
+        lead.consentimento === true
       );
     }
 
 
-    const templates =
-      Array.isArray(
-        dados.templates
-      )
-        ? dados.templates
-        : [];
+    // =======================================================
+    // CONTADORES
+    // =======================================================
+
+    function atualizarContadores() {
+
+      const ativos =
+        leads.filter(
+          lead =>
+            lead.status === "ativo"
+        ).length;
+
+      const descadastrados =
+        leads.filter(
+          lead =>
+            lead.status ===
+            "descadastrado"
+        ).length;
+
+      totalLeads.textContent =
+        leads.length;
+
+      totalAtivos.textContent =
+        ativos;
+
+      totalDescadastrados.textContent =
+        descadastrados;
+
+      totalSelecionados.textContent =
+        selecionados.size;
+
+      botaoUsarCampanha.disabled =
+        selecionados.size === 0;
+    }
 
 
-    const aprovados =
-      templates.filter(
-        item =>
-          String(
-            item.status || ""
-          ).toUpperCase() ===
-          "APPROVED"
-      );
+    // =======================================================
+    // FILTROS
+    // =======================================================
 
+    function obterLeadsFiltrados() {
 
-    campo.innerHTML =
-      `<option value="">
-         Selecione um template
-       </option>`;
+      const termo =
+        pesquisa.value
+          .trim()
+          .toLowerCase();
 
+      const status =
+        filtroStatus.value;
 
-    aprovados.forEach(
-      item => {
+      return leads.filter(
+        lead => {
 
-        const opcao =
-          document.createElement(
-            "option"
+          const nome =
+            String(
+              lead.nome || ""
+            ).toLowerCase();
+
+          const telefone =
+            String(
+              lead.telefone || ""
+            ).toLowerCase();
+
+          const correspondePesquisa =
+            !termo ||
+            nome.includes(
+              termo
+            ) ||
+            telefone.includes(
+              termo
+            );
+
+          const correspondeStatus =
+            status === "todos" ||
+            lead.status === status;
+
+          return (
+            correspondePesquisa &&
+            correspondeStatus
           );
+        }
+      );
+    }
 
 
-        opcao.value =
-          item.nome;
+    // =======================================================
+    // SELECIONAR INDIVIDUAL
+    // =======================================================
 
+    function alterarSelecao(
+      telefone
+    ) {
 
-        opcao.textContent =
-          `${item.nome} — ${item.categoria || ""} — ${item.idioma || ""}`;
+      limparAviso();
 
-
-        campo.appendChild(
-          opcao
-        );
-      }
-    );
-
-
-  } catch (erro) {
-
-    console.error(
-      erro
-    );
-
-
-    campo.innerHTML =
-      `<option value="">
-         Erro ao carregar templates
-       </option>`;
-
-  } finally {
-
-    campo.disabled =
-      false;
-  }
-}
-
-
-// ===========================================================
-// CSV
-// ===========================================================
-
-function detectarSeparador(linha) {
-
-  const pv =
-    (
-      linha.match(/;/g) ||
-      []
-    ).length;
-
-
-  const virgula =
-    (
-      linha.match(/,/g) ||
-      []
-    ).length;
-
-
-  const tab =
-    (
-      linha.match(/\t/g) ||
-      []
-    ).length;
-
-
-  if (
-    pv >= virgula &&
-    pv >= tab
-  ) {
-    return ";";
-  }
-
-
-  if (
-    tab >= virgula &&
-    tab >= pv
-  ) {
-    return "\t";
-  }
-
-
-  return ",";
-}
-
-
-function limparCampo(valor) {
-
-  return String(
-    valor || ""
-  )
-    .trim()
-    .replace(
-      /^"(.*)"$/,
-      "$1"
-    )
-    .trim();
-}
-
-
-function localizarColunaTelefone(
-  cabecalhos
-) {
-
-  const nomes = [
-    "telefone",
-    "celular",
-    "whatsapp",
-    "fone",
-    "phone",
-    "numero",
-    "número",
-    "telefone1",
-    "celular1"
-  ];
-
-
-  return cabecalhos
-    .findIndex(
-      cabecalho => {
-
-        const valor =
-          cabecalho
-            .toLowerCase()
-            .trim();
-
-
-        return nomes.some(
-          nome =>
-            valor.includes(
-              nome
+      const lead =
+        leads.find(
+          item =>
+            String(
+              item.telefone
+            ) ===
+            String(
+              telefone
             )
         );
-      }
-    );
-}
 
-
-function localizarColunaNome(
-  cabecalhos
-) {
-
-  const nomes = [
-    "nome",
-    "cliente",
-    "name"
-  ];
-
-
-  return cabecalhos
-    .findIndex(
-      cabecalho => {
-
-        const valor =
-          cabecalho
-            .toLowerCase()
-            .trim();
-
-
-        return nomes.includes(
-          valor
-        );
-      }
-    );
-}
-
-
-function normalizarTelefone(
-  telefone
-) {
-
-  let numero =
-    String(
-      telefone || ""
-    )
-      .replace(
-        /\D/g,
-        ""
-      );
-
-
-  numero =
-    numero.replace(
-      /^0+/,
-      ""
-    );
-
-
-  if (
-    numero.length === 10 ||
-    numero.length === 11
-  ) {
-    numero =
-      "55" + numero;
-  }
-
-
-  return numero;
-}
-
-
-function telefoneValido(
-  numero
-) {
-
-  if (
-    numero.length !== 12 &&
-    numero.length !== 13
-  ) {
-    return false;
-  }
-
-
-  if (
-    !numero.startsWith(
-      "55"
-    )
-  ) {
-    return false;
-  }
-
-
-  const ddd =
-    parseInt(
-      numero.substring(
-        2,
-        4
-      )
-    );
-
-
-  if (
-    !ddd ||
-    ddd < 11 ||
-    ddd > 99
-  ) {
-    return false;
-  }
-
-
-  return true;
-}
-
-
-// ===========================================================
-// IMPORTAÇÃO
-// ===========================================================
-
-document
-  .getElementById(
-    "arquivoCSV"
-  )
-  .addEventListener(
-    "change",
-    function(event) {
-
-      const arquivo =
-        event.target
-          .files?.[0];
-
-
-      if (!arquivo) {
+      if (
+        !lead ||
+        !leadElegivel(lead)
+      ) {
         return;
       }
 
 
-      const leitor =
-        new FileReader();
-
-
-      leitor.onload =
-        function(e) {
-
-          processarCSV(
-            e.target.result
-          );
-        };
-
-
-      leitor.readAsText(
-        arquivo,
-        "UTF-8"
-      );
-    }
-  );
-
-
-// ===========================================================
-// PROCESSAMENTO CSV
-// ===========================================================
-
-function processarCSV(texto) {
-
-  const linhas =
-    String(texto || "")
-      .replace(/\r/g, "")
-      .split("\n")
-      .filter(
-        linha =>
-          linha.trim() !== ""
-      );
-
-
-  if (
-    linhas.length < 2
-  ) {
-
-    mostrarErro(
-      "O CSV está vazio ou não possui contatos."
-    );
-
-    zerarContadores();
-
-    return;
-  }
-
-
-  const separador =
-    detectarSeparador(
-      linhas[0]
-    );
-
-
-  const cabecalhos =
-    linhas[0]
-      .split(
-        separador
-      )
-      .map(
-        limparCampo
-      );
-
-
-  const colunaTelefone =
-    localizarColunaTelefone(
-      cabecalhos
-    );
-
-
-  const colunaNome =
-    localizarColunaNome(
-      cabecalhos
-    );
-
-
-  if (
-    colunaTelefone === -1
-  ) {
-
-    mostrarErro(
-      "Não encontrei uma coluna TELEFONE, CELULAR ou WHATSAPP."
-    );
-
-    zerarContadores();
-
-    return;
-  }
-
-
-  contatosProcessados =
-    [];
-
-
-  const vistos =
-    new Set();
-
-
-  let validos = 0;
-  let duplicados = 0;
-  let invalidos = 0;
-
-
-  for (
-    let i = 1;
-    i < linhas.length;
-    i++
-  ) {
-
-    const campos =
-      linhas[i]
-        .split(
-          separador
+      if (
+        selecionados.has(
+          String(telefone)
         )
-        .map(
-          limparCampo
+      ) {
+
+        selecionados.delete(
+          String(telefone)
         );
 
+      } else {
 
-    const telefoneOriginal =
-      campos[
-        colunaTelefone
-      ] || "";
+        if (
+          selecionados.size >=
+          LIMITE_CAMPANHA
+        ) {
 
-
-    const telefone =
-      normalizarTelefone(
-        telefoneOriginal
-      );
-
-
-    const nome =
-      colunaNome >= 0
-        ? campos[
-            colunaNome
-          ] || ""
-        : "";
-
-
-    let status;
-
-
-    if (
-      !telefoneValido(
-        telefone
-      )
-    ) {
-
-      status =
-        "Inválido";
-
-      invalidos++;
-
-    } else if (
-      vistos.has(
-        telefone
-      )
-    ) {
-
-      status =
-        "Duplicado";
-
-      duplicados++;
-
-    } else {
-
-      status =
-        "Válido";
-
-      validos++;
-
-      vistos.add(
-        telefone
-      );
-    }
-
-
-    contatosProcessados
-      .push({
-        nome,
-        telefoneOriginal,
-        telefone,
-        status
-      });
-  }
-
-
-  document
-    .getElementById(
-      "totalContatos"
-    )
-    .textContent =
-      contatosProcessados.length;
-
-
-  document
-    .getElementById(
-      "validos"
-    )
-    .textContent =
-      validos;
-
-
-  document
-    .getElementById(
-      "duplicados"
-    )
-    .textContent =
-      duplicados;
-
-
-  document
-    .getElementById(
-      "invalidos"
-    )
-    .textContent =
-      invalidos;
-
-
-  mostrarPreview();
-
-
-  mostrarSucesso(
-    "Lista carregada. Nenhuma mensagem foi enviada ainda."
-  );
-}
-
-
-// ===========================================================
-// PRÉVIA
-// ===========================================================
-
-function mostrarPreview() {
-
-  const tabela =
-    document.getElementById(
-      "previewTabela"
-    );
-
-
-  tabela.innerHTML =
-    "";
-
-
-  contatosProcessados
-    .slice(
-      0,
-      20
-    )
-    .forEach(
-      contato => {
-
-        const linha =
-          document.createElement(
-            "tr"
+          mostrarAviso(
+            "O limite é de 100 contatos por campanha.",
+            "erro"
           );
 
+          return;
+        }
 
-        const classe =
-          contato.status ===
-          "Válido"
-            ? "valido"
-            : "invalido";
-
-
-        linha.innerHTML =
-          `
-          <td>
-            ${escaparHTML(
-              contato.nome
-            )}
-          </td>
-
-          <td>
-            ${escaparHTML(
-              contato.telefoneOriginal
-            )}
-          </td>
-
-          <td>
-            ${escaparHTML(
-              contato.telefone
-            )}
-          </td>
-
-          <td class="${classe}">
-            ${escaparHTML(
-              contato.status
-            )}
-          </td>
-          `;
-
-
-        tabela.appendChild(
-          linha
+        selecionados.add(
+          String(telefone)
         );
       }
-    );
 
 
-  document
-    .getElementById(
-      "previewCard"
-    )
-    .style.display =
-      "block";
-}
+      atualizarContadores();
 
-
-// ===========================================================
-// ENVIAR CAMPANHA
-// ===========================================================
-
-async function prepararCampanha() {
-
-  const nome =
-    document
-      .getElementById(
-        "nomeCampanha"
-      )
-      .value
-      .trim();
-
-
-  if (!nome) {
-
-    mostrarErro(
-      "Digite o nome da campanha."
-    );
-
-    return;
-  }
-
-
-  const contatosValidos =
-    contatosProcessados
-      .filter(
-        contato =>
-          contato.status ===
-          "Válido"
-      );
-
-
-  if (
-    contatosValidos.length === 0
-  ) {
-
-    mostrarErro(
-      "Importe uma lista com pelo menos um contato válido."
-    );
-
-    return;
-  }
-
-
-  const template =
-    document
-      .getElementById(
-        "template"
-      )
-      .value;
-
-
-  if (!template) {
-
-    mostrarErro(
-      "Selecione o template."
-    );
-
-    return;
-  }
-
-
-  const botao =
-    document.getElementById(
-      "botaoCampanha"
-    );
-
-
-  botao.disabled =
-    true;
-
-
-  mostrarAviso(
-    `Enviando campanha "${nome}"...`
-  );
-
-
-  try {
-
-    const resposta =
-      await fetch(
-        "/api/send-campaign",
-        {
-          method:
-            "POST",
-
-          credentials:
-            "same-origin",
-
-          headers: {
-            "Content-Type":
-              "application/json"
-          },
-
-          body:
-            JSON.stringify({
-              campanha:
-                nome,
-
-              template,
-
-              contatos:
-                contatosValidos
-            })
-        }
-      );
-
-
-    const dados =
-      await resposta.json();
-
-
-    if (
-      !resposta.ok ||
-      !dados.ok
-    ) {
-
-      throw new Error(
-        dados.erro ||
-        "Erro ao enviar campanha."
-      );
+      renderizarTabela();
     }
 
 
-    campanhaSelecionada =
-      nome;
-
-
-    localStorage.setItem(
-      "adcredUltimaCampanha",
-      nome
-    );
-
-
-    mostrarSucesso(
-      `Campanha "${nome}" concluída. Enviados: ${dados.enviados || 0}. Falhas: ${dados.falhas || 0}. Ignorados: ${dados.ignorados || 0}.`
-    );
-
-
-    await atualizarStatusCampanha(
-      nome
-    );
-
-
-    await carregarHistorico();
-
-
-  } catch (erro) {
-
-    mostrarErro(
-      erro.message ||
-      "Erro ao enviar campanha."
-    );
-
-  } finally {
-
-    botao.disabled =
-      false;
-  }
-}
-
-
-// ===========================================================
-// STATUS
-// ===========================================================
-
-async function atualizarStatusCampanha(
-  nome
-) {
-
-  if (!nome) {
-    return;
-  }
-
-
-  try {
-
-    const resposta =
-      await fetch(
-        `/api/campaign-status?campanha=${encodeURIComponent(nome)}`,
-        {
-          method:
-            "GET",
-
-          credentials:
-            "same-origin"
-        }
-      );
-
-
-    const dados =
-      await resposta.json();
-
-
-    if (
-      !resposta.ok ||
-      !dados.ok
-    ) {
-      return;
-    }
-
-
-    campanhaSelecionada =
-      nome;
-
-
-    localStorage.setItem(
-      "adcredUltimaCampanha",
-      nome
-    );
-
-
-    document
-      .getElementById(
-        "nomeCampanhaAtual"
-      )
-      .textContent =
-        `Campanha: ${nome}`;
-
-
-    document
-      .getElementById(
-        "campanhaEnviados"
-      )
-      .textContent =
-        dados.enviados || 0;
-
-
-    document
-      .getElementById(
-        "campanhaEntregues"
-      )
-      .textContent =
-        dados.entregues || 0;
-
-
-    document
-      .getElementById(
-        "campanhaRespondidos"
-      )
-      .textContent =
-        dados.respondidos || 0;
-
-
-    document
-      .getElementById(
-        "campanhaDescadastrados"
-      )
-      .textContent =
-        dados.descadastrados || 0;
-
-
-    document
-      .getElementById(
-        "campanhaFalhas"
-      )
-      .textContent =
-        dados.falhas || 0;
-
-
-    document
-      .getElementById(
-        "campanhaIgnorados"
-      )
-      .textContent =
-        dados.ignorados || 0;
-
-
-    document
-      .getElementById(
-        "ultimaAtualizacao"
-      )
-      .textContent =
-        dados.atualizadoEm
-          ? `Última atualização: ${formatarData(dados.atualizadoEm)}`
-          : "";
-
-  } catch (erro) {
-
-    console.error(
-      "Erro ao atualizar status:",
-      erro
-    );
-  }
-}
-
-
-// ===========================================================
-// HISTÓRICO
-// ===========================================================
-
-async function carregarHistorico() {
-
-  const tabela =
-    document.getElementById(
-      "historicoTabela"
-    );
-
-
-  try {
-
-    const resposta =
-      await fetch(
-        "/api/campaign-history",
-        {
-          method:
-            "GET",
-
-          credentials:
-            "same-origin"
-        }
-      );
-
-
-    const dados =
-      await resposta.json();
-
-
-    if (
-      !resposta.ok ||
-      !dados.ok
-    ) {
-
-      throw new Error(
-        dados.erro ||
-        "Erro ao carregar histórico."
-      );
-    }
-
-
-    const campanhas =
-      Array.isArray(
-        dados.campanhas
-      )
-        ? dados.campanhas
-        : [];
-
-
-    tabela.innerHTML =
-      "";
-
-
-    if (
-      campanhas.length === 0
-    ) {
-
-      tabela.innerHTML =
-        `
-        <tr>
-          <td
-            colspan="9"
-            class="sem-registros"
-          >
-            Nenhuma campanha encontrada.
-          </td>
-        </tr>
+    // =======================================================
+    // RENDERIZAR
+    // =======================================================
+
+    function renderizarTabela() {
+
+      const lista =
+        obterLeadsFiltrados();
+
+
+      if (
+        lista.length === 0
+      ) {
+
+        corpoTabela.innerHTML = `
+          <tr>
+            <td colspan="7">
+              <div class="mensagem">
+                Nenhum contato encontrado.
+              </div>
+            </td>
+          </tr>
         `;
 
-      return;
+        rodapeTabela.textContent =
+          "0 contatos exibidos";
+
+        atualizarContadores();
+
+        return;
+      }
+
+
+      corpoTabela.innerHTML =
+        lista
+          .map(
+            lead => {
+
+              const telefone =
+                String(
+                  lead.telefone ||
+                  ""
+                );
+
+              const status =
+                lead.status ===
+                "descadastrado"
+                  ? "descadastrado"
+                  : "ativo";
+
+              const textoStatus =
+                status ===
+                "descadastrado"
+                  ? "Descadastrado"
+                  : "Ativo";
+
+
+              const elegivel =
+                leadElegivel(
+                  lead
+                );
+
+
+              const estaSelecionado =
+                selecionados.has(
+                  telefone
+                );
+
+
+              const consentimento =
+                lead.consentimento ===
+                true
+                  ? `<span class="sim">Sim</span>`
+                  : `<span class="nao">Não</span>`;
+
+
+              let motivoIndisponivel =
+                "";
+
+              if (
+                lead.status ===
+                "descadastrado"
+              ) {
+
+                motivoIndisponivel =
+                  `<span class="indisponivel">Não pode receber campanha</span>`;
+
+              } else if (
+                lead.consentimento !==
+                true
+              ) {
+
+                motivoIndisponivel =
+                  `<span class="indisponivel">Sem consentimento</span>`;
+              }
+
+
+              return `
+                <tr
+                  class="${
+                    estaSelecionado
+                      ? "selecionado"
+                      : ""
+                  }"
+                >
+
+                  <td class="coluna-checkbox">
+
+                    <input
+                      class="checkbox-lead"
+                      type="checkbox"
+
+                      ${
+                        estaSelecionado
+                          ? "checked"
+                          : ""
+                      }
+
+                      ${
+                        elegivel
+                          ? ""
+                          : "disabled"
+                      }
+
+                      onchange="alterarSelecao('${
+                        escaparHtml(
+                          telefone
+                        )
+                      }')"
+                    />
+
+                    ${
+                      motivoIndisponivel
+                    }
+
+                  </td>
+
+
+                  <td class="nome">
+
+                    ${
+                      escaparHtml(
+                        lead.nome ||
+                        "-"
+                      )
+                    }
+
+                  </td>
+
+
+                  <td class="telefone">
+
+                    ${
+                      escaparHtml(
+                        formatarTelefone(
+                          telefone
+                        )
+                      )
+                    }
+
+                  </td>
+
+
+                  <td>
+
+                    <span
+                      class="status ${status}"
+                    >
+                      ${textoStatus}
+                    </span>
+
+                  </td>
+
+
+                  <td>
+
+                    ${consentimento}
+
+                  </td>
+
+
+                  <td>
+
+                    ${
+                      escaparHtml(
+                        lead.origem ||
+                        "-"
+                      )
+                    }
+
+                  </td>
+
+
+                  <td>
+
+                    ${
+                      escaparHtml(
+                        formatarData(
+                          lead.criadoEm
+                        )
+                      )
+                    }
+
+                  </td>
+
+                </tr>
+              `;
+            }
+          )
+          .join("");
+
+
+      rodapeTabela.textContent =
+        `${lista.length} contato(s) exibido(s)`;
+
+
+      atualizarContadores();
     }
 
 
-    campanhas.forEach(
-      campanha => {
+    // =======================================================
+    // SELECIONAR TODOS OS ATIVOS
+    // =======================================================
 
-        const linha =
-          document.createElement(
-            "tr"
-          );
+    function selecionarTodosAtivos() {
 
+      limparAviso();
 
-        linha.innerHTML =
-          `
-          <td>
-            ${escaparHTML(
-              campanha.campanha
-            )}
-          </td>
-
-          <td>
-            ${campanha.enviados || 0}
-          </td>
-
-          <td>
-            ${campanha.entregues || 0}
-          </td>
-
-          <td>
-            ${campanha.respondidos || 0}
-          </td>
-
-          <td>
-            ${campanha.descadastrados || 0}
-          </td>
-
-          <td>
-            ${campanha.falhas || 0}
-          </td>
-
-          <td>
-            ${campanha.ignorados || 0}
-          </td>
-
-          <td>
-            ${formatarData(
-              campanha.atualizadoEm ||
-              campanha.criadoEm
-            )}
-          </td>
-
-          <td>
-            <button
-              class="selecionar-campanha"
-              type="button"
-            >
-              Abrir
-            </button>
-          </td>
-          `;
+      const elegiveis =
+        leads.filter(
+          lead =>
+            leadElegivel(
+              lead
+            )
+        );
 
 
-        const botao =
-          linha.querySelector(
-            "button"
-          );
+      selecionados.clear();
 
 
-        botao.addEventListener(
-          "click",
-          function() {
+      elegiveis
+        .slice(
+          0,
+          LIMITE_CAMPANHA
+        )
+        .forEach(
+          lead => {
 
-            abrirCampanha(
-              campanha.campanha
+            selecionados.add(
+              String(
+                lead.telefone
+              )
             );
           }
         );
 
 
-        tabela.appendChild(
-          linha
+      if (
+        elegiveis.length >
+        LIMITE_CAMPANHA
+      ) {
+
+        mostrarAviso(
+          "Sua base possui mais de 100 contatos elegíveis. Foram selecionados os primeiros 100.",
+          "sucesso"
         );
       }
-    );
 
 
-  } catch (erro) {
+      atualizarContadores();
 
-    console.error(
-      erro
-    );
-
-
-    tabela.innerHTML =
-      `
-      <tr>
-        <td
-          colspan="9"
-          class="sem-registros"
-        >
-          Não foi possível carregar o histórico.
-        </td>
-      </tr>
-      `;
-  }
-}
-
-
-function abrirCampanha(
-  nome
-) {
-
-  campanhaSelecionada =
-    nome;
-
-
-  localStorage.setItem(
-    "adcredUltimaCampanha",
-    nome
-  );
-
-
-  atualizarStatusCampanha(
-    nome
-  );
-
-
-  window.scrollTo({
-    top:
-      document
-        .getElementById(
-          "nomeCampanhaAtual"
-        )
-        .getBoundingClientRect()
-        .top +
-      window.scrollY -
-      30,
-
-    behavior:
-      "smooth"
-  });
-}
-
-
-// ===========================================================
-// UTILIDADES
-// ===========================================================
-
-function mostrarSucesso(
-  texto
-) {
-
-  const elemento =
-    document.getElementById(
-      "mensagem"
-    );
-
-
-  elemento.className =
-    "mensagem sucesso";
-
-
-  elemento.textContent =
-    texto;
-}
-
-
-function mostrarErro(
-  texto
-) {
-
-  const elemento =
-    document.getElementById(
-      "mensagem"
-    );
-
-
-  elemento.className =
-    "mensagem erro";
-
-
-  elemento.textContent =
-    texto;
-}
-
-
-function mostrarAviso(
-  texto
-) {
-
-  const elemento =
-    document.getElementById(
-      "mensagem"
-    );
-
-
-  elemento.className =
-    "mensagem aviso";
-
-
-  elemento.textContent =
-    texto;
-}
-
-
-function zerarContadores() {
-
-  [
-    "totalContatos",
-    "validos",
-    "duplicados",
-    "invalidos"
-  ].forEach(
-    id => {
-
-      document
-        .getElementById(id)
-        .textContent =
-          "0";
+      renderizarTabela();
     }
-  );
-}
 
 
-function escaparHTML(
-  valor
-) {
+    // =======================================================
+    // LIMPAR SELEÇÃO
+    // =======================================================
 
-  const div =
-    document.createElement(
-      "div"
-    );
+    function limparSelecao() {
 
+      limparAviso();
 
-  div.textContent =
-    String(
-      valor || ""
-    );
+      selecionados.clear();
 
+      atualizarContadores();
 
-  return div.innerHTML;
-}
+      renderizarTabela();
+    }
 
 
-function formatarData(
-  valor
-) {
+    // =======================================================
+    // USAR EM CAMPANHA
+    // =======================================================
 
-  if (!valor) {
-    return "-";
-  }
+    function usarSelecionadosEmCampanha() {
 
-
-  const data =
-    new Date(valor);
+      limparAviso();
 
 
-  if (
-    Number.isNaN(
-      data.getTime()
-    )
-  ) {
-    return "-";
-  }
+      if (
+        selecionados.size === 0
+      ) {
+
+        mostrarAviso(
+          "Selecione pelo menos um contato.",
+          "erro"
+        );
+
+        return;
+      }
 
 
-  return data
-    .toLocaleString(
-      "pt-BR"
-    );
-}
+      const contatosSelecionados =
+        leads
+          .filter(
+            lead =>
+              selecionados.has(
+                String(
+                  lead.telefone
+                )
+              ) &&
+              leadElegivel(
+                lead
+              )
+          )
+          .slice(
+            0,
+            LIMITE_CAMPANHA
+          )
+          .map(
+            lead => {
+
+              return {
+                nome:
+                  lead.nome ||
+                  "",
+
+                telefoneOriginal:
+                  formatarTelefone(
+                    lead.telefone
+                  ),
+
+                telefone:
+                  String(
+                    lead.telefone ||
+                    ""
+                  )
+                    .replace(
+                      /\D/g,
+                      ""
+                    ),
+
+                status:
+                  "Válido",
+
+                origem:
+                  "minha_base",
+
+                consentimento:
+                  true
+              };
+            }
+          );
 
 
-// ===========================================================
-// LOGIN
-// ===========================================================
+      if (
+        contatosSelecionados.length ===
+        0
+      ) {
 
-function liberarPainel() {
+        mostrarAviso(
+          "Nenhum contato elegível foi encontrado na seleção.",
+          "erro"
+        );
 
-  document
-    .getElementById(
-      "telaLogin"
-    )
-    .style.display =
-      "none";
-
-
-  document
-    .getElementById(
-      "conteudoPainel"
-    )
-    .style.display =
-      "block";
+        return;
+      }
 
 
-  carregarTemplates();
-
-  carregarHistorico();
-
-
-  if (
-    campanhaSelecionada
-  ) {
-
-    atualizarStatusCampanha(
-      campanhaSelecionada
-    );
-  }
+      localStorage.setItem(
+        "adcredContatosDaBase",
+        JSON.stringify(
+          contatosSelecionados
+        )
+      );
 
 
-  if (
-    intervaloStatus
-  ) {
-    clearInterval(
-      intervaloStatus
-    );
-  }
+      localStorage.setItem(
+        "adcredOrigemContatos",
+        "minha_base"
+      );
 
 
-  intervaloStatus =
-    setInterval(
-      function() {
+      localStorage.setItem(
+        "adcredContatosDaBaseCriadoEm",
+        new Date()
+          .toISOString()
+      );
+
+
+      window.location.href =
+        "/painel.html?origem=base";
+    }
+
+
+    // =======================================================
+    // CARREGAR LEADS
+    // =======================================================
+
+    async function carregarLeads() {
+
+      limparAviso();
+
+      botaoAtualizar.disabled =
+        true;
+
+      botaoAtualizar.textContent =
+        "Atualizando...";
+
+
+      try {
+
+        const resposta =
+          await fetch(
+            "/api/leads",
+            {
+              method: "GET",
+              credentials:
+                "same-origin",
+              cache:
+                "no-store"
+            }
+          );
+
+
+        const tipoConteudo =
+          resposta.headers.get(
+            "content-type"
+          ) || "";
+
 
         if (
-          campanhaSelecionada
+          !tipoConteudo.includes(
+            "application/json"
+          )
         ) {
 
-          atualizarStatusCampanha(
-            campanhaSelecionada
+          throw new Error(
+            "Resposta inválida do servidor."
           );
         }
 
-      },
-      5000
-    );
+
+        const dados =
+          await resposta.json();
 
 
-  if (
-    intervaloHistorico
-  ) {
-    clearInterval(
-      intervaloHistorico
-    );
-  }
+        if (
+          resposta.status ===
+          401
+        ) {
 
+          window.location.href =
+            "/painel.html";
 
-  intervaloHistorico =
-    setInterval(
-      carregarHistorico,
-      15000
-    );
-}
-
-
-function bloquearPainel() {
-
-  document
-    .getElementById(
-      "telaLogin"
-    )
-    .style.display =
-      "flex";
-
-
-  document
-    .getElementById(
-      "conteudoPainel"
-    )
-    .style.display =
-      "none";
-}
-
-
-async function verificarLoginPainel() {
-
-  try {
-
-    const resposta =
-      await fetch(
-        "/api/panel-login",
-        {
-          method:
-            "GET",
-
-          credentials:
-            "same-origin"
+          return;
         }
-      );
 
 
-    const dados =
-      await resposta.json();
+        if (
+          !resposta.ok ||
+          !dados.ok
+        ) {
+
+          throw new Error(
+            dados.erro ||
+            "Não foi possível carregar os leads."
+          );
+        }
 
 
-    if (
-      resposta.ok &&
-      dados.autenticado
-    ) {
+        leads =
+          Array.isArray(
+            dados.leads
+          )
+            ? dados.leads
+            : [];
 
-      liberarPainel();
 
-    } else {
+        // Remove da seleção qualquer contato
+        // que deixou de ser elegível.
 
-      bloquearPainel();
+        for (
+          const telefone
+          of Array.from(
+            selecionados
+          )
+        ) {
+
+          const lead =
+            leads.find(
+              item =>
+                String(
+                  item.telefone
+                ) ===
+                String(
+                  telefone
+                )
+            );
+
+
+          if (
+            !lead ||
+            !leadElegivel(
+              lead
+            )
+          ) {
+
+            selecionados.delete(
+              telefone
+            );
+          }
+        }
+
+
+        atualizarContadores();
+
+        renderizarTabela();
+
+
+      } catch (erro) {
+
+        console.error(
+          "Erro ao carregar leads:",
+          erro
+        );
+
+
+        corpoTabela.innerHTML = `
+          <tr>
+
+            <td colspan="7">
+
+              <div class="mensagem erro">
+
+                ${
+                  escaparHtml(
+                    erro.message ||
+                    "Não foi possível carregar os contatos."
+                  )
+                }
+
+              </div>
+
+            </td>
+
+          </tr>
+        `;
+
+
+        rodapeTabela.textContent =
+          "Erro ao carregar contatos";
+
+
+      } finally {
+
+        botaoAtualizar.disabled =
+          false;
+
+        botaoAtualizar.textContent =
+          "Atualizar";
+      }
     }
 
 
-  } catch {
+    // =======================================================
+    // EVENTOS
+    // =======================================================
 
-    bloquearPainel();
-  }
-}
-
-
-async function entrarPainel() {
-
-  const campoSenha =
-    document.getElementById(
-      "senhaPainel"
+    pesquisa.addEventListener(
+      "input",
+      renderizarTabela
     );
 
 
-  const erroLogin =
-    document.getElementById(
-      "erroLogin"
+    filtroStatus.addEventListener(
+      "change",
+      renderizarTabela
     );
 
 
-  const senha =
-    campoSenha
-      .value
-      .trim();
+    botaoAtualizar.addEventListener(
+      "click",
+      carregarLeads
+    );
 
 
-  erroLogin.style.display =
-    "none";
-
-
-  erroLogin.textContent =
-    "";
-
-
-  if (!senha) {
-
-    erroLogin.textContent =
-      "Digite a senha.";
-
-    erroLogin.style.display =
-      "block";
-
-    return;
-  }
-
-
-  try {
-
-    const resposta =
-      await fetch(
-        "/api/panel-login",
-        {
-          method:
-            "POST",
-
-          headers: {
-            "Content-Type":
-              "application/json"
-          },
-
-          credentials:
-            "same-origin",
-
-          body:
-            JSON.stringify({
-              senha
-            })
-        }
+    botaoSelecionarAtivos
+      .addEventListener(
+        "click",
+        selecionarTodosAtivos
       );
 
 
-    const dados =
-      await resposta.json();
+    botaoLimparSelecao
+      .addEventListener(
+        "click",
+        limparSelecao
+      );
 
 
-    if (
-      !resposta.ok ||
-      !dados.ok
-    ) {
-
-      erroLogin.textContent =
-        dados.erro ||
-        "Senha incorreta.";
-
-      erroLogin.style.display =
-        "block";
-
-      campoSenha.value =
-        "";
-
-      campoSenha.focus();
-
-      return;
-    }
+    botaoUsarCampanha
+      .addEventListener(
+        "click",
+        usarSelecionadosEmCampanha
+      );
 
 
-    campoSenha.value =
-      "";
+    // =======================================================
+    // INICIAR
+    // =======================================================
 
+    carregarLeads();
 
-    liberarPainel();
-
-
-  } catch {
-
-    erroLogin.textContent =
-      "Não foi possível acessar o servidor.";
-
-    erroLogin.style.display =
-      "block";
-  }
-}
-
-
-// ===========================================================
-// INÍCIO
-// ===========================================================
-
-verificarLoginPainel();
-
-</script>
-
+  </script>
 
 </body>
-
 </html>
