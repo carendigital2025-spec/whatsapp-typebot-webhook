@@ -71,6 +71,12 @@
       margin-top: 5px;
     }
 
+    .cnpj-topo {
+      color: #d9e1ea;
+      font-size: 12px;
+      margin-top: 7px;
+    }
+
     .card {
       background: #ffffff;
       color: #142033;
@@ -124,6 +130,12 @@
     .grupo input:focus {
       border-color: #d7aa4b;
       box-shadow: 0 0 0 3px rgba(215, 170, 75, 0.16);
+    }
+
+    .ajuda-telefone {
+      margin-top: 6px;
+      font-size: 11.5px;
+      color: #8995a5;
     }
 
     .consentimento {
@@ -215,7 +227,7 @@
       text-align: center;
       color: #91a1b5;
       font-size: 11px;
-      line-height: 1.5;
+      line-height: 1.6;
       margin-top: 20px;
     }
 
@@ -254,6 +266,10 @@
       <h1>ADCred Solução Financeira</h1>
 
       <p>Atendimento digital</p>
+
+      <div class="cnpj-topo">
+        CNPJ: 68.860.680/0001-57
+      </div>
     </header>
 
     <section class="card">
@@ -290,12 +306,16 @@
             id="telefone"
             name="telefone"
             type="tel"
-            placeholder="(51) 99999-9999"
+            placeholder="(DDD) 99999-9999"
             autocomplete="tel"
             inputmode="numeric"
             maxlength="16"
             required
           />
+
+          <div class="ajuda-telefone">
+            Informe seu número com DDD. Aceitamos números de todo o Brasil.
+          </div>
         </div>
 
         <div class="consentimento">
@@ -308,10 +328,11 @@
           />
 
           <label for="consentimento">
-            Autorizo a ADCred Solução Financeira a entrar em
-            contato comigo pelo WhatsApp sobre esta solicitação
-            e comunicações relacionadas aos seus produtos e
-            serviços. Estou ciente de que posso solicitar o
+            Autorizo a ADCred Solução Financeira,
+            CNPJ 68.860.680/0001-57,
+            a entrar em contato comigo pelo WhatsApp sobre esta
+            solicitação e comunicações relacionadas aos seus produtos
+            e serviços. Estou ciente de que posso solicitar o
             descadastro a qualquer momento.
           </label>
 
@@ -343,6 +364,8 @@
     <footer class="rodape">
       ADCred Solução Financeira
       <br />
+      CNPJ: 68.860.680/0001-57
+      <br />
       Atendimento digital e seguro.
     </footer>
 
@@ -361,6 +384,7 @@
 
     // -------------------------------------------------------
     // MÁSCARA DO TELEFONE
+    // ACEITA QUALQUER DDD BRASILEIRO
     // -------------------------------------------------------
 
     telefoneInput.addEventListener("input", function () {
@@ -405,7 +429,7 @@
     });
 
     // -------------------------------------------------------
-    // MENSAGENS NA TELA
+    // MENSAGENS
     // -------------------------------------------------------
 
     function mostrarMensagem(texto, tipo) {
@@ -419,7 +443,7 @@
     }
 
     // -------------------------------------------------------
-    // ENVIO DO FORMULÁRIO
+    // ENVIO
     // -------------------------------------------------------
 
     form.addEventListener("submit", async function (event) {
@@ -481,6 +505,15 @@
             versaoConsentimento: "v1"
           })
         });
+
+        const tipoConteudo =
+          resposta.headers.get("content-type") || "";
+
+        if (!tipoConteudo.includes("application/json")) {
+          throw new Error(
+            "O servidor não respondeu corretamente. Tente novamente em instantes."
+          );
+        }
 
         const dados = await resposta.json();
 
