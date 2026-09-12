@@ -353,7 +353,15 @@ export default async function handler(
             contato?.nome || ""
           ).trim(),
 
-        telefone
+        telefone,
+
+        origem:
+          String(
+            contato?.origem || ""
+          ).trim(),
+
+        consentimento:
+          contato?.consentimento === true
       });
     }
 
@@ -449,6 +457,128 @@ export default async function handler(
 
       const telefone =
         contato.telefone;
+
+
+      // -----------------------------------------------------
+      // VALIDA CONTATOS VINDOS DA MINHA BASE
+      // -----------------------------------------------------
+
+      if (
+        contato.origem ===
+        "minha_base"
+      ) {
+
+        try {
+
+          const registroLead =
+            await redisCommand([
+              "GET",
+              `lead:${telefone}`
+            ]);
+
+
+          if (!registroLead) {
+
+            ignorados++;
+
+            ignoradosDetalhes
+              .push({
+                telefone,
+                motivo:
+                  "Contato da Minha Base não encontrado no cadastro de leads."
+              });
+
+            continue;
+          }
+
+
+          let dadosLead;
+
+          try {
+
+            dadosLead =
+              JSON.parse(
+                registroLead
+              );
+
+          } catch {
+
+            ignorados++;
+
+            ignoradosDetalhes
+              .push({
+                telefone,
+                motivo:
+                  "Cadastro do lead inválido."
+              });
+
+            continue;
+          }
+
+
+          const statusLead =
+            String(
+              dadosLead?.status ||
+              ""
+            )
+              .trim()
+              .toLowerCase();
+
+
+          if (
+            statusLead !==
+            "ativo"
+          ) {
+
+            ignorados++;
+
+            ignoradosDetalhes
+              .push({
+                telefone,
+                motivo:
+                  "Contato da Minha Base não está ativo."
+              });
+
+            continue;
+          }
+
+
+          if (
+            dadosLead?.consentimento !==
+            true
+          ) {
+
+            ignorados++;
+
+            ignoradosDetalhes
+              .push({
+                telefone,
+                motivo:
+                  "Contato da Minha Base sem consentimento válido."
+              });
+
+            continue;
+          }
+
+        } catch (erro) {
+
+          console.error(
+            "Erro ao validar lead da Minha Base:",
+            erro
+          );
+
+          ignorados++;
+
+          ignoradosDetalhes
+            .push({
+              telefone,
+              motivo:
+                "Não foi possível validar o contato da Minha Base."
+            });
+
+          continue;
+        }
+      }
 
 
       // -----------------------------------------------------
