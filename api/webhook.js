@@ -1417,7 +1417,61 @@ async function processTypebotResponse(
     }
 
 
+        // =======================================================
+    // IMAGEM
     // =======================================================
+
+    if (
+      message.type ===
+      "image"
+    ) {
+      const imageUrl =
+        findFirstHttpUrl(
+          message?.content
+        );
+
+      if (!imageUrl) {
+        console.log(
+          "Imagem do Typebot sem URL:",
+          JSON.stringify(message)
+        );
+
+        continue;
+      }
+
+      try {
+        await sendWhatsAppImage(
+          to,
+          imageUrl
+        );
+
+        try {
+          await saveCrmMessage({
+            telefone:
+              to,
+
+            texto:
+              "Imagem enviada",
+
+            direcao:
+              "saida",
+
+            tipo:
+              "image"
+          });
+        } catch {}
+
+      } catch (erroImagem) {
+        console.error(
+          "Erro ao enviar imagem do Typebot:",
+          erroImagem
+        );
+      }
+
+      continue;
+    }
+
+// =======================================================
     // VÍDEO
     // =======================================================
 
@@ -1896,6 +1950,89 @@ async function sendWhatsAppButtons(
 
 
 // ===========================================================
+// ENVIAR IMAGEM
+// ===========================================================
+
+async function sendWhatsAppImage(
+  to,
+  imageUrl
+) {
+  const graphVersion =
+    process.env.GRAPH_API_VERSION ||
+    "v23.0";
+
+  const url =
+    `https://graph.facebook.com/${graphVersion}/${process.env.PHONE_NUMBER_ID}/messages`;
+
+  const response =
+    await fetch(
+      url,
+      {
+        method:
+          "POST",
+
+        headers: {
+          Authorization:
+            `Bearer ${process.env.WHATSAPP_TOKEN}`,
+
+          "Content-Type":
+            "application/json"
+        },
+
+        body:
+          JSON.stringify({
+            messaging_product:
+              "whatsapp",
+
+            recipient_type:
+              "individual",
+
+            to,
+
+            type:
+              "image",
+
+            image: {
+              link:
+                imageUrl
+            }
+          })
+      }
+    );
+
+  const responseText =
+    await response.text();
+
+  let data;
+
+  try {
+    data =
+      JSON.parse(
+        responseText
+      );
+  } catch {
+    data = {
+      raw:
+        responseText
+    };
+  }
+
+  if (!response.ok) {
+    console.error(
+      "Erro Meta ao enviar imagem:",
+      data
+    );
+
+    throw new Error(
+      `Falha ao enviar imagem: ${response.status}`
+    );
+  }
+
+  return data;
+}
+
+
+
 // ENVIAR VÍDEO
 // ===========================================================
 
