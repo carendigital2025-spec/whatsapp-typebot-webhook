@@ -2422,23 +2422,19 @@ function renderizarHistorico(
           "div"
         );
 
-      const origem =
-        String(
-          mensagem.origem ||
-          mensagem.from ||
-          mensagem.tipo ||
-          mensagem.direction ||
-          ""
-        ).toLowerCase();
+      const direcao =
+  String(
+    mensagem.direcao ||
+    mensagem.direction ||
+    ""
+  ).toLowerCase();
 
-      const enviada =
-        mensagem.enviada === true ||
-        mensagem.sent === true ||
-        origem === "atendente" ||
-        origem === "empresa" ||
-        origem === "out" ||
-        origem === "outbound" ||
-        origem === "assistant";
+const enviada =
+  direcao === "saida" ||
+  direcao === "out" ||
+  direcao === "outbound" ||
+  mensagem.enviada === true ||
+  mensagem.sent === true;
 
       bolha.className =
         "mensagem " +
