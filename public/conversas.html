@@ -558,6 +558,288 @@
     }
 
     /* ==========================
+       RESPOSTAS RÁPIDAS
+       ========================== */
+
+    .quick-wrap {
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    #botaoRespostasRapidas {
+      min-width: 155px;
+      padding: 0 14px;
+      background: #0f766e;
+    }
+
+    #botaoRespostasRapidas:disabled {
+      opacity: .55;
+      cursor: not-allowed;
+    }
+
+    .quick-menu {
+      display: none;
+      position: absolute;
+      left: 0;
+      bottom: 58px;
+      width: 340px;
+      max-height: 360px;
+      overflow-y: auto;
+      background: white;
+      border: 1px solid #d1d5db;
+      border-radius: 10px;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, .18);
+      z-index: 80;
+    }
+
+    .quick-menu.aberto {
+      display: block;
+    }
+
+    .quick-menu-topo {
+      position: sticky;
+      top: 0;
+      background: white;
+      padding: 12px;
+      border-bottom: 1px solid #e5e7eb;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      z-index: 2;
+    }
+
+    .quick-menu-topo strong {
+      font-size: 14px;
+    }
+
+    .quick-gerenciar {
+      border: 0 !important;
+      background: #eef2ff !important;
+      color: #3730a3 !important;
+      height: 34px !important;
+      padding: 0 10px !important;
+      font-size: 12px;
+    }
+
+    .quick-lista {
+      padding: 6px;
+    }
+
+    .quick-item {
+      width: 100%;
+      height: auto !important;
+      min-height: 44px;
+      padding: 10px 12px !important;
+      border: 0 !important;
+      border-radius: 7px !important;
+      background: white !important;
+      color: #1f2937 !important;
+      text-align: left;
+      font-weight: normal !important;
+      display: block;
+    }
+
+    .quick-item:hover {
+      background: #f3f4f6 !important;
+    }
+
+    .quick-item strong {
+      display: block;
+      margin-bottom: 3px;
+      font-size: 13px;
+    }
+
+    .quick-item span {
+      display: block;
+      color: #6b7280;
+      font-size: 12px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .quick-vazio {
+      padding: 22px 14px;
+      text-align: center;
+      color: #6b7280;
+      font-size: 13px;
+    }
+        /* ==========================
+       MODAL DE GERENCIAMENTO
+       ========================== */
+
+    .modal-fundo {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(17, 24, 39, .55);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal-fundo.aberto {
+      display: flex;
+    }
+
+    .modal-caixa {
+      width: min(760px, 100%);
+      max-height: 88vh;
+      overflow: hidden;
+      background: white;
+      border-radius: 14px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, .25);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .modal-topo {
+      padding: 18px 20px;
+      border-bottom: 1px solid #e5e7eb;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 15px;
+    }
+
+    .modal-topo h3 {
+      font-size: 20px;
+    }
+
+    .modal-fechar {
+      border: 0;
+      background: #f3f4f6;
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 18px;
+    }
+
+    .modal-corpo {
+      padding: 18px 20px;
+      overflow-y: auto;
+    }
+
+    .quick-form {
+      background: #f8fafc;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      padding: 15px;
+      margin-bottom: 18px;
+    }
+
+    .quick-form label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 13px;
+      font-weight: bold;
+    }
+
+    .quick-form input,
+    .quick-form textarea {
+      width: 100%;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      padding: 11px;
+      outline: none;
+      background: white;
+    }
+
+    .quick-form input {
+      margin-bottom: 12px;
+    }
+
+    .quick-form textarea {
+      min-height: 120px;
+      resize: vertical;
+    }
+
+    .quick-form-acoes {
+      margin-top: 12px;
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+    }
+
+    .quick-form-acoes button,
+    .quick-card-acoes button {
+      border: 0;
+      border-radius: 7px;
+      padding: 9px 12px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .quick-salvar {
+      background: #111827;
+      color: white;
+    }
+
+    .quick-cancelar {
+      background: #e5e7eb;
+      color: #374151;
+    }
+
+    .quick-card {
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      padding: 14px;
+      margin-bottom: 10px;
+    }
+
+    .quick-card strong {
+      display: block;
+      margin-bottom: 7px;
+    }
+
+    .quick-card p {
+      color: #4b5563;
+      font-size: 13px;
+      line-height: 1.45;
+      white-space: pre-wrap;
+    }
+
+    .quick-card-acoes {
+      margin-top: 12px;
+      display: flex;
+      gap: 7px;
+      justify-content: flex-end;
+    }
+
+    .quick-editar {
+      background: #e0f2fe;
+      color: #0369a1;
+    }
+
+    .quick-excluir {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .quick-aviso {
+      display: none;
+      margin-bottom: 12px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      font-size: 13px;
+    }
+
+    .quick-aviso.sucesso {
+      display: block;
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .quick-aviso.erro {
+      display: block;
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    /* ==========================
        RESPONSIVO
        ========================== */
 
@@ -768,6 +1050,46 @@
 
       <div class="resposta">
 
+        <div class="quick-wrap">
+
+          <button
+            id="botaoRespostasRapidas"
+            type="button"
+            disabled
+          >
+            ⚡ Respostas rápidas
+          </button>
+
+          <div
+            class="quick-menu"
+            id="menuRespostasRapidas"
+          >
+
+            <div class="quick-menu-topo">
+              <strong>Respostas rápidas</strong>
+
+              <button
+                class="quick-gerenciar"
+                id="botaoGerenciarRespostas"
+                type="button"
+              >
+                ⚙️ Gerenciar
+              </button>
+            </div>
+
+            <div
+              class="quick-lista"
+              id="listaRespostasRapidas"
+            >
+              <div class="quick-vazio">
+                Carregando...
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
         <textarea
           id="mensagemResposta"
           placeholder="Digite uma mensagem..."
@@ -789,6 +1111,101 @@
 
 </div>
 
+<div
+  class="modal-fundo"
+  id="modalRespostasRapidas"
+>
+  <div class="modal-caixa">
+
+    <div class="modal-topo">
+      <div>
+        <h3>⚡ Gerenciar respostas rápidas</h3>
+
+        <p
+          style="
+            margin-top:5px;
+            color:#6b7280;
+            font-size:13px;
+          "
+        >
+          Cadastre, edite ou exclua suas mensagens prontas.
+        </p>
+      </div>
+
+      <button
+        class="modal-fechar"
+        id="fecharModalRespostas"
+        type="button"
+        aria-label="Fechar"
+      >
+        ×
+      </button>
+    </div>
+
+    <div class="modal-corpo">
+
+      <div
+        class="quick-aviso"
+        id="avisoRespostasRapidas"
+      ></div>
+
+      <div class="quick-form">
+
+        <input
+          type="hidden"
+          id="quickReplyId"
+        >
+
+        <label for="quickReplyTitulo">
+          Nome da resposta
+        </label>
+
+        <input
+          type="text"
+          id="quickReplyTitulo"
+          maxlength="80"
+          placeholder="Ex.: Cliente sem saldo"
+        >
+
+        <label for="quickReplyTexto">
+          Mensagem
+        </label>
+
+        <textarea
+          id="quickReplyTexto"
+          placeholder="Digite ou cole aqui a mensagem pronta..."
+        ></textarea>
+
+        <div class="quick-form-acoes">
+
+          <button
+            class="quick-cancelar"
+            id="cancelarEdicaoResposta"
+            type="button"
+            style="display:none;"
+          >
+            Cancelar edição
+          </button>
+
+          <button
+            class="quick-salvar"
+            id="salvarRespostaRapida"
+            type="button"
+          >
+            Salvar resposta
+          </button>
+
+        </div>
+
+      </div>
+
+      <div id="listaGerenciarRespostas"></div>
+
+    </div>
+
+  </div>
+</div>
+
 <script>
 
 let telefoneSelecionado = "";
@@ -799,6 +1216,9 @@ let atualizando = false;
 let enviando = false;
 
 let modoSelecionado = "bot";
+
+let respostasRapidas = [];
+let carregandoRespostasRapidas = false;
 
 
 // ===========================================================
@@ -1004,9 +1424,7 @@ function aplicarBusca() {
       }
     );
 }
-
-
-// ===========================================================
+  // ===========================================================
 // CARREGAR LISTA
 // ===========================================================
 
@@ -1496,6 +1914,13 @@ async function abrirConversa(
 
   document
     .getElementById(
+      "botaoRespostasRapidas"
+    )
+    .disabled =
+      false;
+
+  document
+    .getElementById(
       "statusConversa"
     )
     .disabled =
@@ -1921,6 +2346,731 @@ async function editarNome() {
 
 
 // ===========================================================
+// RESPOSTAS RÁPIDAS
+// ===========================================================
+
+function mostrarAvisoResposta(
+  texto,
+  tipo = ""
+) {
+  const aviso =
+    document.getElementById(
+      "avisoRespostasRapidas"
+    );
+
+  aviso.textContent =
+    texto || "";
+
+  aviso.className =
+    "quick-aviso" +
+    (
+      texto && tipo
+        ? ` ${tipo}`
+        : ""
+    );
+}
+
+
+function resumoResposta(texto) {
+  const valor =
+    String(texto || "")
+      .replace(/\s+/g, " ")
+      .trim();
+
+  return valor.length > 75
+    ? valor.slice(0, 75) + "..."
+    : valor;
+}
+
+
+async function carregarRespostasRapidas() {
+  if (carregandoRespostasRapidas) {
+    return;
+  }
+
+  carregandoRespostasRapidas = true;
+
+  try {
+    const resposta =
+      await fetch(
+        "/api/quick-replies",
+        {
+          method: "GET",
+          credentials: "same-origin"
+        }
+      );
+
+    const dados =
+      await resposta.json();
+
+    if (
+      !resposta.ok ||
+      !dados.ok
+    ) {
+      throw new Error(
+        dados.erro ||
+        "Erro ao carregar respostas rápidas."
+      );
+    }
+
+    respostasRapidas =
+      Array.isArray(dados.respostas)
+        ? dados.respostas
+        : [];
+
+    renderizarMenuRespostas();
+    renderizarGerenciadorRespostas();
+
+  } catch (erro) {
+    console.error(
+      "Erro ao carregar respostas rápidas:",
+      erro
+    );
+
+    const lista =
+      document.getElementById(
+        "listaRespostasRapidas"
+      );
+
+    lista.innerHTML = `
+      <div class="quick-vazio">
+        Não foi possível carregar as respostas.
+      </div>
+    `;
+
+  } finally {
+    carregandoRespostasRapidas = false;
+  }
+}
+  function renderizarMenuRespostas() {
+  const lista =
+    document.getElementById(
+      "listaRespostasRapidas"
+    );
+
+  lista.replaceChildren();
+
+  if (!respostasRapidas.length) {
+    const vazio =
+      document.createElement(
+        "div"
+      );
+
+    vazio.className =
+      "quick-vazio";
+
+    vazio.textContent =
+      "Nenhuma resposta cadastrada. Clique em Gerenciar para criar a primeira.";
+
+    lista.appendChild(
+      vazio
+    );
+
+    return;
+  }
+
+  respostasRapidas.forEach(
+    (resposta) => {
+      const botao =
+        document.createElement(
+          "button"
+        );
+
+      botao.type =
+        "button";
+
+      botao.className =
+        "quick-item";
+
+      const titulo =
+        document.createElement(
+          "strong"
+        );
+
+      titulo.textContent =
+        resposta.titulo ||
+        "Resposta";
+
+      const resumo =
+        document.createElement(
+          "span"
+        );
+
+      resumo.textContent =
+        resumoResposta(
+          resposta.texto
+        );
+
+      botao.appendChild(
+        titulo
+      );
+
+      botao.appendChild(
+        resumo
+      );
+
+      botao.addEventListener(
+        "click",
+        () => {
+          usarRespostaRapida(
+            resposta
+          );
+        }
+      );
+
+      lista.appendChild(
+        botao
+      );
+    }
+  );
+}
+
+
+function renderizarGerenciadorRespostas() {
+  const lista =
+    document.getElementById(
+      "listaGerenciarRespostas"
+    );
+
+  lista.replaceChildren();
+
+  if (!respostasRapidas.length) {
+    const vazio =
+      document.createElement(
+        "div"
+      );
+
+    vazio.className =
+      "quick-vazio";
+
+    vazio.textContent =
+      "Você ainda não cadastrou nenhuma resposta rápida.";
+
+    lista.appendChild(
+      vazio
+    );
+
+    return;
+  }
+
+  respostasRapidas.forEach(
+    (resposta) => {
+      const card =
+        document.createElement(
+          "div"
+        );
+
+      card.className =
+        "quick-card";
+
+      const titulo =
+        document.createElement(
+          "strong"
+        );
+
+      titulo.textContent =
+        resposta.titulo ||
+        "Resposta";
+
+      const texto =
+        document.createElement(
+          "p"
+        );
+
+      texto.textContent =
+        resposta.texto || "";
+
+      const acoes =
+        document.createElement(
+          "div"
+        );
+
+      acoes.className =
+        "quick-card-acoes";
+
+      const editar =
+        document.createElement(
+          "button"
+        );
+
+      editar.type =
+        "button";
+
+      editar.className =
+        "quick-editar";
+
+      editar.textContent =
+        "Editar";
+
+      editar.addEventListener(
+        "click",
+        () => {
+          iniciarEdicaoResposta(
+            resposta
+          );
+        }
+      );
+
+      const excluir =
+        document.createElement(
+          "button"
+        );
+
+      excluir.type =
+        "button";
+
+      excluir.className =
+        "quick-excluir";
+
+      excluir.textContent =
+        "Excluir";
+
+      excluir.addEventListener(
+        "click",
+        () => {
+          excluirRespostaRapida(
+            resposta
+          );
+        }
+      );
+
+      acoes.appendChild(
+        editar
+      );
+
+      acoes.appendChild(
+        excluir
+      );
+
+      card.appendChild(
+        titulo
+      );
+
+      card.appendChild(
+        texto
+      );
+
+      card.appendChild(
+        acoes
+      );
+
+      lista.appendChild(
+        card
+      );
+    }
+  );
+}
+
+
+function usarRespostaRapida(
+  resposta
+) {
+  if (!telefoneSelecionado) {
+    return;
+  }
+
+  const campo =
+    document.getElementById(
+      "mensagemResposta"
+    );
+
+  campo.value =
+    resposta.texto || "";
+
+  fecharMenuRespostas();
+
+  campo.focus();
+
+  campo.setSelectionRange(
+    campo.value.length,
+    campo.value.length
+  );
+}
+
+
+function abrirMenuRespostas() {
+  const menu =
+    document.getElementById(
+      "menuRespostasRapidas"
+    );
+
+  menu.classList.toggle(
+    "aberto"
+  );
+
+  if (
+    menu.classList.contains(
+      "aberto"
+    )
+  ) {
+    carregarRespostasRapidas();
+  }
+}
+
+
+function fecharMenuRespostas() {
+  document
+    .getElementById(
+      "menuRespostasRapidas"
+    )
+    .classList.remove(
+      "aberto"
+    );
+}
+
+
+function abrirGerenciadorRespostas() {
+  fecharMenuRespostas();
+
+  mostrarAvisoResposta("");
+
+  document
+    .getElementById(
+      "modalRespostasRapidas"
+    )
+    .classList.add(
+      "aberto"
+    );
+
+  carregarRespostasRapidas();
+
+  setTimeout(
+    () => {
+      document
+        .getElementById(
+          "quickReplyTitulo"
+        )
+        .focus();
+    },
+    50
+  );
+}
+
+
+function fecharGerenciadorRespostas() {
+  document
+    .getElementById(
+      "modalRespostasRapidas"
+    )
+    .classList.remove(
+      "aberto"
+    );
+
+  limparFormularioResposta();
+  mostrarAvisoResposta("");
+}
+
+
+function limparFormularioResposta() {
+  document
+    .getElementById(
+      "quickReplyId"
+    )
+    .value = "";
+
+  document
+    .getElementById(
+      "quickReplyTitulo"
+    )
+    .value = "";
+
+  document
+    .getElementById(
+      "quickReplyTexto"
+    )
+    .value = "";
+
+  document
+    .getElementById(
+      "cancelarEdicaoResposta"
+    )
+    .style.display =
+      "none";
+
+  document
+    .getElementById(
+      "salvarRespostaRapida"
+    )
+    .textContent =
+      "Salvar resposta";
+}
+
+
+function iniciarEdicaoResposta(
+  resposta
+) {
+  document
+    .getElementById(
+      "quickReplyId"
+    )
+    .value =
+      resposta.id || "";
+
+  document
+    .getElementById(
+      "quickReplyTitulo"
+    )
+    .value =
+      resposta.titulo || "";
+
+  document
+    .getElementById(
+      "quickReplyTexto"
+    )
+    .value =
+      resposta.texto || "";
+
+  document
+    .getElementById(
+      "cancelarEdicaoResposta"
+    )
+    .style.display =
+      "inline-block";
+
+  document
+    .getElementById(
+      "salvarRespostaRapida"
+    )
+    .textContent =
+      "Salvar alterações";
+
+  document
+    .getElementById(
+      "quickReplyTitulo"
+    )
+    .focus();
+}
+
+
+async function salvarRespostaRapida() {
+  const id =
+    document
+      .getElementById(
+        "quickReplyId"
+      )
+      .value
+      .trim();
+
+  const titulo =
+    document
+      .getElementById(
+        "quickReplyTitulo"
+      )
+      .value
+      .trim();
+
+  const texto =
+    document
+      .getElementById(
+        "quickReplyTexto"
+      )
+      .value
+      .trim();
+
+  if (!titulo) {
+    mostrarAvisoResposta(
+      "Informe um nome para a resposta.",
+      "erro"
+    );
+
+    return;
+  }
+
+  if (!texto) {
+    mostrarAvisoResposta(
+      "Digite ou cole a mensagem da resposta.",
+      "erro"
+    );
+
+    return;
+  }
+
+  const botao =
+    document.getElementById(
+      "salvarRespostaRapida"
+    );
+
+  botao.disabled = true;
+
+  const textoAnterior =
+    botao.textContent;
+
+  botao.textContent =
+    "Salvando...";
+
+  try {
+    const resposta =
+      await fetch(
+        "/api/quick-replies",
+        {
+          method:
+            id
+              ? "PUT"
+              : "POST",
+
+          credentials:
+            "same-origin",
+
+          headers: {
+            "Content-Type":
+              "application/json"
+          },
+
+          body:
+            JSON.stringify({
+              id,
+              titulo,
+              texto
+            })
+        }
+      );
+
+    const dados =
+      await resposta.json();
+
+    if (
+      !resposta.ok ||
+      !dados.ok
+    ) {
+      throw new Error(
+        dados.erro ||
+        "Não foi possível salvar a resposta."
+      );
+    }
+
+    respostasRapidas =
+      Array.isArray(dados.respostas)
+        ? dados.respostas
+        : respostasRapidas;
+
+    limparFormularioResposta();
+
+    renderizarMenuRespostas();
+    renderizarGerenciadorRespostas();
+
+    mostrarAvisoResposta(
+      id
+        ? "Resposta atualizada com sucesso."
+        : "Resposta cadastrada com sucesso.",
+      "sucesso"
+    );
+
+  } catch (erro) {
+    console.error(
+      "Erro ao salvar resposta rápida:",
+      erro
+    );
+
+    mostrarAvisoResposta(
+      erro.message ||
+      "Não foi possível salvar a resposta.",
+      "erro"
+    );
+
+  } finally {
+    botao.disabled = false;
+
+    if (
+      document
+        .getElementById(
+          "quickReplyId"
+        )
+        .value
+    ) {
+      botao.textContent =
+        "Salvar alterações";
+    } else {
+      botao.textContent =
+        "Salvar resposta";
+    }
+
+    if (!botao.textContent) {
+      botao.textContent =
+        textoAnterior;
+    }
+  }
+}
+
+
+async function excluirRespostaRapida(
+  respostaRapida
+) {
+  const confirmar =
+    window.confirm(
+      `Excluir a resposta "${respostaRapida.titulo}"?`
+    );
+
+  if (!confirmar) {
+    return;
+  }
+
+  try {
+    const resposta =
+      await fetch(
+        "/api/quick-replies",
+        {
+          method: "DELETE",
+
+          credentials:
+            "same-origin",
+
+          headers: {
+            "Content-Type":
+              "application/json"
+          },
+
+          body:
+            JSON.stringify({
+              id:
+                respostaRapida.id
+            })
+        }
+      );
+
+    const dados =
+      await resposta.json();
+
+    if (
+      !resposta.ok ||
+      !dados.ok
+    ) {
+      throw new Error(
+        dados.erro ||
+        "Não foi possível excluir a resposta."
+      );
+    }
+
+    respostasRapidas =
+      Array.isArray(dados.respostas)
+        ? dados.respostas
+        : [];
+
+    limparFormularioResposta();
+
+    renderizarMenuRespostas();
+    renderizarGerenciadorRespostas();
+
+    mostrarAvisoResposta(
+      "Resposta excluída com sucesso.",
+      "sucesso"
+    );
+
+  } catch (erro) {
+    console.error(
+      "Erro ao excluir resposta rápida:",
+      erro
+    );
+
+    mostrarAvisoResposta(
+      erro.message ||
+      "Não foi possível excluir a resposta.",
+      "erro"
+    );
+  }
+}
+
+
+// ===========================================================
 // ATUALIZAÇÃO AUTOMÁTICA
 // ===========================================================
 
@@ -2048,6 +3198,114 @@ document
       }
     }
   );
+  document
+  .getElementById(
+    "botaoRespostasRapidas"
+  )
+  .addEventListener(
+    "click",
+    (event) => {
+      event.stopPropagation();
+      abrirMenuRespostas();
+    }
+  );
+
+
+document
+  .getElementById(
+    "botaoGerenciarRespostas"
+  )
+  .addEventListener(
+    "click",
+    (event) => {
+      event.stopPropagation();
+      abrirGerenciadorRespostas();
+    }
+  );
+
+
+document
+  .getElementById(
+    "salvarRespostaRapida"
+  )
+  .addEventListener(
+    "click",
+    salvarRespostaRapida
+  );
+
+
+document
+  .getElementById(
+    "cancelarEdicaoResposta"
+  )
+  .addEventListener(
+    "click",
+    () => {
+      limparFormularioResposta();
+      mostrarAvisoResposta("");
+    }
+  );
+
+
+document
+  .getElementById(
+    "fecharModalRespostas"
+  )
+  .addEventListener(
+    "click",
+    fecharGerenciadorRespostas
+  );
+
+
+document
+  .getElementById(
+    "modalRespostasRapidas"
+  )
+  .addEventListener(
+    "click",
+    (event) => {
+      if (
+        event.target.id ===
+        "modalRespostasRapidas"
+      ) {
+        fecharGerenciadorRespostas();
+      }
+    }
+  );
+
+
+document.addEventListener(
+  "click",
+  (event) => {
+    const menu =
+      document.getElementById(
+        "menuRespostasRapidas"
+      );
+
+    const botao =
+      document.getElementById(
+        "botaoRespostasRapidas"
+      );
+
+    if (
+      !menu.contains(event.target) &&
+      !botao.contains(event.target)
+    ) {
+      fecharMenuRespostas();
+    }
+  }
+);
+
+
+document.addEventListener(
+  "keydown",
+  (event) => {
+    if (event.key === "Escape") {
+      fecharMenuRespostas();
+      fecharGerenciadorRespostas();
+    }
+  }
+);
 
 
 // ===========================================================
@@ -2064,6 +3322,7 @@ async function iniciarConversas() {
 
   try {
     await carregarConversas();
+    await carregarRespostasRapidas();
 
   } catch (erro) {
     console.error(erro);
