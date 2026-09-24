@@ -395,6 +395,29 @@
     }
 
     /* ==========================
+       RADAR FGTS
+       ========================== */
+
+    #botaoRadarFgts {
+      font-weight: bold;
+      flex-shrink: 0;
+
+      background: #ecfdf5;
+      color: #047857;
+      border-color: #a7f3d0;
+    }
+
+    #botaoRadarFgts:hover:not(:disabled) {
+      background: #d1fae5;
+    }
+
+    #botaoRadarFgts.no-radar {
+      background: #047857;
+      color: white;
+      border-color: #047857;
+    }
+
+    /* ==========================
        HISTÓRICO
        ========================== */
 
@@ -512,8 +535,7 @@
       position: relative;
       z-index: 20;
     }
-
-    .resposta textarea {
+        .resposta textarea {
       flex: 1;
 
       width: 100%;
@@ -572,23 +594,24 @@
       background: #0f766e;
     }
 
-    #botaoRespostasRapidas:disabled {
-      opacity: .55;
-      cursor: not-allowed;
-    }
-
     .quick-menu {
       display: none;
       position: absolute;
       left: 0;
       bottom: 58px;
+
       width: 340px;
       max-height: 360px;
+
       overflow-y: auto;
+
       background: white;
+
       border: 1px solid #d1d5db;
       border-radius: 10px;
-      box-shadow: 0 12px 30px rgba(0, 0, 0, .18);
+
+      box-shadow: 0 12px 30px rgba(0,0,0,.18);
+
       z-index: 80;
     }
 
@@ -599,26 +622,31 @@
     .quick-menu-topo {
       position: sticky;
       top: 0;
+
       background: white;
+
       padding: 12px;
+
       border-bottom: 1px solid #e5e7eb;
+
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 10px;
-      z-index: 2;
-    }
 
-    .quick-menu-topo strong {
-      font-size: 14px;
+      z-index: 2;
     }
 
     .quick-gerenciar {
       border: 0 !important;
+
       background: #eef2ff !important;
       color: #3730a3 !important;
+
       height: 34px !important;
+
       padding: 0 10px !important;
+
       font-size: 12px;
     }
 
@@ -628,15 +656,22 @@
 
     .quick-item {
       width: 100%;
+
       height: auto !important;
       min-height: 44px;
+
       padding: 10px 12px !important;
+
       border: 0 !important;
       border-radius: 7px !important;
+
       background: white !important;
       color: #1f2937 !important;
+
       text-align: left;
+
       font-weight: normal !important;
+
       display: block;
     }
 
@@ -652,8 +687,10 @@
 
     .quick-item span {
       display: block;
+
       color: #6b7280;
       font-size: 12px;
+
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -661,22 +698,26 @@
 
     .quick-vazio {
       padding: 22px 14px;
+
       text-align: center;
+
       color: #6b7280;
       font-size: 13px;
     }
-        /* ==========================
-       MODAL DE GERENCIAMENTO
-       ========================== */
 
     .modal-fundo {
       display: none;
+
       position: fixed;
       inset: 0;
-      background: rgba(17, 24, 39, .55);
+
+      background: rgba(17,24,39,.55);
+
       z-index: 200;
+
       align-items: center;
       justify-content: center;
+
       padding: 20px;
     }
 
@@ -687,34 +728,42 @@
     .modal-caixa {
       width: min(760px, 100%);
       max-height: 88vh;
+
       overflow: hidden;
+
       background: white;
+
       border-radius: 14px;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, .25);
+
+      box-shadow: 0 20px 60px rgba(0,0,0,.25);
+
       display: flex;
       flex-direction: column;
     }
 
     .modal-topo {
       padding: 18px 20px;
+
       border-bottom: 1px solid #e5e7eb;
+
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 15px;
     }
 
-    .modal-topo h3 {
-      font-size: 20px;
-    }
-
     .modal-fechar {
       border: 0;
+
       background: #f3f4f6;
+
       width: 36px;
       height: 36px;
+
       border-radius: 8px;
+
       cursor: pointer;
+
       font-size: 18px;
     }
 
@@ -725,15 +774,19 @@
 
     .quick-form {
       background: #f8fafc;
+
       border: 1px solid #e5e7eb;
       border-radius: 10px;
+
       padding: 15px;
       margin-bottom: 18px;
     }
 
     .quick-form label {
       display: block;
+
       margin-bottom: 6px;
+
       font-size: 13px;
       font-weight: bold;
     }
@@ -741,10 +794,14 @@
     .quick-form input,
     .quick-form textarea {
       width: 100%;
+
       border: 1px solid #d1d5db;
       border-radius: 8px;
+
       padding: 11px;
+
       outline: none;
+
       background: white;
     }
 
@@ -757,8 +814,10 @@
       resize: vertical;
     }
 
-    .quick-form-acoes {
+    .quick-form-acoes,
+    .quick-card-acoes {
       margin-top: 12px;
+
       display: flex;
       gap: 8px;
       justify-content: flex-end;
@@ -768,7 +827,9 @@
     .quick-card-acoes button {
       border: 0;
       border-radius: 7px;
+
       padding: 9px 12px;
+
       cursor: pointer;
       font-weight: bold;
     }
@@ -786,6 +847,7 @@
     .quick-card {
       border: 1px solid #e5e7eb;
       border-radius: 10px;
+
       padding: 14px;
       margin-bottom: 10px;
     }
@@ -797,16 +859,11 @@
 
     .quick-card p {
       color: #4b5563;
+
       font-size: 13px;
       line-height: 1.45;
-      white-space: pre-wrap;
-    }
 
-    .quick-card-acoes {
-      margin-top: 12px;
-      display: flex;
-      gap: 7px;
-      justify-content: flex-end;
+      white-space: pre-wrap;
     }
 
     .quick-editar {
@@ -821,9 +878,12 @@
 
     .quick-aviso {
       display: none;
+
       margin-bottom: 12px;
       padding: 10px 12px;
+
       border-radius: 8px;
+
       font-size: 13px;
     }
 
@@ -861,6 +921,8 @@
       .acoes-cabecalho button {
         padding-left: 7px;
         padding-right: 7px;
+
+        font-size: 12px;
       }
 
       .mensagem {
@@ -1013,6 +1075,14 @@
           </button>
 
           <button
+            id="botaoRadarFgts"
+            type="button"
+            disabled
+          >
+            ➕ Radar FGTS
+          </button>
+
+          <button
             id="botaoModo"
             type="button"
             class="assumir"
@@ -1066,7 +1136,10 @@
           >
 
             <div class="quick-menu-topo">
-              <strong>Respostas rápidas</strong>
+
+              <strong>
+                Respostas rápidas
+              </strong>
 
               <button
                 class="quick-gerenciar"
@@ -1075,6 +1148,7 @@
               >
                 ⚙️ Gerenciar
               </button>
+
             </div>
 
             <div
@@ -1115,11 +1189,16 @@
   class="modal-fundo"
   id="modalRespostasRapidas"
 >
+
   <div class="modal-caixa">
 
     <div class="modal-topo">
+
       <div>
-        <h3>⚡ Gerenciar respostas rápidas</h3>
+
+        <h3>
+          ⚡ Gerenciar respostas rápidas
+        </h3>
 
         <p
           style="
@@ -1130,16 +1209,17 @@
         >
           Cadastre, edite ou exclua suas mensagens prontas.
         </p>
+
       </div>
 
       <button
         class="modal-fechar"
         id="fecharModalRespostas"
         type="button"
-        aria-label="Fechar"
       >
         ×
       </button>
+
     </div>
 
     <div class="modal-corpo">
@@ -1204,6 +1284,7 @@
     </div>
 
   </div>
+
 </div>
 
 <script>
@@ -1214,11 +1295,10 @@ let assinaturaHistorico = "";
 
 let atualizando = false;
 let enviando = false;
+let adicionandoRadar = false;
 
 let modoSelecionado = "bot";
-
 let respostasRapidas = [];
-let carregandoRespostasRapidas = false;
 
 
 // ===========================================================
@@ -1260,53 +1340,411 @@ async function verificarLogin() {
 // ===========================================================
 
 function pegarInicial(nome) {
-  const texto =
+  const valor =
     String(nome || "?").trim();
 
-  return texto
-    ? texto.charAt(0).toUpperCase()
-    : "?";
-}
-
-
-function escaparHTML(valor) {
-  const div =
-    document.createElement("div");
-
-  div.textContent =
-    valor || "";
-
-  return div.innerHTML;
-}
-
-
-function formatarHora(data) {
-  if (!data) {
-    return "";
-  }
-
-  const objeto =
-    new Date(data);
-
-  if (
-    Number.isNaN(
-      objeto.getTime()
-    )
-  ) {
-    return "";
-  }
-
-  return objeto.toLocaleTimeString(
-    "pt-BR",
-    {
-      hour: "2-digit",
-      minute: "2-digit"
-    }
+  return (
+    valor.charAt(0).toUpperCase() ||
+    "?"
   );
 }
 
+function mostrarErro(texto) {
+  const elemento =
+    document.getElementById(
+      "erroTopo"
+    );
 
-function statusLabel(status) {
+  elemento.textContent =
+    texto || "";
+
+  elemento.style.display =
+    texto ? "block" : "none";
+}
+
+function normalizarTelefone(valor) {
+  return String(valor || "")
+    .replace(/\D/g, "");
+}
+
+function hojeLocalISO() {
+  const agora = new Date();
+
+  const ano =
+    agora.getFullYear();
+
+  const mes =
+    String(
+      agora.getMonth() + 1
+    ).padStart(2, "0");
+
+  const dia =
+    String(
+      agora.getDate()
+    ).padStart(2, "0");
+
+  return `${ano}-${mes}-${dia}`;
+}
+
+function proximoDia23Radar(
+  dataReferencia = hojeLocalISO()
+) {
+  const partes =
+    String(dataReferencia)
+      .split("-")
+      .map(Number);
+
+  let ano = partes[0];
+  let mes = partes[1] - 1;
+  const dia = partes[2];
+
+  if (dia >= 23) {
+    mes++;
+
+    if (mes > 11) {
+      mes = 0;
+      ano++;
+    }
+  }
+
+  return (
+    `${ano}-` +
+    `${String(mes + 1).padStart(2, "0")}-23`
+  );
+}
+  // ===========================================================
+// RADAR FGTS
+// ===========================================================
+
+function atualizarBotaoRadar(
+  cadastrado = false
+) {
+  const botao =
+    document.getElementById(
+      "botaoRadarFgts"
+    );
+
+  if (!telefoneSelecionado) {
+    botao.disabled = true;
+    botao.classList.remove(
+      "no-radar"
+    );
+    botao.textContent =
+      "➕ Radar FGTS";
+
+    return;
+  }
+
+  botao.disabled = false;
+
+  if (cadastrado) {
+    botao.classList.add(
+      "no-radar"
+    );
+
+    botao.textContent =
+      "✓ No Radar FGTS";
+
+  } else {
+    botao.classList.remove(
+      "no-radar"
+    );
+
+    botao.textContent =
+      "➕ Radar FGTS";
+  }
+}
+
+
+async function verificarClienteNoRadar() {
+  if (!telefoneSelecionado) {
+    atualizarBotaoRadar(false);
+    return false;
+  }
+
+  try {
+    const resposta =
+      await fetch(
+        "/api/fgts-radar",
+        {
+          method: "GET",
+          credentials: "same-origin"
+        }
+      );
+
+    if (resposta.status === 401) {
+      window.location.href =
+        "/painel.html";
+
+      return false;
+    }
+
+    const dados =
+      await resposta.json();
+
+    if (
+      !resposta.ok ||
+      !dados.ok
+    ) {
+      throw new Error(
+        dados.erro ||
+        "Erro ao consultar Radar FGTS"
+      );
+    }
+
+    const telefoneAtual =
+      normalizarTelefone(
+        telefoneSelecionado
+      );
+
+    const clientes =
+      Array.isArray(
+        dados.clientes
+      )
+        ? dados.clientes
+        : [];
+
+    const encontrado =
+      clientes.some(
+        (cliente) =>
+          normalizarTelefone(
+            cliente.telefone
+          ) === telefoneAtual
+      );
+
+    atualizarBotaoRadar(
+      encontrado
+    );
+
+    return encontrado;
+
+  } catch (erro) {
+    console.error(
+      "Erro ao verificar Radar FGTS:",
+      erro
+    );
+
+    atualizarBotaoRadar(false);
+
+    return false;
+  }
+}
+
+
+async function adicionarClienteAoRadar() {
+  if (
+    adicionandoRadar ||
+    !telefoneSelecionado
+  ) {
+    return;
+  }
+
+  const botao =
+    document.getElementById(
+      "botaoRadarFgts"
+    );
+
+  adicionandoRadar = true;
+  botao.disabled = true;
+  botao.textContent =
+    "Verificando...";
+
+  try {
+    mostrarErro("");
+
+    const consulta =
+      await fetch(
+        "/api/fgts-radar",
+        {
+          method: "GET",
+          credentials: "same-origin"
+        }
+      );
+
+    if (consulta.status === 401) {
+      window.location.href =
+        "/painel.html";
+
+      return;
+    }
+
+    const dadosConsulta =
+      await consulta.json();
+
+    if (
+      !consulta.ok ||
+      !dadosConsulta.ok
+    ) {
+      throw new Error(
+        dadosConsulta.erro ||
+        "Não foi possível consultar o Radar FGTS."
+      );
+    }
+
+    const telefoneAtual =
+      normalizarTelefone(
+        telefoneSelecionado
+      );
+
+    const clientes =
+      Array.isArray(
+        dadosConsulta.clientes
+      )
+        ? dadosConsulta.clientes
+        : [];
+
+    const clienteExistente =
+      clientes.find(
+        (cliente) =>
+          normalizarTelefone(
+            cliente.telefone
+          ) === telefoneAtual
+      );
+
+    if (clienteExistente) {
+      atualizarBotaoRadar(true);
+
+      alert(
+        `${nomeSelecionado || "Este cliente"} já está cadastrado no Radar FGTS.`
+      );
+
+      return;
+    }
+
+    const hoje =
+      hojeLocalISO();
+
+    const reconsulta =
+      proximoDia23Radar(
+        hoje
+      );
+
+    const resposta =
+      await fetch(
+        "/api/fgts-radar",
+        {
+          method: "POST",
+
+          credentials:
+            "same-origin",
+
+          headers: {
+            "Content-Type":
+              "application/json"
+          },
+
+          body:
+            JSON.stringify({
+              nome:
+                nomeSelecionado ||
+                telefoneSelecionado,
+
+              telefone:
+                telefoneSelecionado,
+
+              origem:
+                "WhatsApp API",
+
+              ultimaConsulta:
+                hoje,
+
+              reconsulta,
+
+              resultado:
+                "Sem saldo",
+
+              observacao:
+                "Adicionado pelo CRM de conversas.",
+
+              ativo:
+                true
+            })
+        }
+      );
+
+    if (resposta.status === 401) {
+      window.location.href =
+        "/painel.html";
+
+      return;
+    }
+
+    const dados =
+      await resposta.json();
+
+    if (
+      !resposta.ok ||
+      !dados.ok
+    ) {
+      throw new Error(
+        dados.erro ||
+        "Não foi possível adicionar o cliente ao Radar FGTS."
+      );
+    }
+
+    atualizarBotaoRadar(true);
+
+    alert(
+      `${nomeSelecionado || "Cliente"} foi adicionado ao Radar FGTS com sucesso!`
+    );
+
+  } catch (erro) {
+    console.error(
+      "Erro ao adicionar ao Radar FGTS:",
+      erro
+    );
+
+    mostrarErro(
+      erro.message ||
+      "Não foi possível adicionar o cliente ao Radar FGTS."
+    );
+
+    atualizarBotaoRadar(false);
+
+  } finally {
+    adicionandoRadar = false;
+
+    if (
+      telefoneSelecionado &&
+      botao.textContent ===
+        "Verificando..."
+    ) {
+      botao.disabled = false;
+      botao.textContent =
+        "➕ Radar FGTS";
+    }
+  }
+}
+
+
+// ===========================================================
+// FORMATAÇÕES
+// ===========================================================
+
+function formatarHorario(valor) {
+  if (!valor) {
+    return "";
+  }
+
+  try {
+    const data =
+      new Date(valor);
+
+    return data.toLocaleTimeString(
+      "pt-BR",
+      {
+        hour: "2-digit",
+        minute: "2-digit"
+      }
+    );
+
+  } catch {
+    return "";
+  }
+}
+
+
+function textoStatus(status) {
   const mapa = {
     novo:
       "Novo",
@@ -1321,19 +1759,38 @@ function statusLabel(status) {
       "Finalizado"
   };
 
-  return mapa[status] || "Novo";
+  return (
+    mapa[status] ||
+    status ||
+    "Novo"
+  );
+}
+
+
+function textoPreview(
+  conversa
+) {
+  return (
+    conversa.ultimaMensagem ||
+    conversa.preview ||
+    "Sem mensagens"
+  );
 }
 
 
 // ===========================================================
-// MODO BOT / HUMANO
+// INTERFACE DO MODO
 // ===========================================================
 
-function atualizarInterfaceModo(modo) {
+function atualizarInterfaceModo(
+  modo
+) {
   modoSelecionado =
-    modo || "bot";
+    modo === "humano"
+      ? "humano"
+      : "bot";
 
-  const indicador =
+  const etiqueta =
     document.getElementById(
       "modoAtual"
     );
@@ -1344,12 +1801,13 @@ function atualizarInterfaceModo(modo) {
     );
 
   if (
-    modoSelecionado === "humano"
+    modoSelecionado ===
+    "humano"
   ) {
-    indicador.textContent =
+    etiqueta.textContent =
       "👤 Atendimento humano";
 
-    indicador.className =
+    etiqueta.className =
       "modo-atual modo-humano";
 
     botao.textContent =
@@ -1359,10 +1817,10 @@ function atualizarInterfaceModo(modo) {
       "devolver";
 
   } else {
-    indicador.textContent =
+    etiqueta.textContent =
       "🤖 Atendimento automático";
 
-    indicador.className =
+    etiqueta.className =
       "modo-atual modo-bot";
 
     botao.textContent =
@@ -1375,58 +1833,11 @@ function atualizarInterfaceModo(modo) {
 
 
 // ===========================================================
-// ERROS
+// LISTA DE CONVERSAS
 // ===========================================================
 
-function mostrarErro(texto) {
-  const elemento =
-    document.getElementById(
-      "erroTopo"
-    );
+let conversasCarregadas = [];
 
-  elemento.textContent =
-    texto || "";
-
-  elemento.style.display =
-    texto
-      ? "block"
-      : "none";
-}
-
-
-// ===========================================================
-// BUSCA
-// ===========================================================
-
-function aplicarBusca() {
-  const termo =
-    document
-      .getElementById(
-        "buscarCliente"
-      )
-      .value
-      .toLowerCase()
-      .trim();
-
-  document
-    .querySelectorAll(
-      ".cliente"
-    )
-    .forEach(
-      (cliente) => {
-        cliente.style.display =
-          cliente
-            .textContent
-            .toLowerCase()
-            .includes(termo)
-            ? "flex"
-            : "none";
-      }
-    );
-}
-  // ===========================================================
-// CARREGAR LISTA
-// ===========================================================
 
 async function carregarConversas() {
   const resposta =
@@ -1437,6 +1848,16 @@ async function carregarConversas() {
         credentials: "same-origin"
       }
     );
+
+  if (
+    resposta.status ===
+    401
+  ) {
+    window.location.href =
+      "/painel.html";
+
+    return;
+  }
 
   const dados =
     await resposta.json();
@@ -1451,45 +1872,75 @@ async function carregarConversas() {
     );
   }
 
+  conversasCarregadas =
+    Array.isArray(
+      dados.conversations
+    )
+      ? dados.conversations
+      : (
+          Array.isArray(
+            dados.conversas
+          )
+            ? dados.conversas
+            : []
+        );
+
+  renderizarConversas(
+    conversasCarregadas
+  );
+}
+
+
+function renderizarConversas(
+  conversas
+) {
   const lista =
     document.getElementById(
       "listaClientes"
     );
 
-  const conversas =
-    dados.conversations || [];
+  lista.replaceChildren();
 
-  if (!conversas.length) {
-    lista.innerHTML = `
-      <div
-        style="
-          padding:25px;
-          text-align:center;
-          color:#6b7280;
-        "
-      >
-        Nenhuma conversa encontrada.
-      </div>
-    `;
+  if (
+    !conversas.length
+  ) {
+    const vazio =
+      document.createElement(
+        "div"
+      );
+
+    vazio.style.padding =
+      "25px";
+
+    vazio.style.textAlign =
+      "center";
+
+    vazio.style.color =
+      "#6b7280";
+
+    vazio.textContent =
+      "Nenhuma conversa encontrada.";
+
+    lista.appendChild(
+      vazio
+    );
 
     return;
   }
 
-  const fragmento =
-    document.createDocumentFragment();
-
   conversas.forEach(
     (conversa) => {
       const telefone =
-        conversa.telefone || "";
+        conversa.telefone ||
+        conversa.phone ||
+        conversa.from ||
+        "";
 
       const nome =
         conversa.nome ||
-        telefone;
-
-      const modo =
-        conversa.modoAtendimento ||
-        "bot";
+        conversa.name ||
+        telefone ||
+        "Cliente";
 
       const item =
         document.createElement(
@@ -1497,90 +1948,155 @@ async function carregarConversas() {
         );
 
       item.className =
-        "cliente" +
-        (
-          telefone === telefoneSelecionado
-            ? " ativo"
-            : ""
+        "cliente";
+
+      if (
+        telefoneSelecionado &&
+        telefone ===
+          telefoneSelecionado
+      ) {
+        item.classList.add(
+          "ativo"
+        );
+      }
+
+      const avatar =
+        document.createElement(
+          "div"
         );
 
-      item.dataset.telefone =
-        telefone;
+      avatar.className =
+        "avatar";
 
-      item.innerHTML = `
-        <div class="avatar">
-          ${escaparHTML(
-            pegarInicial(nome)
-          )}
-        </div>
+      avatar.textContent =
+        pegarInicial(nome);
 
-        <div class="dados-cliente">
+      const dadosCliente =
+        document.createElement(
+          "div"
+        );
 
-          <div class="linha-nome">
+      dadosCliente.className =
+        "dados-cliente";
 
-            <strong>
-              ${escaparHTML(nome)}
-            </strong>
+      const linhaNome =
+        document.createElement(
+          "div"
+        );
 
-            ${
-              Number(
-                conversa.naoLidas || 0
-              ) > 0
-                ? `
-                  <span class="badge">
-                    ${Number(
-                      conversa.naoLidas
-                    )}
-                  </span>
-                `
-                : ""
-            }
+      linhaNome.className =
+        "linha-nome";
 
-          </div>
+      const nomeElemento =
+        document.createElement(
+          "strong"
+        );
 
-          <span class="preview">
-            ${escaparHTML(
-              conversa.ultimaMensagem ||
-              ""
-            )}
-          </span>
+      nomeElemento.textContent =
+        nome;
 
-          <div class="meta-cliente">
+      linhaNome.appendChild(
+        nomeElemento
+      );
 
-            <span class="status-mini">
-              ${escaparHTML(
-                statusLabel(
-                  conversa.status
-                )
-              )}
-            </span>
+      const naoLidas =
+        Number(
+          conversa.naoLidas ||
+          conversa.unread ||
+          conversa.unreadCount ||
+          0
+        );
 
-            <span
-              class="modo-mini ${
-                modo === "humano"
-                  ? "modo-humano"
-                  : "modo-bot"
-              }"
-            >
-              ${
-                modo === "humano"
-                  ? "👤 Humano"
-                  : "🤖 Bot"
-              }
-            </span>
+      if (
+        naoLidas > 0
+      ) {
+        const badge =
+          document.createElement(
+            "span"
+          );
 
-            <span>
-              ${escaparHTML(
-                formatarHora(
-                  conversa.atualizadoEm
-                )
-              )}
-            </span>
+        badge.className =
+          "badge";
 
-          </div>
+        badge.textContent =
+          String(naoLidas);
 
-        </div>
-      `;
+        linhaNome.appendChild(
+          badge
+        );
+      }
+
+      const preview =
+        document.createElement(
+          "span"
+        );
+
+      preview.className =
+        "preview";
+
+      preview.textContent =
+        textoPreview(
+          conversa
+        );
+
+      const meta =
+        document.createElement(
+          "div"
+        );
+
+      meta.className =
+        "meta-cliente";
+
+      const status =
+        document.createElement(
+          "span"
+        );
+
+      status.className =
+        "status-mini";
+
+      status.textContent =
+        textoStatus(
+          conversa.status
+        );
+
+      const modo =
+        document.createElement(
+          "span"
+        );
+
+      const modoHumano =
+        conversa.modoAtendimento ===
+        "humano";
+
+      modo.className =
+        "modo-mini " +
+        (
+          modoHumano
+            ? "modo-humano"
+            : "modo-bot"
+        );
+
+      modo.textContent =
+        modoHumano
+          ? "Humano"
+          : "Bot";
+
+      meta.append(
+        status,
+        modo
+      );
+
+      dadosCliente.append(
+        linhaNome,
+        preview,
+        meta
+      );
+
+      item.append(
+        avatar,
+        dadosCliente
+      );
 
       item.addEventListener(
         "click",
@@ -1594,17 +2110,64 @@ async function carregarConversas() {
         }
       );
 
-      fragmento.appendChild(
+      lista.appendChild(
         item
       );
     }
   );
+}
 
-  lista.replaceChildren(
-    fragmento
+
+// ===========================================================
+// BUSCA
+// ===========================================================
+
+function aplicarBusca() {
+  const termo =
+    document
+      .getElementById(
+        "buscarCliente"
+      )
+      .value
+      .trim()
+      .toLowerCase();
+
+  if (!termo) {
+    renderizarConversas(
+      conversasCarregadas
+    );
+
+    return;
+  }
+
+  const filtradas =
+    conversasCarregadas.filter(
+      (conversa) => {
+        const nome =
+          String(
+            conversa.nome ||
+            conversa.name ||
+            ""
+          ).toLowerCase();
+
+        const telefone =
+          String(
+            conversa.telefone ||
+            conversa.phone ||
+            conversa.from ||
+            ""
+          ).toLowerCase();
+
+        return (
+          nome.includes(termo) ||
+          telefone.includes(termo)
+        );
+      }
+    );
+
+  renderizarConversas(
+    filtradas
   );
-
-  aplicarBusca();
 }
 
 
@@ -1641,7 +2204,7 @@ async function marcarComoLida(
 
   } catch (erro) {
     console.error(
-      "Erro ao marcar como lida:",
+      "Erro ao marcar conversa como lida:",
       erro
     );
   }
@@ -1656,16 +2219,9 @@ async function buscarHistorico(
   telefone,
   forcarRolagem = false
 ) {
-  const area =
-    document.getElementById(
-      "mensagens"
-    );
-
-  const pertoDoFim =
-    area.scrollHeight -
-    area.scrollTop -
-    area.clientHeight <
-    120;
+  if (!telefone) {
+    return;
+  }
 
   const resposta =
     await fetch(
@@ -1673,10 +2229,20 @@ async function buscarHistorico(
         telefone
       )}`,
       {
-        credentials:
-          "same-origin"
+        method: "GET",
+        credentials: "same-origin"
       }
     );
+
+  if (
+    resposta.status ===
+    401
+  ) {
+    window.location.href =
+      "/painel.html";
+
+    return;
+  }
 
   const dados =
     await resposta.json();
@@ -1691,100 +2257,55 @@ async function buscarHistorico(
     );
   }
 
-  const mensagens =
-    dados.mensagens || [];
+  if (
+    telefone !==
+    telefoneSelecionado
+  ) {
+    return;
+  }
 
-  const assinaturaNova =
-    mensagens
-      .map(
-        (mensagem) =>
-          `${mensagem.timestamp}|${mensagem.direcao}|${mensagem.texto}`
+  const mensagens =
+    Array.isArray(
+      dados.messages
+    )
+      ? dados.messages
+      : (
+          Array.isArray(
+            dados.mensagens
+          )
+            ? dados.mensagens
+            : []
+        );
+
+  const novaAssinatura =
+    JSON.stringify(
+      mensagens.map(
+        (mensagem) => [
+          mensagem.id ||
+            "",
+          mensagem.timestamp ||
+            mensagem.data ||
+            "",
+          mensagem.texto ||
+            mensagem.text ||
+            mensagem.body ||
+            ""
+        ]
       )
-      .join("§");
+    );
 
   if (
-    assinaturaNova !==
-    assinaturaHistorico
+    novaAssinatura !==
+      assinaturaHistorico ||
+    forcarRolagem
   ) {
     assinaturaHistorico =
-      assinaturaNova;
+      novaAssinatura;
 
-    if (!mensagens.length) {
-      area.innerHTML = `
-        <div class="vazio">
-          Nenhuma mensagem encontrada.
-        </div>
-      `;
-
-    } else {
-      const fragmento =
-        document
-          .createDocumentFragment();
-
-      mensagens.forEach(
-        (mensagem) => {
-          const bolha =
-            document.createElement(
-              "div"
-            );
-
-          bolha.className =
-            mensagem.direcao ===
-            "saida"
-              ? "mensagem atendente-msg"
-              : "mensagem cliente-msg";
-
-          const texto =
-            document.createElement(
-              "div"
-            );
-
-          texto.textContent =
-            mensagem.texto || "";
-
-          const hora =
-            document.createElement(
-              "span"
-            );
-
-          hora.className =
-            "hora";
-
-          hora.textContent =
-            formatarHora(
-              mensagem.data
-            );
-
-          bolha.appendChild(
-            texto
-          );
-
-          bolha.appendChild(
-            hora
-          );
-
-          fragmento.appendChild(
-            bolha
-          );
-        }
-      );
-
-      area.replaceChildren(
-        fragmento
-      );
-    }
-
-    if (
-      forcarRolagem ||
-      pertoDoFim
-    ) {
-      requestAnimationFrame(
-        () => {
-          area.scrollTop =
-            area.scrollHeight;
-        }
-      );
-    }
+    renderizarHistorico(
+      mensagens,
+      forcarRolagem
+    );
   }
 
   const conversa =
@@ -1833,6 +2354,146 @@ async function buscarHistorico(
     atualizarInterfaceModo(
       conversa.modoAtendimento ||
       "bot"
+    );
+  }
+}
+  // ===========================================================
+// RENDERIZAR HISTÓRICO
+// ===========================================================
+
+function renderizarHistorico(
+  mensagens,
+  forcarRolagem = false
+) {
+  const area =
+    document.getElementById(
+      "mensagens"
+    );
+
+  const estavaNoFim =
+    area.scrollHeight -
+      area.scrollTop -
+      area.clientHeight <
+    120;
+
+  area.replaceChildren();
+
+  if (!mensagens.length) {
+    const vazio =
+      document.createElement(
+        "div"
+      );
+
+    vazio.className =
+      "vazio";
+
+    const titulo =
+      document.createElement(
+        "h3"
+      );
+
+    titulo.textContent =
+      "Nenhuma mensagem";
+
+    const texto =
+      document.createElement(
+        "p"
+      );
+
+    texto.textContent =
+      "O histórico desta conversa está vazio.";
+
+    vazio.append(
+      titulo,
+      texto
+    );
+
+    area.appendChild(
+      vazio
+    );
+
+    return;
+  }
+
+  mensagens.forEach(
+    (mensagem) => {
+      const bolha =
+        document.createElement(
+          "div"
+        );
+
+      const origem =
+        String(
+          mensagem.origem ||
+          mensagem.from ||
+          mensagem.tipo ||
+          mensagem.direction ||
+          ""
+        ).toLowerCase();
+
+      const enviada =
+        mensagem.enviada === true ||
+        mensagem.sent === true ||
+        origem === "atendente" ||
+        origem === "empresa" ||
+        origem === "out" ||
+        origem === "outbound" ||
+        origem === "assistant";
+
+      bolha.className =
+        "mensagem " +
+        (
+          enviada
+            ? "atendente-msg"
+            : "cliente-msg"
+        );
+
+      const texto =
+        document.createElement(
+          "div"
+        );
+
+      texto.textContent =
+        mensagem.texto ||
+        mensagem.text ||
+        mensagem.body ||
+        "";
+
+      const hora =
+        document.createElement(
+          "span"
+        );
+
+      hora.className =
+        "hora";
+
+      hora.textContent =
+        formatarHorario(
+          mensagem.timestamp ||
+          mensagem.data ||
+          mensagem.createdAt
+        );
+
+      bolha.append(
+        texto,
+        hora
+      );
+
+      area.appendChild(
+        bolha
+      );
+    }
+  );
+
+  if (
+    forcarRolagem ||
+    estavaNoFim
+  ) {
+    requestAnimationFrame(
+      () => {
+        area.scrollTop =
+          area.scrollHeight;
+      }
     );
   }
 }
@@ -1940,6 +2601,17 @@ async function abrirConversa(
     .disabled =
       false;
 
+  document
+    .getElementById(
+      "botaoRadarFgts"
+    )
+    .disabled =
+      false;
+
+  atualizarBotaoRadar(
+    false
+  );
+
   try {
     mostrarErro("");
 
@@ -1947,6 +2619,8 @@ async function abrirConversa(
       telefone,
       true
     );
+
+    await verificarClienteNoRadar();
 
     if (marcarLida) {
       await marcarComoLida(
@@ -2007,6 +2681,7 @@ async function enviarMensagem() {
   enviando = true;
 
   botao.disabled = true;
+
   botao.textContent =
     "Enviando...";
 
@@ -2017,7 +2692,8 @@ async function enviarMensagem() {
       await fetch(
         "/api/send-message",
         {
-          method: "POST",
+          method:
+            "POST",
 
           credentials:
             "same-origin",
@@ -2050,9 +2726,11 @@ async function enviarMensagem() {
       );
     }
 
-    campo.value = "";
+    campo.value =
+      "";
 
-    assinaturaHistorico = "";
+    assinaturaHistorico =
+      "";
 
     await buscarHistorico(
       telefoneSelecionado,
@@ -2075,7 +2753,8 @@ async function enviarMensagem() {
   } finally {
     enviando = false;
 
-    botao.disabled = false;
+    botao.disabled =
+      false;
 
     botao.textContent =
       "Enviar";
@@ -2099,7 +2778,8 @@ async function alternarModoAtendimento() {
       "botaoModo"
     );
 
-  botao.disabled = true;
+  botao.disabled =
+    true;
 
   const acao =
     modoSelecionado ===
@@ -2114,7 +2794,8 @@ async function alternarModoAtendimento() {
       await fetch(
         "/api/conversations",
         {
-          method: "POST",
+          method:
+            "POST",
 
           credentials:
             "same-origin",
@@ -2173,7 +2854,8 @@ async function alternarModoAtendimento() {
     );
 
   } finally {
-    botao.disabled = false;
+    botao.disabled =
+      false;
   }
 }
 
@@ -2201,7 +2883,8 @@ async function atualizarStatus() {
       await fetch(
         "/api/conversations",
         {
-          method: "POST",
+          method:
+            "POST",
 
           credentials:
             "same-origin",
@@ -2270,6 +2953,13 @@ async function editarNome() {
     return;
   }
 
+  const nomeLimpo =
+    novoNome.trim();
+
+  if (!nomeLimpo) {
+    return;
+  }
+
   try {
     mostrarErro("");
 
@@ -2277,7 +2967,8 @@ async function editarNome() {
       await fetch(
         "/api/conversations",
         {
-          method: "POST",
+          method:
+            "POST",
 
           credentials:
             "same-origin",
@@ -2296,7 +2987,7 @@ async function editarNome() {
                 telefoneSelecionado,
 
               nome:
-                novoNome
+                nomeLimpo
             })
         }
       );
@@ -2316,6 +3007,7 @@ async function editarNome() {
 
     nomeSelecionado =
       dados.conversa?.nome ||
+      nomeLimpo ||
       telefoneSelecionado;
 
     document
@@ -2377,26 +3069,23 @@ function resumoResposta(texto) {
       .replace(/\s+/g, " ")
       .trim();
 
-  return valor.length > 75
-    ? valor.slice(0, 75) + "..."
-    : valor;
+  return (
+    valor.length > 75
+      ? valor.slice(0, 75) +
+        "..."
+      : valor
+  );
 }
 
 
 async function carregarRespostasRapidas() {
-  if (carregandoRespostasRapidas) {
-    return;
-  }
-
-  carregandoRespostasRapidas = true;
-
   try {
     const resposta =
       await fetch(
         "/api/quick-replies",
         {
-          method: "GET",
-          credentials: "same-origin"
+          credentials:
+            "same-origin"
         }
       );
 
@@ -2414,7 +3103,9 @@ async function carregarRespostasRapidas() {
     }
 
     respostasRapidas =
-      Array.isArray(dados.respostas)
+      Array.isArray(
+        dados.respostas
+      )
         ? dados.respostas
         : [];
 
@@ -2423,26 +3114,20 @@ async function carregarRespostasRapidas() {
 
   } catch (erro) {
     console.error(
-      "Erro ao carregar respostas rápidas:",
       erro
     );
 
-    const lista =
-      document.getElementById(
+    document
+      .getElementById(
         "listaRespostasRapidas"
-      );
-
-    lista.innerHTML = `
-      <div class="quick-vazio">
-        Não foi possível carregar as respostas.
-      </div>
-    `;
-
-  } finally {
-    carregandoRespostasRapidas = false;
+      )
+      .innerHTML =
+        '<div class="quick-vazio">Não foi possível carregar as respostas.</div>';
   }
 }
-  function renderizarMenuRespostas() {
+
+
+function renderizarMenuRespostas() {
   const lista =
     document.getElementById(
       "listaRespostasRapidas"
@@ -2450,7 +3135,9 @@ async function carregarRespostasRapidas() {
 
   lista.replaceChildren();
 
-  if (!respostasRapidas.length) {
+  if (
+    !respostasRapidas.length
+  ) {
     const vazio =
       document.createElement(
         "div"
@@ -2501,11 +3188,8 @@ async function carregarRespostasRapidas() {
           resposta.texto
         );
 
-      botao.appendChild(
-        titulo
-      );
-
-      botao.appendChild(
+      botao.append(
+        titulo,
         resumo
       );
 
@@ -2524,9 +3208,7 @@ async function carregarRespostasRapidas() {
     }
   );
 }
-
-
-function renderizarGerenciadorRespostas() {
+  function renderizarGerenciadorRespostas() {
   const lista =
     document.getElementById(
       "listaGerenciarRespostas"
@@ -2534,7 +3216,9 @@ function renderizarGerenciadorRespostas() {
 
   lista.replaceChildren();
 
-  if (!respostasRapidas.length) {
+  if (
+    !respostasRapidas.length
+  ) {
     const vazio =
       document.createElement(
         "div"
@@ -2578,7 +3262,8 @@ function renderizarGerenciadorRespostas() {
         );
 
       texto.textContent =
-        resposta.texto || "";
+        resposta.texto ||
+        "";
 
       const acoes =
         document.createElement(
@@ -2602,14 +3287,11 @@ function renderizarGerenciadorRespostas() {
       editar.textContent =
         "Editar";
 
-      editar.addEventListener(
-        "click",
-        () => {
+      editar.onclick =
+        () =>
           iniciarEdicaoResposta(
             resposta
           );
-        }
-      );
 
       const excluir =
         document.createElement(
@@ -2625,32 +3307,20 @@ function renderizarGerenciadorRespostas() {
       excluir.textContent =
         "Excluir";
 
-      excluir.addEventListener(
-        "click",
-        () => {
+      excluir.onclick =
+        () =>
           excluirRespostaRapida(
             resposta
           );
-        }
-      );
 
-      acoes.appendChild(
-        editar
-      );
-
-      acoes.appendChild(
+      acoes.append(
+        editar,
         excluir
       );
 
-      card.appendChild(
-        titulo
-      );
-
-      card.appendChild(
-        texto
-      );
-
-      card.appendChild(
+      card.append(
+        titulo,
+        texto,
         acoes
       );
 
@@ -2733,17 +3403,6 @@ function abrirGerenciadorRespostas() {
     );
 
   carregarRespostasRapidas();
-
-  setTimeout(
-    () => {
-      document
-        .getElementById(
-          "quickReplyTitulo"
-        )
-        .focus();
-    },
-    50
-  );
 }
 
 
@@ -2757,6 +3416,7 @@ function fecharGerenciadorRespostas() {
     );
 
   limparFormularioResposta();
+
   mostrarAvisoResposta("");
 }
 
@@ -2766,19 +3426,22 @@ function limparFormularioResposta() {
     .getElementById(
       "quickReplyId"
     )
-    .value = "";
+    .value =
+      "";
 
   document
     .getElementById(
       "quickReplyTitulo"
     )
-    .value = "";
+    .value =
+      "";
 
   document
     .getElementById(
       "quickReplyTexto"
     )
-    .value = "";
+    .value =
+      "";
 
   document
     .getElementById(
@@ -2833,12 +3496,6 @@ function iniciarEdicaoResposta(
     )
     .textContent =
       "Salvar alterações";
-
-  document
-    .getElementById(
-      "quickReplyTitulo"
-    )
-    .focus();
 }
 
 
@@ -2885,19 +3542,6 @@ async function salvarRespostaRapida() {
     return;
   }
 
-  const botao =
-    document.getElementById(
-      "salvarRespostaRapida"
-    );
-
-  botao.disabled = true;
-
-  const textoAnterior =
-    botao.textContent;
-
-  botao.textContent =
-    "Salvando...";
-
   try {
     const resposta =
       await fetch(
@@ -2939,13 +3583,16 @@ async function salvarRespostaRapida() {
     }
 
     respostasRapidas =
-      Array.isArray(dados.respostas)
+      Array.isArray(
+        dados.respostas
+      )
         ? dados.respostas
         : respostasRapidas;
 
     limparFormularioResposta();
 
     renderizarMenuRespostas();
+
     renderizarGerenciadorRespostas();
 
     mostrarAvisoResposta(
@@ -2956,38 +3603,11 @@ async function salvarRespostaRapida() {
     );
 
   } catch (erro) {
-    console.error(
-      "Erro ao salvar resposta rápida:",
-      erro
-    );
-
     mostrarAvisoResposta(
       erro.message ||
       "Não foi possível salvar a resposta.",
       "erro"
     );
-
-  } finally {
-    botao.disabled = false;
-
-    if (
-      document
-        .getElementById(
-          "quickReplyId"
-        )
-        .value
-    ) {
-      botao.textContent =
-        "Salvar alterações";
-    } else {
-      botao.textContent =
-        "Salvar resposta";
-    }
-
-    if (!botao.textContent) {
-      botao.textContent =
-        textoAnterior;
-    }
   }
 }
 
@@ -2995,12 +3615,11 @@ async function salvarRespostaRapida() {
 async function excluirRespostaRapida(
   respostaRapida
 ) {
-  const confirmar =
-    window.confirm(
+  if (
+    !confirm(
       `Excluir a resposta "${respostaRapida.titulo}"?`
-    );
-
-  if (!confirmar) {
+    )
+  ) {
     return;
   }
 
@@ -3009,7 +3628,8 @@ async function excluirRespostaRapida(
       await fetch(
         "/api/quick-replies",
         {
-          method: "DELETE",
+          method:
+            "DELETE",
 
           credentials:
             "same-origin",
@@ -3041,13 +3661,16 @@ async function excluirRespostaRapida(
     }
 
     respostasRapidas =
-      Array.isArray(dados.respostas)
+      Array.isArray(
+        dados.respostas
+      )
         ? dados.respostas
         : [];
 
     limparFormularioResposta();
 
     renderizarMenuRespostas();
+
     renderizarGerenciadorRespostas();
 
     mostrarAvisoResposta(
@@ -3056,11 +3679,6 @@ async function excluirRespostaRapida(
     );
 
   } catch (erro) {
-    console.error(
-      "Erro ao excluir resposta rápida:",
-      erro
-    );
-
     mostrarAvisoResposta(
       erro.message ||
       "Não foi possível excluir a resposta.",
@@ -3077,12 +3695,14 @@ async function excluirRespostaRapida(
 async function atualizarAutomaticamente() {
   if (
     atualizando ||
-    enviando
+    enviando ||
+    adicionandoRadar
   ) {
     return;
   }
 
-  atualizando = true;
+  atualizando =
+    true;
 
   try {
     document
@@ -3094,7 +3714,9 @@ async function atualizarAutomaticamente() {
 
     await carregarConversas();
 
-    if (telefoneSelecionado) {
+    if (
+      telefoneSelecionado
+    ) {
       await buscarHistorico(
         telefoneSelecionado,
         false
@@ -3122,7 +3744,8 @@ async function atualizarAutomaticamente() {
         "Falha temporária na atualização";
 
   } finally {
-    atualizando = false;
+    atualizando =
+      false;
   }
 }
 
@@ -3183,6 +3806,16 @@ document
 
 document
   .getElementById(
+    "botaoRadarFgts"
+  )
+  .addEventListener(
+    "click",
+    adicionarClienteAoRadar
+  );
+
+
+document
+  .getElementById(
     "mensagemResposta"
   )
   .addEventListener(
@@ -3198,7 +3831,9 @@ document
       }
     }
   );
-  document
+
+
+document
   .getElementById(
     "botaoRespostasRapidas"
   )
@@ -3206,6 +3841,7 @@ document
     "click",
     (event) => {
       event.stopPropagation();
+
       abrirMenuRespostas();
     }
   );
@@ -3219,6 +3855,7 @@ document
     "click",
     (event) => {
       event.stopPropagation();
+
       abrirGerenciadorRespostas();
     }
   );
@@ -3242,6 +3879,7 @@ document
     "click",
     () => {
       limparFormularioResposta();
+
       mostrarAvisoResposta("");
     }
   );
@@ -3288,8 +3926,12 @@ document.addEventListener(
       );
 
     if (
-      !menu.contains(event.target) &&
-      !botao.contains(event.target)
+      !menu.contains(
+        event.target
+      ) &&
+      !botao.contains(
+        event.target
+      )
     ) {
       fecharMenuRespostas();
     }
@@ -3300,7 +3942,10 @@ document.addEventListener(
 document.addEventListener(
   "keydown",
   (event) => {
-    if (event.key === "Escape") {
+    if (
+      event.key ===
+      "Escape"
+    ) {
       fecharMenuRespostas();
       fecharGerenciadorRespostas();
     }
@@ -3322,10 +3967,13 @@ async function iniciarConversas() {
 
   try {
     await carregarConversas();
+
     await carregarRespostasRapidas();
 
   } catch (erro) {
-    console.error(erro);
+    console.error(
+      erro
+    );
 
     mostrarErro(
       "Não foi possível carregar as conversas."
