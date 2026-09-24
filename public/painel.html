@@ -426,7 +426,450 @@ th {
   }
 }
 
-</style>
+  /* ==========================================================
+   ADCRED CRM 2.0 — IDENTIDADE VISUAL
+   ========================================================== */
+
+:root {
+  --adcred-navy: #071d3b;
+  --adcred-navy-2: #0b2d55;
+  --adcred-blue: #1769e0;
+  --adcred-cyan: #08a9c4;
+  --adcred-teal: #079b9a;
+  --adcred-bg: #f4f7fb;
+  --adcred-card: #ffffff;
+  --adcred-text: #10233f;
+  --adcred-muted: #718096;
+  --adcred-border: #e3eaf2;
+  --adcred-success: #18a875;
+}
+
+body {
+  font-family: "Segoe UI", Arial, sans-serif;
+  background: var(--adcred-bg);
+  color: var(--adcred-text);
+}
+
+/* TOPO ATUAL */
+.topo {
+  background:
+    linear-gradient(
+      135deg,
+      var(--adcred-navy) 0%,
+      var(--adcred-navy-2) 65%,
+      #075b78 100%
+    );
+
+  color: white;
+  padding: 28px 32px;
+  box-shadow: 0 5px 22px rgba(7, 29, 59, 0.14);
+}
+
+.topo h1 {
+  font-size: 34px;
+  letter-spacing: -0.8px;
+  margin-bottom: 5px;
+}
+
+.topo p {
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 15px;
+}
+
+/* NAVEGAÇÃO */
+.topo-nav {
+  gap: 10px;
+  margin-top: 22px;
+}
+
+.topo-nav a {
+  border-radius: 12px;
+  padding: 11px 18px;
+  font-weight: 700;
+  transition: 0.2s ease;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.topo-nav a:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 7px 18px rgba(0, 0, 0, 0.15);
+}
+
+/* ÁREA PRINCIPAL */
+.container {
+  max-width: 1380px;
+  padding: 30px;
+}
+
+/* CARDS */
+.card {
+  background: var(--adcred-card);
+  border: 1px solid var(--adcred-border);
+  border-radius: 20px;
+  padding: 28px;
+  box-shadow:
+    0 8px 30px rgba(21, 43, 77, 0.06);
+}
+
+.card h2 {
+  color: var(--adcred-navy);
+  letter-spacing: -0.4px;
+}
+
+/* CAMPOS */
+input,
+select,
+textarea {
+  border: 1px solid #dbe4ee;
+  border-radius: 11px;
+  background: #fff;
+  transition: 0.2s ease;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: var(--adcred-cyan);
+  box-shadow: 0 0 0 3px rgba(8, 169, 196, 0.10);
+}
+
+/* BOTÕES PRINCIPAIS */
+button {
+  border-radius: 11px;
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease,
+    opacity 0.15s ease;
+}
+
+button:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+#prepareBtn,
+#confirmSendBtn {
+  background:
+    linear-gradient(
+      135deg,
+      var(--adcred-navy),
+      var(--adcred-blue)
+    );
+
+  box-shadow:
+    0 7px 18px rgba(23, 105, 224, 0.18);
+}
+
+/* MÉTRICAS */
+.metricas {
+  gap: 16px;
+}
+
+.metrica {
+  border: 1px solid var(--adcred-border);
+  border-radius: 16px;
+  background:
+    linear-gradient(
+      145deg,
+      #ffffff,
+      #f8fbff
+    );
+  padding: 18px;
+}
+
+.metrica strong {
+  color: var(--adcred-navy);
+  font-size: 23px;
+}
+
+/* LISTA / ANÁLISE */
+.lista-status {
+  border-radius: 16px;
+  border: 1px solid var(--adcred-border);
+  background: #fbfdff;
+}
+
+/* HISTÓRICO */
+.historico-item {
+  border-radius: 15px;
+  border: 1px solid var(--adcred-border);
+  box-shadow: 0 4px 16px rgba(21, 43, 77, 0.04);
+}
+
+/* MODAL */
+.modal-card {
+  border-radius: 22px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  box-shadow:
+    0 24px 80px rgba(7, 29, 59, 0.25);
+}
+
+/* SCROLLBAR */
+::-webkit-scrollbar {
+  width: 9px;
+  height: 9px;
+}
+
+::-webkit-scrollbar-track {
+  background: #eef3f8;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #b8c7d8;
+  border-radius: 20px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #91a7bd;
+}
+
+/* MOBILE */
+@media (max-width: 700px) {
+  .container {
+    padding: 16px;
+  }
+
+  .topo {
+    padding: 22px 16px;
+  }
+
+  .topo h1 {
+    font-size: 28px;
+  }
+
+  .card {
+    padding: 20px;
+    border-radius: 17px;
+  }
+}
+
+/* ==========================================================
+   ADCRED CRM 2.0 — CABEÇALHO / MARCA / PERFIL
+   ========================================================== */
+
+.adcred-header-principal {
+  width: 100%;
+  max-width: 1380px;
+  margin: 0 auto;
+
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 30px;
+}
+
+
+/* MARCA ADCRED */
+
+.adcred-marca {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  text-align: left;
+}
+
+.adcred-icone-marca {
+  width: 52px;
+  height: 52px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+
+  border-radius: 15px;
+  font-size: 28px;
+
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+.adcred-marca h1 {
+  margin: 0;
+  padding: 0;
+
+  font-size: 31px;
+  line-height: 1;
+
+  color: #ffffff;
+  letter-spacing: -1px;
+}
+
+.adcred-marca h1 span {
+  color: #45c6df;
+}
+
+.adcred-marca p {
+  margin: 5px 0 0;
+  padding: 0;
+
+  font-size: 11px;
+  font-weight: 700;
+
+  color: rgba(255, 255, 255, 0.70);
+
+  text-transform: uppercase;
+  letter-spacing: 2.2px;
+}
+
+
+/* TÍTULO CENTRAL */
+
+.adcred-titulo-painel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+
+  text-align: center;
+}
+
+.adcred-titulo-painel strong {
+  font-size: 17px;
+  color: #ffffff;
+}
+
+.adcred-titulo-painel span {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.62);
+}
+
+
+/* PERFIL */
+
+.adcred-perfil {
+  justify-self: end;
+
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  padding: 8px 9px 8px 15px;
+
+  background: rgba(255, 255, 255, 0.09);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+
+  border-radius: 16px;
+}
+
+.adcred-perfil-texto {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+
+.adcred-perfil-texto strong {
+  color: #ffffff;
+  font-size: 13px;
+}
+
+.adcred-perfil-texto span {
+  color: rgba(255, 255, 255, 0.62);
+  font-size: 11px;
+}
+
+.adcred-avatar {
+  width: 43px;
+  height: 43px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  overflow: hidden;
+
+  border-radius: 13px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #08a9c4,
+      #1769e0
+    );
+
+  border: 2px solid rgba(255, 255, 255, 0.65);
+
+  color: #ffffff;
+
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.adcred-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+
+/* NAVEGAÇÃO NOVA */
+
+.topo-nav {
+  max-width: 1380px;
+  margin: 22px auto 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+
+  gap: 9px;
+}
+
+.topo-nav .link-conversas {
+  margin: 0 !important;
+
+  background: rgba(255, 255, 255, 0.09) !important;
+  color: rgba(255, 255, 255, 0.90) !important;
+
+  border: 1px solid rgba(255, 255, 255, 0.12);
+
+  padding: 10px 16px;
+
+  border-radius: 11px;
+
+  text-decoration: none;
+
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.topo-nav .link-conversas:hover {
+  background: rgba(255, 255, 255, 0.17) !important;
+  color: #ffffff !important;
+
+  transform: translateY(-1px);
+}
+
+
+/* RESPONSIVO */
+
+@media (max-width: 800px) {
+
+  .adcred-header-principal {
+    grid-template-columns: 1fr auto;
+  }
+
+  .adcred-titulo-painel {
+    display: none;
+  }
+
+  .adcred-perfil-texto {
+    display: none;
+  }
+
+  .adcred-perfil {
+    padding: 6px;
+  }
+
+  .topo-nav {
+    justify-content: flex-start;
+  }
+}</style>
 
 </head>
 
@@ -508,49 +951,89 @@ th {
 >
 
 
-<div class="topo">
+<!-- ==========================================================
+     ADCRED CRM 2.0 — CABEÇALHO PRINCIPAL
+     ========================================================== -->
 
-  <h1>
-    ADCred
-  </h1>
+<header class="topo">
 
-  <p>
-    Painel de Campanhas
-  </p>
+  <div class="adcred-header-principal">
 
-   <a
-    href="/conversas.html"
-    class="link-conversas"
-  >
-    Conversas
-  </a>
+    <div class="adcred-marca">
+      <div class="adcred-icone-marca">
+        🐷
+      </div>
 
-  <a
-    href="/radar-fgts.html"
-    class="link-conversas"
-    style="
-      margin-left:8px;
-      background:#0f766e;
-      color:white;
-    "
-  >
-    🔄 Radar FGTS
-  </a>
+      <div>
+        <h1>AD<span>Cred</span></h1>
+        <p>Solução Financeira</p>
+      </div>
+    </div>
 
-  <a
-    href="/base.html"
-    class="link-conversas"
-    style="
-      margin-left:8px;
-      background:#d7aa4b;
-      color:#071426;
-    "
-  >
-    Minha Base
-  </a>
 
-</div>
+    <div class="adcred-titulo-painel">
+      <strong>Central de Atendimento</strong>
+      <span>Gestão de clientes e campanhas</span>
+    </div>
 
+
+    <div class="adcred-perfil">
+
+      <div class="adcred-perfil-texto">
+        <strong>Caren Rosa</strong>
+        <span>Atendimento ADCred</span>
+      </div>
+
+      <div class="adcred-avatar">
+        <span>CR</span>
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <nav class="topo-nav">
+
+    <a
+      href="#"
+      class="link-conversas"
+      onclick="window.scrollTo({top:0,behavior:'smooth'}); return false;"
+    >
+      🏠 Visão geral
+    </a>
+
+    <a
+      href="/conversas.html"
+      class="link-conversas"
+    >
+      💬 Conversas
+    </a>
+
+    <a
+      href="/radar-fgts.html"
+      class="link-conversas"
+    >
+      🎯 Radar FGTS
+    </a>
+
+    <a
+      href="/base.html"
+      class="link-conversas"
+    >
+      👥 Minha Base
+    </a>
+
+    <a
+      href="#novaCampanha"
+      class="link-conversas"
+    >
+      📣 Campanhas
+    </a>
+
+  </nav>
+
+</header>
 
 <div class="container">
 
