@@ -2277,22 +2277,28 @@ async function buscarHistorico(
             : []
         );
 
-  const novaAssinatura =
-    JSON.stringify(
-      mensagens.map(
-        (mensagem) => [
-          mensagem.id ||
-            "",
-          mensagem.timestamp ||
-            mensagem.data ||
-            "",
-          mensagem.texto ||
-            mensagem.text ||
-            mensagem.body ||
-            ""
-        ]
-      )
-    );
+ const novaAssinatura =
+  JSON.stringify(
+    mensagens.map(
+      (mensagem) => [
+        mensagem.id ||
+          "",
+        mensagem.timestamp ||
+          mensagem.data ||
+          "",
+        mensagem.texto ||
+          mensagem.text ||
+          mensagem.body ||
+          "",
+        mensagem.tipo ||
+          mensagem.type ||
+          "",
+        mensagem.mediaId ||
+          mensagem.media_id ||
+          ""
+      ]
+    )
+  );
 
   if (
     novaAssinatura !==
