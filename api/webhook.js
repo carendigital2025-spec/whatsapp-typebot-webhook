@@ -115,7 +115,8 @@ async function saveCrmMessage({
   texto,
   direcao,
   nome = "",
-  tipo = "text"
+  tipo = "text",
+  mediaId = ""
 }) {
   if (!telefone || !texto) {
     return;
@@ -134,6 +135,7 @@ async function saveCrmMessage({
     texto,
     direcao,
     tipo,
+    mediaId,
     timestamp: agora,
     data: dataIso
   };
@@ -910,7 +912,8 @@ export default async function handler(
         "";
 
       let userMessage = "";
-
+let mediaId = "";
+let mediaTipo = "";
 
       // =====================================================
       // TEXTO
@@ -925,6 +928,15 @@ export default async function handler(
             ?.body ||
           "";
       }
+      // =====================================================
+// IMAGEM RECEBIDA
+// =====================================================
+
+if (message.type === "image") {
+  mediaId = message.image?.id || "";
+  mediaTipo = "image";
+  userMessage = message.image?.caption || "📷 Imagem recebida";
+}
 
 
       // =====================================================
@@ -1035,7 +1047,10 @@ export default async function handler(
             nomePerfil,
 
           tipo:
-            message.type
+            message.type,
+          
+          mediaId:
+  mediaId,
         });
 
       } catch (erroCrm) {
