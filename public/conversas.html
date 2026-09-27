@@ -2450,16 +2450,94 @@ const enviada =
             : "cliente-msg"
         );
 
-      const texto =
-        document.createElement(
-          "div"
-        );
+    const texto = document.createElement("div");
 
-      texto.textContent =
-        mensagem.texto ||
-        mensagem.text ||
-        mensagem.body ||
-        "";
+const conteudoTexto =
+  mensagem.texto ||
+  mensagem.text ||
+  mensagem.body ||
+  "";
+
+const tipoMensagem =
+  mensagem.tipo ||
+  mensagem.type ||
+  "text";
+
+const mediaId =
+  mensagem.mediaId ||
+  mensagem.media_id ||
+  "";
+
+if (tipoMensagem === "image" && mediaId) {
+  const imagem = document.createElement("img");
+
+  imagem.src =
+    `/api/media?id=${encodeURIComponent(mediaId)}`;
+
+  imagem.alt = "Imagem recebida";
+
+  imagem.style.maxWidth = "280px";
+  imagem.style.width = "100%";
+  imagem.style.height = "auto";
+  imagem.style.borderRadius = "10px";
+  imagem.style.display = "block";
+  imagem.style.cursor = "pointer";
+
+  imagem.onclick = () => {
+    window.open(imagem.src, "_blank");
+  };
+
+  texto.appendChild(imagem);
+
+  if (
+    conteudoTexto &&
+    conteudoTexto !== "📷 Imagem recebida"
+  ) {
+    const legenda =
+      document.createElement("div");
+
+    legenda.textContent = conteudoTexto;
+    legenda.style.marginTop = "6px";
+
+    texto.appendChild(legenda);
+  }
+
+} else if (
+  tipoMensagem === "video" &&
+  mediaId
+) {
+  const video =
+    document.createElement("video");
+
+  video.src =
+    `/api/media?id=${encodeURIComponent(mediaId)}`;
+
+  video.controls = true;
+  video.preload = "metadata";
+
+  video.style.maxWidth = "280px";
+  video.style.width = "100%";
+  video.style.borderRadius = "10px";
+  video.style.display = "block";
+
+  texto.appendChild(video);
+
+  if (
+    conteudoTexto &&
+    conteudoTexto !== "🎥 Vídeo recebido"
+  ) {
+    const legenda =
+      document.createElement("div");
+
+    legenda.textContent = conteudoTexto;
+    legenda.style.marginTop = "6px";
+
+    texto.appendChild(legenda);
+  }
+
+} else {
+  texto.textContent = conteudoTexto;
+}
 
       const hora =
         document.createElement(
