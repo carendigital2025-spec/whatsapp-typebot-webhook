@@ -3867,8 +3867,50 @@ document
     "click",
     enviarMensagem
   );
+// ===========================================================
+// BOTÃO PARA SELECIONAR IMAGEM
+// ===========================================================
 
+document
+  .getElementById(
+    "botaoImagem"
+  )
+  .addEventListener(
+    "click",
+    () => {
+      document
+        .getElementById(
+          "arquivoImagem"
+        )
+        .click();
+    }
+  );
+// ===========================================================
+// IMAGEM SELECIONADA PARA ENVIO
+// ===========================================================
 
+document
+  .getElementById(
+    "arquivoImagem"
+  )
+  .addEventListener(
+    "change",
+    async (event) => {
+      const arquivo =
+        event.target.files?.[0];
+
+      if (!arquivo) {
+        return;
+      }
+
+      console.log(
+        "Imagem selecionada:",
+        arquivo.name,
+        arquivo.type,
+        arquivo.size
+      );
+    }
+  );
 document
   .getElementById(
     "statusConversa"
