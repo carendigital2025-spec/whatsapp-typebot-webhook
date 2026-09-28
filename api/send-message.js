@@ -459,49 +459,28 @@ if (tipo === "image") {
               "application/json"
           },
 
-         body:
-  JSON.stringify(
-    tipo === "image"
-      ? {
-          messaging_product:
-            "whatsapp",
-
-          recipient_type:
-            "individual",
-
-          to:
-            telefone,
-
-          type:
-            "image",
-
-         image: {
-  id:
-    mediaIdEnviado
-}
+body: JSON.stringify(
+  tipo === "image"
+    ? {
+        messaging_product: "whatsapp",
+        recipient_type: "individual",
+        to: telefone,
+        type: "image",
+        image: {
+          id: mediaIdEnviado
         }
-      : {
-          messaging_product:
-            "whatsapp",
-
-          recipient_type:
-            "individual",
-
-          to:
-            telefone,
-
-          type:
-            "text",
-
-          text: {
-            preview_url:
-              false,
-
-            body:
-              texto
-          }
+      }
+    : {
+        messaging_product: "whatsapp",
+        recipient_type: "individual",
+        to: telefone,
+        type: "text",
+        text: {
+          preview_url: false,
+          body: texto
         }
-  )
+      }
+)
       );
 
     const respostaTexto =
