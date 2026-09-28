@@ -264,7 +264,7 @@ async function salvarMensagemCrm(
 // ROTA PRINCIPAL
 // ===========================================================
 
-export default async function handler(
+module.exports = async function handler(
   req,
   res
 ) {
