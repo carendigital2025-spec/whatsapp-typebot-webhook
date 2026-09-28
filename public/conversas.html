@@ -2471,8 +2471,8 @@ const mediaId =
 if (tipoMensagem === "image" && mediaId) {
   const imagem = document.createElement("img");
 
-  imagem.src =
-    `/api/media?id=${encodeURIComponent(mediaId)}`;
+ imagem.src =
+  `/api/conversations?mediaId=${encodeURIComponent(mediaId)}`;
 
   imagem.alt = "Imagem recebida";
 
