@@ -156,7 +156,11 @@ function normalizarTelefone(valor) {
 
 async function salvarMensagemCrm(
   telefone,
-  texto
+  texto,
+  tipo = "text",
+  imagemBase64 = "",
+  imagemMimeType = "",
+  imagemNome = ""
 ) {
   const agora = Date.now();
 
@@ -165,14 +169,29 @@ async function salvarMensagemCrm(
       agora
     ).toISOString();
 
-  const mensagem = {
-    telefone,
-    texto,
-    direcao: "saida",
-    tipo: "text",
-    timestamp: agora,
-    data: dataIso
-  };
+ const mensagem = {
+  telefone,
+  texto:
+    tipo === "image"
+      ? "[Imagem]"
+      : texto,
+  direcao: "saida",
+  tipo,
+  imagemBase64:
+    tipo === "image"
+      ? imagemBase64
+      : "",
+  imagemMimeType:
+    tipo === "image"
+      ? imagemMimeType
+      : "",
+  imagemNome:
+    tipo === "image"
+      ? imagemNome
+      : "",
+  timestamp: agora,
+  data: dataIso
+};
 
   await redisCommand([
     "RPUSH",
@@ -525,10 +544,14 @@ if (tipo === "image") {
         });
     }
 
-    await salvarMensagemCrm(
-      telefone,
-      texto
-    );
+   await salvarMensagemCrm(
+  telefone,
+  texto,
+  tipo,
+  imagemBase64,
+  imagemMimeType,
+  imagemNome
+);
 
     return res
       .status(200)
