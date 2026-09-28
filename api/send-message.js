@@ -304,11 +304,44 @@ export default async function handler(
           0,
           4096
         );
+    const tipo =
+  String(
+    req.body?.tipo ||
+    "text"
+  );
 
-    if (
-      !telefone ||
-      !texto
-    ) {
+const imagemBase64 =
+  String(
+    req.body?.imagemBase64 ||
+    ""
+  );
+
+const imagemMimeType =
+  String(
+    req.body?.imagemMimeType ||
+    ""
+  );
+
+const imagemNome =
+  String(
+    req.body?.imagemNome ||
+    ""
+  );
+
+   if (
+  !telefone ||
+  (
+    tipo === "text" &&
+    !texto
+  ) ||
+  (
+    tipo === "image" &&
+    (
+      !imagemBase64 ||
+      !imagemMimeType
+    )
+  )
+) {
       return res
         .status(400)
         .json({
@@ -331,6 +364,87 @@ export default async function handler(
     const url =
       `https://graph.facebook.com/${process.env.GRAPH_API_VERSION}/${process.env.PHONE_NUMBER_ID}/messages`;
 
+    let mediaIdEnviado = "";
+
+if (tipo === "image") {
+  const base64Limpo =
+    imagemBase64.includes(",")
+      ? imagemBase64.split(",")[1]
+      : imagemBase64;
+
+  const bufferImagem =
+    Buffer.from(
+      base64Limpo,
+      "base64"
+    );
+
+  const formData =
+    new FormData();
+
+  const blob =
+    new Blob(
+      [bufferImagem],
+      {
+        type:
+          imagemMimeType
+      }
+    );
+
+  formData.append(
+    "messaging_product",
+    "whatsapp"
+  );
+
+  formData.append(
+    "file",
+    blob,
+    imagemNome ||
+      "imagem.jpg"
+  );
+
+  const respostaUpload =
+    await fetch(
+      `https://graph.facebook.com/${process.env.GRAPH_API_VERSION}/${process.env.PHONE_NUMBER_ID}/media`,
+      {
+        method: "POST",
+
+        headers: {
+          Authorization:
+            `Bearer ${process.env.WHATSAPP_TOKEN}`
+        },
+
+        body:
+          formData
+      }
+    );
+
+  const dadosUpload =
+    await respostaUpload.json();
+
+  if (
+    !respostaUpload.ok ||
+    !dadosUpload?.id
+  ) {
+    console.error(
+      "Erro upload mídia Meta:",
+      dadosUpload
+    );
+
+    return res
+      .status(502)
+      .json({
+        ok: false,
+        erro:
+          "Não foi possível enviar a imagem para o WhatsApp.",
+        detalhes:
+          dadosUpload
+      });
+  }
+
+  mediaIdEnviado =
+    dadosUpload.id;
+}
+
     const resposta =
       await fetch(
         url,
@@ -345,29 +459,49 @@ export default async function handler(
               "application/json"
           },
 
-          body:
-            JSON.stringify({
-              messaging_product:
-                "whatsapp",
+         body:
+  JSON.stringify(
+    tipo === "image"
+      ? {
+          messaging_product:
+            "whatsapp",
 
-              recipient_type:
-                "individual",
+          recipient_type:
+            "individual",
 
-              to:
-                telefone,
+          to:
+            telefone,
 
-              type:
-                "text",
+          type:
+            "image",
 
-              text: {
-                preview_url:
-                  false,
-
-                body:
-                  texto
-              }
-            })
+         image: {
+  id:
+    mediaIdEnviado
+}
         }
+      : {
+          messaging_product:
+            "whatsapp",
+
+          recipient_type:
+            "individual",
+
+          to:
+            telefone,
+
+          type:
+            "text",
+
+          text: {
+            preview_url:
+              false,
+
+            body:
+              texto
+          }
+        }
+  )
       );
 
     const respostaTexto =
