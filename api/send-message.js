@@ -160,7 +160,8 @@ async function salvarMensagemCrm(
   tipo = "text",
   imagemBase64 = "",
   imagemMimeType = "",
-  imagemNome = ""
+  imagemNome = "",
+  mediaId = ""
 ) {
   const agora = Date.now();
 
@@ -189,6 +190,10 @@ async function salvarMensagemCrm(
     tipo === "image"
       ? imagemNome
       : "",
+   mediaId:
+  tipo === "image"
+    ? mediaId
+    : "",
   timestamp: agora,
   data: dataIso
 };
@@ -550,7 +555,8 @@ if (tipo === "image") {
   tipo,
   imagemBase64,
   imagemMimeType,
-  imagemNome
+ imagemNome,
+mediaIdEnviado
 );
 
     return res
