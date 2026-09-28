@@ -3908,12 +3908,97 @@ document
         return;
       }
 
-      console.log(
-        "Imagem selecionada:",
-        arquivo.name,
-        arquivo.type,
-        arquivo.size
+      const leitor =
+  new FileReader();
+
+leitor.onload =
+  async () => {
+    const resultado =
+      String(
+        leitor.result || ""
       );
+
+    const imagemBase64 =
+      resultado.includes(",")
+        ? resultado.split(",")[1]
+        : resultado;
+
+    try {
+      mostrarErro("");
+
+      const resposta =
+        await fetch(
+          "/api/send-message",
+          {
+            method: "POST",
+
+            credentials:
+              "same-origin",
+
+            headers: {
+              "Content-Type":
+                "application/json"
+            },
+
+            body:
+              JSON.stringify({
+                telefone:
+                  telefoneSelecionado,
+
+                tipo:
+                  "image",
+
+                imagemBase64,
+
+                imagemMimeType:
+                  arquivo.type,
+
+                imagemNome:
+                  arquivo.name
+              })
+          }
+        );
+
+      const dados =
+        await resposta.json();
+
+      if (
+        !resposta.ok ||
+        !dados.ok
+      ) {
+        throw new Error(
+          dados.erro ||
+          "Erro ao enviar imagem."
+        );
+      }
+
+      assinaturaHistorico = "";
+
+      await buscarHistorico(
+        telefoneSelecionado,
+        true
+      );
+
+      await carregarConversas();
+
+    } catch (erro) {
+      console.error(
+        "Erro ao enviar imagem:",
+        erro
+      );
+
+      mostrarErro(
+        erro.message ||
+        "Não foi possível enviar a imagem."
+      );
+    } finally {
+      event.target.value = "";
+    }
+  };
+
+leitor.readAsDataURL(
+  arquivo
+);
     }
   );
 document
