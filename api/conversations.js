@@ -134,7 +134,106 @@ export default async function handler(
     });
   }
 
-  try {
+  try 
+  {// ===========================================================
+// CARREGAR MÍDIA RECEBIDA DO WHATSAPP
+// ===========================================================
+
+if (
+  req.method === "GET" &&
+  req.query?.mediaId
+) {
+  const mediaId = req.query.mediaId;
+
+  const token =
+    process.env.WHATSAPP_TOKEN ||
+    process.env.META_ACCESS_TOKEN ||
+    process.env.ACCESS_TOKEN;
+
+  if (!token) {
+    return res.status(500).json({
+      ok: false,
+      erro: "Token da Meta não configurado"
+    });
+  }
+
+  const respostaInfo = await fetch(
+    `https://graph.facebook.com/v23.0/${encodeURIComponent(mediaId)}`,
+    {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    }
+  );
+
+  const info = await respostaInfo.json();
+
+  if (!respostaInfo.ok || !info?.url) {
+    console.error(
+      "Erro ao buscar informações da mídia:",
+      info
+    );
+
+    return res.status(502).json({
+      ok: false,
+      erro: "Não foi possível localizar a mídia no WhatsApp"
+    });
+  }
+
+  const respostaMedia = await fetch(
+    info.url,
+    {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    }
+  );
+
+  if (!respostaMedia.ok) {
+    const erroMedia =
+      await respostaMedia.text();
+
+    console.error(
+      "Erro ao baixar mídia:",
+      erroMedia
+    );
+
+    return res.status(502).json({
+      ok: false,
+      erro: "Não foi possível baixar a mídia"
+    });
+  }
+
+  const arrayBuffer =
+    await respostaMedia.arrayBuffer();
+
+  const buffer =
+    Buffer.from(arrayBuffer);
+
+  const contentType =
+    respostaMedia.headers.get("content-type") ||
+    info.mime_type ||
+    "application/octet-stream";
+
+  res.setHeader(
+    "Content-Type",
+    contentType
+  );
+
+  res.setHeader(
+    "Content-Length",
+    buffer.length
+  );
+
+  res.setHeader(
+    "Cache-Control",
+    "private, max-age=300"
+  );
+
+  return res.status(200).send(buffer);
+}
     if (req.method === "POST") {
       const telefone =
         normalizarTelefone(
