@@ -174,7 +174,7 @@ async function salvarMensagemCrm(
   telefone,
   texto:
     tipo === "image"
-      ? "[Imagem]"
+     ? ""
       : texto,
   direcao: "saida",
   tipo,
