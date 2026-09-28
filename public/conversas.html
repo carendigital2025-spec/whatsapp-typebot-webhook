@@ -3913,112 +3913,36 @@ document
 // ===========================================================
 
 document
-  .getElementById(
-    "arquivoImagem"
-  )
-  .addEventListener(
-    "change",
-    async (event) => {
-      const arquivo =
-        event.target.files?.[0];
+  .getElementById("arquivoImagem")
+  .addEventListener("change", (event) => {
+    const arquivo = event.target.files?.[0];
 
-      if (!arquivo) {
-        return;
-      }
-
-      const leitor =
-  new FileReader();
-
-leitor.onload =
-  async () => {
-    const resultado =
-      String(
-        leitor.result || ""
-      );
-
-    const imagemBase64 =
-      resultado.includes(",")
-        ? resultado.split(",")[1]
-        : resultado;
-
-    try {
-      mostrarErro("");
-
-      const resposta =
-        await fetch(
-          "/api/send-message",
-          {
-            method: "POST",
-
-            credentials:
-              "same-origin",
-
-            headers: {
-              "Content-Type":
-                "application/json"
-            },
-
-            body:
-              JSON.stringify({
-                telefone:
-                  telefoneSelecionado,
-
-                tipo:
-                  "image",
-
-                imagemBase64,
-
-                imagemMimeType:
-                  arquivo.type,
-
-                imagemNome:
-                  arquivo.name
-              })
-          }
-        );
-
-      const dados =
-        await resposta.json();
-
-      if (
-        !resposta.ok ||
-        !dados.ok
-      ) {
-        throw new Error(
-          dados.erro ||
-          "Erro ao enviar imagem."
-        );
-      }
-
-      assinaturaHistorico = "";
-
-      await buscarHistorico(
-        telefoneSelecionado,
-        true
-      );
-
-      await carregarConversas();
-
-    } catch (erro) {
-      console.error(
-        "Erro ao enviar imagem:",
-        erro
-      );
-
-      mostrarErro(
-        erro.message ||
-        "Não foi possível enviar a imagem."
-      );
-    } finally {
-      event.target.value = "";
+    if (!arquivo) {
+      return;
     }
-  };
 
-leitor.readAsDataURL(
-  arquivo
-);
+    const previewContainer =
+      document.getElementById("previewImagemContainer");
+
+    const previewImagem =
+      document.getElementById("previewImagem");
+
+    const botaoImagem =
+      document.getElementById("botaoImagem");
+
+    if (previewImagem) {
+      previewImagem.src =
+        URL.createObjectURL(arquivo);
     }
-  );
+
+    if (previewContainer) {
+      previewContainer.hidden = false;
+    }
+
+    if (botaoImagem) {
+      botaoImagem.disabled = false;
+    }
+  });
 document
   .getElementById(
     "statusConversa"
